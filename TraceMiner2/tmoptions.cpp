@@ -2,7 +2,7 @@
 
 tmOptions::tmOptions()
 {
-    mHelp = true;
+    mHelp = false;
     mVerbose = false;
     mHtml = false;
     mTraceFile = "";
@@ -18,7 +18,89 @@ tmOptions::~tmOptions()
 
 bool tmOptions::ParseArgs(int argc, char *argv[]) {
 
-    mTraceFile = "C:\\Users\\ndunbar\\Downloads\\Oracle-Azure stuff\\TraceMinerTraces\\jdepy1t_ora_48496808.trc";
+    bool invalidArgs = false;
+    bool gotTraceAlready = false;
+
+    if (argc < 2) {
+        // Insufficient args.
+        cerr << "TraceMiner2: no arguments supplied." << endl;
+        return false;
+    }
+
+    for (int arg = 1; arg < argc; arg++) {
+        // Convert args to lower case and to strings.
+        // Not really safe with Unicode though!
+        string thisArg = string(argv[arg]);
+        for (int c = 0; c < thisArg.length(); c++) {
+            thisArg[c] = tolower(thisArg[c]);
+        }
+
+        // Try verbose first ...
+        if ((thisArg == "--verbose") ||
+        (thisArg == "-v")) {
+            mVerbose = true;
+            continue;
+        }
+
+        // Ok, try HTML instead ...
+        if ((thisArg == "--html") ||
+        (thisArg == "-m")) {
+            mHtml = true;
+            continue;
+        }
+
+        // Nope? Try help then ...
+        if ((thisArg == "--help") ||
+        (thisArg == "-h")        ||
+        (thisArg == "-?")) {
+            mHelp = true;
+            continue;
+        }
+
+        // Either a filename or an error.
+        // Try for an error ...
+        if (thisArg[0] == '-') {
+            cerr << "TraceMiner2: Invalid argument '";
+            cerr << string(argv[arg]) << "'." << endl;
+            invalidArgs = true;
+            continue;
+        }
+
+        // Nope. Must (!) be a filename.
+        // Do not lowercase it as we are probably on Unix!
+        // And we only want a single trace file.
+        if (!gotTraceAlready) {
+            mTraceFile = string(argv[arg]);
+            gotTraceAlready = true;
+        } else {
+            // Too many tracefiles.
+            cerr << "TraceMiner2: too many trace files. (" << argv[arg] << ")." << endl;
+            invalidArgs = true;
+        }
+
+    }
+
+    // We need at least a trace file.
+    if (mTraceFile.empty()) {
+        cerr << "TraceMiner2: no trace file supplied." << endl;
+        invalidArgs = true;
+    }
+
+    // Did we barf?
+    if (invalidArgs) {
+        usage();
+        return false;
+    }
+
+    // Dis we just want help?
+    if (mHelp) {
+        usage();
+        return true;
+    }
+
+    // Set up the other files now.
+    // Assumes mTraceFile is correct.
+
     mReportFile = replaceFileExtension(mTraceFile, mReportExtension);
     mDebugFile = replaceFileExtension(mTraceFile, mDebugExtension);
 

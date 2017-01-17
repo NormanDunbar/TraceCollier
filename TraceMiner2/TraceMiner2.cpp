@@ -21,16 +21,20 @@ int main(int argc, char *argv[])
 {
     // Parse command line args and bale if problems detected.
     bool allOk = options.ParseArgs(argc, argv);
-    if (!allOk)
+    if (!allOk) {
         return 1;
+    }
 
+    // Show help and exit requested?
     if (options.Help()) {
-        options.usage();
         return 0;
     }
 
-    cout << "Tracefile   " << options.traceFile() << endl;
-    cout << "ReportFile " << options.reportFile() << endl;
-    cout << "DebugFile " << options.debugFile() << endl;
+    tmTraceFile *traceFile = new tmTraceFile(options.traceFile());
+    ifstream *ifs = traceFile->openTraceFile();
+
+
+    // Clean up.
+    delete traceFile;
 
 }
