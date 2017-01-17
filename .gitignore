@@ -27,3 +27,14 @@
 *.exe
 *.out
 *.app
+
+# CodeBlocks and Borland Compiler stuff
+*.ilc
+*.ild
+*.ilf
+*.ils
+*.map
+*.tds
+*.save
+*.depend
+*.layout
