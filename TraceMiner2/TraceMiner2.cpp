@@ -30,11 +30,25 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    // This is it, here is where we hit the big time! :)
     tmTraceFile *traceFile = new tmTraceFile(options.traceFile());
-    ifstream *ifs = traceFile->openTraceFile();
 
+    // Assume everything worked.
+    int result = 0;
+
+    // Open the trace file and parse the header.
+    if (!traceFile->openTraceFile()) {
+        cerr << "TraceMiner2: Failed to open " << options.traceFile() << endl;
+        result = 1;
+    } else {
+        // Parse the remainder of the trace file.
+        if (!traceFile->parseTraceFile()) {
+            cerr << "TraceMiner2: Failed to parse " << options.traceFile() << endl;
+            result = 1;
+        }
+    }
 
     // Clean up.
     delete traceFile;
-
+    return result;
 }

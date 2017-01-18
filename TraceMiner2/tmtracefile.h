@@ -17,13 +17,20 @@ class tmTraceFile
         string TraceFileName() { return mTraceFileName; }
         void SetTraceFileName(string val) { mTraceFileName = val; }
         unsigned lineNumber() { return mLineNumber; }
-        bool Parse();
+        bool parseTraceFile();
+        bool openTraceFile();
+        string DatabaseVersion() { return mDatabaseVersion; };
+        string OriginalTraceFileName() { return mOriginalTraceFileName; };
+        string OracleHome() { return mOracleHome; };
+        string InstanceName() { return mInstanceName; };
+        string SystemName() { return mSystemName; };
+        string NodeName() { return mNodeName; };
 
     protected:
 
     private:
         string mTraceFileName;
-        map<string, tmCursor> mCursors;
+        map<string, tmCursor *> mCursors;
 
         // Stuff from the trace file header.
         string mDatabaseVersion;
@@ -32,15 +39,13 @@ class tmTraceFile
         string mInstanceName;
         string mSystemName;
         string mNodeName;
-        string mTraceFileDate;
         ifstream *mIfs;
 
         // Internal stuff.
         void cleanUp();
         bool parseHeader();
         void init();
-        ifstream *openTraceFile();
-        string readTraceLine(bool *ok);
+        bool readTraceLine(string *aLine);
         // Where the hell are we?
         unsigned mLineNumber;
 

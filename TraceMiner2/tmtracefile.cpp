@@ -22,7 +22,6 @@ void tmTraceFile::init() {
     mInstanceName = "";
     mSystemName = "";
     mNodeName = "";
-    mTraceFileDate = "";
     mLineNumber = 0;
     mIfs = NULL;
 }
@@ -60,7 +59,6 @@ tmTraceFile::~tmTraceFile()
     // Destructor.
     // If still open, close the trace file.
     cleanUp();
-    cout << "tmTracefile destroyed!" << endl;
 }
 
 
@@ -68,11 +66,65 @@ tmTraceFile::~tmTraceFile()
   *
   * If a trace file is known, the Parse() function will parse it and report
   * the various binds etc used in the EXEC lines found. Only 'DEP=0' EXECs are
-  * considered. Returns a pointer to the ifstream used to open the file. Or NULL.
+  * considered. Returns a boolean indicating success or failure.
   */
-bool tmTraceFile::Parse()
+bool tmTraceFile::parseTraceFile()
 {
     // Process a trace file.
+    string traceLine;
+
+    // The main parsing loop. What kind of line have we
+    // read? Deal with it accordingly.
+    while (readTraceLine(&traceLine)) {
+
+        // Start with the shortest substr() that gives
+        // a unique string for any "verbs"!
+        string chunk = traceLine.substr(0, 7);
+
+        // PARSING IN CURSOR #cursorID
+        if (chunk == "PARSING") {
+            cout << mLineNumber << ": PARSING IN CURSOR" << endl;
+        }
+
+        // PARSE ERROR
+        if (chunk == "PARSE E") {
+            cout << mLineNumber << ": PARSE ERROR" << endl;
+        }
+
+        // XCTEND (COMMIT/ROLLBACK)
+        if (chunk == "XCTEND ") {
+            cout << mLineNumber << ": XCTEND" << endl;
+        }
+
+        // PARSE #cursorID
+        if (chunk == "PARSE #") {
+            cout << mLineNumber << ": PARSE #" << endl;
+        }
+
+        // BINDS #cursorID
+        if (chunk == "BINDS #") {
+            cout << mLineNumber << ": BINDS #" << endl;
+        }
+
+        // CLOSE #cursorID
+        if (chunk == "CLOSE #") {
+            cout << mLineNumber << ": CLOSE #" << endl;
+        }
+
+        // ERROR #cursorID
+        if (chunk == "ERROR #") {
+            cout << mLineNumber << ": ERROR #" << endl;
+        }
+
+        // Need to shorten things if we get this far!
+        // EXEC #cursorID
+        chunk = chunk.substr(0, 6);
+        if (chunk == "EXEC #") {
+            cout << mLineNumber << ": EXEC #" << endl;
+        }
+
+    }
+
     return true;
 }
 
@@ -88,10 +140,11 @@ bool tmTraceFile::Parse()
   */
 bool tmTraceFile::parseHeader() {
 
-    bool ok = true;
+    string traceLine;
+    bool ok = readTraceLine(&traceLine);
 
-    string traceLine = readTraceLine(&ok);
     if (!ok) {
+        cerr << "parseHeader(): Cannot read first line from " << mTraceFileName << endl;
         return false;
     }
 
@@ -112,37 +165,39 @@ bool tmTraceFile::parseHeader() {
     // We have a valid (hopefully!) trace file.
     // Extract heading details.
     // Position to the first real line.
-    mOriginalTraceFileName = traceLine.substr(12);
+    mOriginalTraceFileName = traceLine.substr(11);
 
     while (true) {
-        traceLine = readTraceLine(&ok);
-        if (!ok)
+        ok = readTraceLine(&traceLine);
+        if (!ok) {
+            cerr << "parseHeader(): Cannot read header line(s) from " << mTraceFileName << endl;
             break;
+        }
 
         string chunk = traceLine.substr(0, 10);
 
         if (chunk == "Oracle Dat") {
-            mDatabaseVersion = traceLine.substr(17);
+            mDatabaseVersion = traceLine.substr(16);
             continue;
         }
 
-        if (chunk == "ORACLE HOM") {
-            mDatabaseVersion = traceLine.substr(15);
+        if (chunk == "ORACLE_HOM") {
+            mOracleHome = traceLine.substr(14);
             continue;
         }
 
         if (chunk == "System nam") {
-            mDatabaseVersion = traceLine.substr(14); // Hmm. TAB character here sometimes!
+            mSystemName = traceLine.substr(13); // Hmm. TAB character here sometimes!
             continue;
         }
 
         if (chunk == "Node name:") {
-            mDatabaseVersion = traceLine.substr(12);
+            mNodeName = traceLine.substr(11);
             continue;
         }
 
-        if (chunk == "*** SESSIO") {
-            mTraceFileDate = traceLine.substr(28);
+        if (chunk == "Instance n") {
+            mInstanceName = traceLine.substr(15);
             continue;
         }
 
@@ -152,10 +207,7 @@ bool tmTraceFile::parseHeader() {
 
     }
 
-    if (!ok)
-        return false;
-
-    return true;
+    return ok;
 }
 
 
@@ -163,41 +215,48 @@ bool tmTraceFile::parseHeader() {
   *
   * Open a trace file and read in the header details.
   */
-ifstream *tmTraceFile::openTraceFile()
+bool tmTraceFile::openTraceFile()
 {
+
     if (mTraceFileName.empty()) {
-        return NULL;
+        return false;
     }
 
-    ifstream *mIfs = new ifstream(mTraceFileName);
+    mIfs = new ifstream(mTraceFileName);
 
     if (!mIfs->good()) {
+        cerr << "Cannot open trace file " << mTraceFileName << endl;
         cleanUp();
-        return mIfs;
+        return false;
     }
 
     // Read in the header stuff, and attempt to validate this file
     // as an Oracle trace file. It could be something else!
     if (!parseHeader()) {
         cleanUp();
-        return mIfs;
+        return false;
     };
 
     // Looks like a valid trace file.
-    return mIfs;
+    return true;
 
 }
 
 
 /** @brief Reads a single line from a trace file.
   *
-  * Reads a single line from a trace file. Updated the current
-  * line number within the trace file. Sets bool parameter if we
+  * Reads a single line from a trace file. Updates the current
+  * line number within the trace file. Returns bool parameter if we
   * are still good for more reading.
   */
-string tmTraceFile::readTraceLine(bool *ok) {
-    string aLine;
-    getline(*mIfs, aLine);
-    *ok = mIfs->good();
-    return aLine;
+bool tmTraceFile::readTraceLine(string *aLine) {
+    try {
+        getline(*mIfs, *aLine);
+    } catch (exception e) {
+        cerr << "EXCEPTION: readTraceLine(): " << e.what() << "." << endl;
+        return false;
+    }
+
+    mLineNumber++;
+    return mIfs->good();
 }
