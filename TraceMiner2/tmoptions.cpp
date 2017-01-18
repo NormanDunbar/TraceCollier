@@ -1,4 +1,4 @@
-#include "TraceMiner2.h"
+#include "tmoptions.h"
 
 tmOptions::tmOptions()
 {

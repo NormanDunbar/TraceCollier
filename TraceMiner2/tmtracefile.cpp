@@ -1,6 +1,5 @@
 #include "tmtracefile.h"
 
-
 void tmTraceFile::cleanUp() {
     // If still open, close the trace file.
     if (mIfs) {
@@ -10,6 +9,21 @@ void tmTraceFile::cleanUp() {
 
         delete mIfs;
         mIfs = NULL;
+    }
+
+    // If we have any cursors, clean them out.
+    //Beware, clear() doesn't destruct classes!
+    if (mCursors.size()) {
+        tmCursor *me;
+        for (map<string, tmCursor *>::iterator iter = mCursors.begin(); iter != mCursors.end(); ++iter) {
+
+            THIS BIT DOESN'T COMPILE.
+
+            me = *iter;
+            cerr << "FREE: " << me->CursorId() << endl;
+            mCursors.erase(iter);
+            free me;
+        }
     }
 }
 
@@ -83,44 +97,37 @@ bool tmTraceFile::parseTraceFile()
 
         // PARSING IN CURSOR #cursorID
         if (chunk == "PARSING") {
-            cout << mLineNumber << ": PARSING IN CURSOR" << endl;
+            parsePARSING(traceLine);
         }
 
         // PARSE ERROR
         if (chunk == "PARSE E") {
-            cout << mLineNumber << ": PARSE ERROR" << endl;
         }
 
         // XCTEND (COMMIT/ROLLBACK)
         if (chunk == "XCTEND ") {
-            cout << mLineNumber << ": XCTEND" << endl;
         }
 
         // PARSE #cursorID
         if (chunk == "PARSE #") {
-            cout << mLineNumber << ": PARSE #" << endl;
         }
 
         // BINDS #cursorID
         if (chunk == "BINDS #") {
-            cout << mLineNumber << ": BINDS #" << endl;
         }
 
         // CLOSE #cursorID
         if (chunk == "CLOSE #") {
-            cout << mLineNumber << ": CLOSE #" << endl;
         }
 
         // ERROR #cursorID
         if (chunk == "ERROR #") {
-            cout << mLineNumber << ": ERROR #" << endl;
         }
 
         // Need to shorten things if we get this far!
         // EXEC #cursorID
         chunk = chunk.substr(0, 6);
         if (chunk == "EXEC #") {
-            cout << mLineNumber << ": EXEC #" << endl;
         }
 
     }
@@ -259,4 +266,50 @@ bool tmTraceFile::readTraceLine(string *aLine) {
 
     mLineNumber++;
     return mIfs->good();
+}
+
+
+/** @brief Parses out a PARSING IN CURSOR line.
+  *
+  * Parses a line form the trace file. The line is expected
+  * to be the PARSING IN CURSOR line. We are only interested in
+  * cursors at depth = 1.
+  * Creates a tmCursor object and appends it to the map<string, tmCursor *>
+  * that we use to hold these things.
+  * Returns true if all ok.
+  */
+bool tmTraceFile::parsePARSING(const string &thisLine) {
+
+    // PARSING IN CURSOR #4572676384 len=229 dep=1 ...
+    regex reg("(#\\d+)\\slen=(\\d+)\\sdep=(\\d+)");
+    smatch match;
+
+    // Extract the cursorID, the length and the depth.
+    if (!regex_search(thisLine, match, reg)) {
+        cerr << "parsePARSING(): Cannot match regex against PARSING IN CURSOR at line: " <<  mLineNumber << "." << endl;
+        return false;
+    }
+
+    // Found it!
+    // Extract the goodies. We must have three matches.
+    string cursorID = match[1];
+    string sqlLength = match[2];
+    string depth = match[3];
+
+    if (depth == "0") {
+        tmCursor *thisCursor = new tmCursor(cursorID, stoul(sqlLength,NULL,10), mLineNumber);
+
+        // Stash this one.
+        mCursors.insert(pair<string, tmCursor *>(cursorID, thisCursor));
+
+        cerr << "CursorID = " << cursorID << endl;
+        cerr << "sqlLength = " << sqlLength << endl;
+        cerr << "depth = " << depth << endl;
+
+        cerr << "MAP contains " << mCursors.size() << endl << endl;
+    }
+
+    // Looks like a good parse.
+    return true;
+
 }

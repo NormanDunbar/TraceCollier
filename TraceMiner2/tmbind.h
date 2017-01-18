@@ -1,7 +1,9 @@
 #ifndef TMBIND_H
 #define TMBIND_H
 
-#include "TraceMiner2.h"
+#include <string>
+
+using std::string;
 
 
 class tmBind

@@ -5,7 +5,6 @@
 #include <fstream>
 #include <string>
 #include <map>
-#include <exception>
 
 using std::string;
 using std::map;
@@ -13,8 +12,6 @@ using std::map;
 using std::cout;
 using std::cerr;
 using std::endl;
-using std::getline;
-using std::exception;
 
 #include "tmtracefile.h"
 #include "tmcursor.h"

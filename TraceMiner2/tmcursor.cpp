@@ -1,11 +1,16 @@
 #include "tmcursor.h"
 
-tmCursor::tmCursor()
+tmCursor::tmCursor(string id, unsigned sqlSize, unsigned sqlLine)
 {
-    //ctor
+    mCursorId = id;
+    mSQLLineNumber = sqlLine;
+    unsigned mSQLSize = sqlSize;
+    mSQLText = "";
+    mSQLParseLine = 0;
+
 }
 
 tmCursor::~tmCursor()
 {
-    //dtor
+    cout << "Destroying mCursorID: " << mCursorId << endl;
 }

@@ -1,11 +1,26 @@
 #ifndef TMTRACEFILE_H
 #define TMTRACEFILE_H
 
-#include "TraceMiner2.h"
+#include <string>
+#include <map>
+#include <iostream>
+#include <fstream>
+#include <exception>
+#include <regex>
 
+using std::string;
+using std::map;
+using std::ifstream;
+using std::cerr;
+using std::cout;
+using std::endl;
+using std::getline;
+using std::exception;
+using std::regex;
+using std::smatch;
+using std::stoul;
 
-class tmCursor;
-class ifstream;
+#include "tmcursor.h"
 
 class tmTraceFile
 {
@@ -31,6 +46,7 @@ class tmTraceFile
     private:
         string mTraceFileName;
         map<string, tmCursor *> mCursors;
+        unsigned mLineNumber;
 
         // Stuff from the trace file header.
         string mDatabaseVersion;
@@ -46,8 +62,7 @@ class tmTraceFile
         bool parseHeader();
         void init();
         bool readTraceLine(string *aLine);
-        // Where the hell are we?
-        unsigned mLineNumber;
+        bool parsePARSING(const string &thisLine);
 
 };
 

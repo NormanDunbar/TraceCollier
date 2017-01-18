@@ -1,6 +1,15 @@
 #ifndef TMOPTIONS_H
 #define TMOPTIONS_H
 
+#include <string>
+#include <iostream>
+
+#include "utilities.h"
+
+using std::string;
+using std::cerr;
+using std::endl;
+
 // What valid commandline options are allowed?
 static string validArgs[] = {string("--verbose"), string("-v"),
                              string("--html"),    string("-m"),
