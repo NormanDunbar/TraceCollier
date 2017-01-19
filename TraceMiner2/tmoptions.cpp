@@ -16,6 +16,11 @@ tmOptions::~tmOptions()
 }
 
 
+/** @brief Parses the command line arguments.
+  *
+  * Checks for various flags, and makes sure we have a single file name.
+  * Returns true if all ok.
+  */
 bool tmOptions::ParseArgs(int argc, char *argv[]) {
 
     bool invalidArgs = false;
@@ -107,7 +112,10 @@ bool tmOptions::ParseArgs(int argc, char *argv[]) {
     return true;
 }
 
-
+/** @brief Online help!
+  *
+  * Displays brief details of how to use the utility.
+  */
 void tmOptions::usage() {
 
     cerr << endl << "USAGE:" << endl << endl;

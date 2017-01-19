@@ -29,17 +29,21 @@ class tmTraceFile
         tmTraceFile(string TraceFileName);
         ~tmTraceFile();
 
+        // Getters.
         string TraceFileName() { return mTraceFileName; }
-        void SetTraceFileName(string val) { mTraceFileName = val; }
         unsigned lineNumber() { return mLineNumber; }
-        bool parseTraceFile();
-        bool openTraceFile();
         string DatabaseVersion() { return mDatabaseVersion; };
         string OriginalTraceFileName() { return mOriginalTraceFileName; };
         string OracleHome() { return mOracleHome; };
         string InstanceName() { return mInstanceName; };
         string SystemName() { return mSystemName; };
         string NodeName() { return mNodeName; };
+
+        // There are no setters.
+
+
+        bool parseTraceFile();
+        bool openTraceFile();
 
     protected:
 
@@ -62,7 +66,11 @@ class tmTraceFile
         bool parseHeader();
         void init();
         bool readTraceLine(string *aLine);
+        map<string, tmCursor *>::iterator findCursor(const string &cursorID);
+
+        // Parsing stuff.
         bool parsePARSING(const string &thisLine);
+        bool parsePARSE(const string &thisLine);
 
 };
 

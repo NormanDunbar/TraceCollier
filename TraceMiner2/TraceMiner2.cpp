@@ -38,12 +38,14 @@ int main(int argc, char *argv[])
 
     // Open the trace file and parse the header.
     if (!traceFile->openTraceFile()) {
-        cerr << "TraceMiner2: Failed to open " << options.traceFile() << endl;
+        cerr << "TraceMiner2: Failed to open "
+             << options.traceFile() << endl;
         result = 1;
     } else {
         // Parse the remainder of the trace file.
         if (!traceFile->parseTraceFile()) {
-            cerr << "TraceMiner2: Failed to parse " << options.traceFile() << endl;
+            cerr << "TraceMiner2: Failed to parse "
+                 << options.traceFile() << endl;
             result = 1;
         }
     }

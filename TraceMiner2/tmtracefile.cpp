@@ -1,5 +1,10 @@
 #include "tmtracefile.h"
 
+/** @brief Cleans up the cursor in the event that something was wrong.
+  *
+  * In the event that a parse goes badly, this function will be called
+  * to clean up whatever mess there is, lying around in the object.
+  */
 void tmTraceFile::cleanUp() {
     // If still open, close the trace file.
     if (mIfs) {
@@ -14,20 +19,23 @@ void tmTraceFile::cleanUp() {
     // If we have any cursors, clean them out.
     //Beware, clear() doesn't destruct classes!
     if (mCursors.size()) {
-        tmCursor *me;
-        for (map<string, tmCursor *>::iterator iter = mCursors.begin(); iter != mCursors.end(); ++iter) {
-
-            THIS BIT DOESN'T COMPILE.
-
-            me = *iter;
-            cerr << "FREE: " << me->CursorId() << endl;
-            mCursors.erase(iter);
-            free me;
+        for (map<string, tmCursor *>::iterator i = mCursors.begin(); i != mCursors.end(); ++i) {
+            cerr << endl << "FREEING CURSOR: " << i->second->CursorId() << endl;
+            cerr << *(i->second);
+            mCursors.erase(i);
+            delete i->second;
         }
     }
 }
 
 
+/** @brief Initialises the internals of a trace file object.
+  *
+  * When I had two different constructors, I needed to initialise
+  * the members in each. Extracted that code to this function.
+  * Since then, I've removed all but one of the constructors, but
+  * I have not decided yet, that I'll stick with that option.
+  */
 void tmTraceFile::init() {
     mTraceFileName = "";
     mOriginalTraceFileName = "";
@@ -38,17 +46,6 @@ void tmTraceFile::init() {
     mNodeName = "";
     mLineNumber = 0;
     mIfs = NULL;
-}
-
-
-/** @brief Default constructor.
-  *
-  * Constructs a new tmTraceFile class without knowing which actual trace file
-  * is to be used. Must call SetTraceFile() before attempting to parse anything.
-  */
-tmTraceFile::tmTraceFile()
-{
-    init();
 }
 
 
@@ -97,41 +94,59 @@ bool tmTraceFile::parseTraceFile()
 
         // PARSING IN CURSOR #cursorID
         if (chunk == "PARSING") {
-            parsePARSING(traceLine);
+            if (!parsePARSING(traceLine)) {
+                return false;
+            };
+            continue;
         }
 
         // PARSE ERROR
         if (chunk == "PARSE E") {
+            continue;
         }
 
         // XCTEND (COMMIT/ROLLBACK)
         if (chunk == "XCTEND ") {
+            continue;
         }
 
         // PARSE #cursorID
         if (chunk == "PARSE #") {
+            if (!parsePARSE(traceLine)) {
+                return false;
+            };
+            continue;
         }
 
         // BINDS #cursorID
         if (chunk == "BINDS #") {
+            continue;
         }
 
         // CLOSE #cursorID
         if (chunk == "CLOSE #") {
+            // At present, we no longer care about CLOSEing a cursor.
+            continue;
         }
 
         // ERROR #cursorID
         if (chunk == "ERROR #") {
+            continue;
         }
 
         // Need to shorten things if we get this far!
         // EXEC #cursorID
         chunk = chunk.substr(0, 6);
         if (chunk == "EXEC #") {
+            continue;
         }
 
+        // We don't need the continue above, to be honest.
+        // But if I ever add another check here, I'll probably
+        // forget to add one in the check above. It's what I do! :(
     }
 
+    // We have a good parse.
     return true;
 }
 
@@ -151,7 +166,8 @@ bool tmTraceFile::parseHeader() {
     bool ok = readTraceLine(&traceLine);
 
     if (!ok) {
-        cerr << "parseHeader(): Cannot read first line from " << mTraceFileName << endl;
+        cerr << "parseHeader(): Cannot read first line from "
+             << mTraceFileName << endl;
         return false;
     }
 
@@ -177,7 +193,8 @@ bool tmTraceFile::parseHeader() {
     while (true) {
         ok = readTraceLine(&traceLine);
         if (!ok) {
-            cerr << "parseHeader(): Cannot read header line(s) from " << mTraceFileName << endl;
+            cerr << "parseHeader(): Cannot read header line(s) from "
+                 << mTraceFileName << endl;
             break;
         }
 
@@ -275,41 +292,175 @@ bool tmTraceFile::readTraceLine(string *aLine) {
   * to be the PARSING IN CURSOR line. We are only interested in
   * cursors at depth = 1.
   * Creates a tmCursor object and appends it to the map<string, tmCursor *>
-  * that we use to hold these things.
+  * that we use to hold these things, if the depth is zero. Only one
+  * cursor can be added to the map - it's got a unique key.
   * Returns true if all ok.
   */
 bool tmTraceFile::parsePARSING(const string &thisLine) {
 
     // PARSING IN CURSOR #4572676384 len=229 dep=1 ...
-    regex reg("(#\\d+)\\slen=(\\d+)\\sdep=(\\d+)");
+    regex reg("PARSING IN CURSOR\\s(#\\d+)\\slen=(\\d+)\\sdep=(\\d+).*");
     smatch match;
 
     // Extract the cursorID, the length and the depth.
-    if (!regex_search(thisLine, match, reg)) {
-        cerr << "parsePARSING(): Cannot match regex against PARSING IN CURSOR at line: " <<  mLineNumber << "." << endl;
+    if (!regex_match(thisLine, match, reg)) {
+        cerr << "parsePARSING(): Cannot match regex against PARSING IN CURSOR at line: "
+             <<  mLineNumber << "." << endl;
         return false;
     }
 
     // Found it!
-    // Extract the goodies. We must have three matches.
+    // Extract the goodies! We definitely have all three matches.
+    // Match[0] = "#12345678 len=123 dep=0"
+    // Match[1] = "#12345678"
+    // Match[2] = "123"
+    // Match[3] = "0"
+
+    // No validation necessary, they are digits etc, as required.
+
+    // The SQL starts on the following line, not this one!
+    unsigned sqlLine = mLineNumber + 1;
     string cursorID = match[1];
-    string sqlLength = match[2];
-    string depth = match[3];
+    unsigned sqlLength = stoul(match[2], NULL, 10);
+    unsigned depth = stoul(match[3], NULL, 10);
 
-    if (depth == "0") {
-        tmCursor *thisCursor = new tmCursor(cursorID, stoul(sqlLength,NULL,10), mLineNumber);
+    // We only care about user level SQL so depth 0 only gets saved away.
+    // This does mean that SQL executed in a PL/SQL call is ignored though.
+    // So far, that's what my customer(s) want. (Hello Rich.)
+    // It's a pity that the trace doesn't show an easy way to find a parent depth
+    // zero cursor for all the cursors with depth > zero. That would be nice.
+    if (!depth) {
+        tmCursor *thisCursor = new tmCursor(cursorID, sqlLength, sqlLine);
+        if (!thisCursor) {
+            cerr << "parsePARSING(): Cannot allocate a new tmCursor." << endl;
+            return false;
+        }
 
-        // Stash this one.
-        mCursors.insert(pair<string, tmCursor *>(cursorID, thisCursor));
+        // Extract the SQL Text.
+        // For efficiency, pre-allocate the current sql length, plus a bit.
+        string sqlText = "";
+        string aLine;
+        sqlText.reserve(sqlLength + 20);
 
-        cerr << "CursorID = " << cursorID << endl;
-        cerr << "sqlLength = " << sqlLength << endl;
-        cerr << "depth = " << depth << endl;
+        while (readTraceLine(&aLine)) {
+            if (aLine.substr(0, 11) == "END OF STMT") {
+                break;
+            }
 
-        cerr << "MAP contains " << mCursors.size() << endl << endl;
+            if (!sqlText.empty()) {
+                    sqlText += string("\n");
+            }
+
+            sqlText += aLine;
+        }
+
+        // An iterator for the insert into the map. AKA where are we?
+        pair<map<string, tmCursor *>::iterator, bool> exists;
+
+        // Stash this new cursor. If the cursor exists, update it. Maps are weird!
+        // CusrorIDs are like Highlanders. There can be only one! ;)
+        exists = mCursors.insert(pair<string, tmCursor *>(cursorID, thisCursor));
+
+        // If the bool is false, the insert failed - already there.
+        // So we simply update.
+        //
+        // Exists is a pair<mCursors::iterator, bool>. It indexes the map at the
+        // position of the inserted or already existing cursor data.
+        // Exists.second is the bool. True=inserted, False=already exists.
+        // Exists.first is an iterator (pseudo pointer) to a pair <string, tmCursor *>.
+        // Exists.first->first is the string, aka the cursorID.
+        // Exists.first->second is the tmCursor pointer.
+        //
+        // Phew!
+
+        // So, after all that, did we insert or find our cursor?
+        if (!exists.second) {
+            // Update existing cursor details. Only the
+            // SQL details will have changed. At the moment.
+            // And we have not yet parsed this SQL text.
+            exists.first->second->SetSQLLineNumber(sqlLine);
+            exists.first->second->SetSQLLength(sqlLength);
+            exists.first->second->SetSQLParseLine(0);
+            delete thisCursor;
+        }
+
+        // Then set the SQL Text, regardless.
+        exists.first->second->SetSQLText(sqlText);
     }
 
     // Looks like a good parse.
     return true;
 
+}
+
+/** @brief Parses out a PARSE line.
+  *
+  * Parses a line form the trace file. The line is expected
+  * to be the PARSING IN CURSOR line. We are only interested in
+  * cursors at depth = 1.
+  * Creates a tmCursor object and appends it to the map<string, tmCursor *>
+  * that we use to hold these things, if the depth is zero. Only one
+  * cursor can be added to the map - it's got a unique key.
+  * Returns true if all ok.
+  */
+bool tmTraceFile::parsePARSE(const string &thisLine) {
+
+    // PARSE #4572676384 ... dep=1 ...
+    regex reg("PARSE\\s(#\\d+).*?dep=(\\d+).*");
+    smatch match;
+
+    // Extract the cursorID, the length and the depth.
+    if (!regex_match(thisLine, match, reg)) {
+        cerr << "parsePARSE(): Cannot match regex against PARSE # at line: "
+             <<  mLineNumber << "." << endl;
+        return false;
+    }
+
+    // Found it!
+    // Extract the goodies! We definitely have all three matches.
+    // Match[0] = the whole line!
+    // Match[1] = "#12345678"
+    // Match[2] = "0"
+
+    // No validation necessary, they are digits etc, as required.
+
+    // The SQL starts on the following line, not this one!
+    string cursorID = match[1];
+    unsigned depth = stoul(match[2], NULL, 10);
+
+    // We only care about user level SQL, so only depth 0.
+    if (!depth) {
+        // Find the existing cursor.
+        map<string, tmCursor *>::iterator i = findCursor(cursorID);
+
+        // Found?
+        if (i != mCursors.end()) {
+            // Yes. Thankfully! Update the PARSE line number.
+            // i is an iterator to a pair<string, tmCursor *>
+            // So i->first is the string.
+            // And i->second is the tmCursor pointer.
+            i->second->SetSQLParseLine(mLineNumber);
+        } else {
+            // Not found. Oh dear!
+            cerr << "parsePARSE(): Found PARSE for cursor " << cursorID
+                 << " but not found in existing cursor list." << endl;
+            return false;
+        }
+    }
+
+    // Looks like a good parse.
+    return true;
+
+}
+
+
+/** @brief Finds a cursor in the cursor list.
+  *
+  * Searches the mCursors map for a given key.
+  * Returns a valid iterator if all ok, otherwise returns mCursors.end().
+  */
+map<string, tmCursor *>::iterator tmTraceFile::findCursor(const string &cursorID) {
+
+        // Find an existing cursor in the map.
+        return mCursors.find(cursorID);
 }

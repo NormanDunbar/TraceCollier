@@ -10,17 +10,13 @@ using std::string;
 using std::cerr;
 using std::endl;
 
-// What valid commandline options are allowed?
-static string validArgs[] = {string("--verbose"), string("-v"),
-                             string("--html"),    string("-m"),
-                             string("--help"),    string("-h"), string("-?")};
-
 class tmOptions
 {
     public:
         tmOptions();
         virtual ~tmOptions();
 
+        // Getters.
         bool Verbose() { return mVerbose; }
         bool Html() { return mHtml; }
         bool Help() { return mHelp; }
@@ -32,6 +28,8 @@ class tmOptions
         string htmlExtension() { return mHtmlExtension; }
         string reportExtension() { return mReportExtension; }
         string debugExtension() { return mDebugExtension; }
+
+        // There are no Setters.
 
         void usage();
         bool ParseArgs(int argc, char *argv[]);

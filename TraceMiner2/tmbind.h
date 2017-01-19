@@ -2,23 +2,34 @@
 #define TMBIND_H
 
 #include <string>
+#include <iostream>
+
 
 using std::string;
+using std::endl;
+using std::cerr;
+using std::cout;
+using std::endl;
 
 
 class tmBind
 {
     public:
-        tmBind();
-        tmBind(unsigned BindID);
+        tmBind(unsigned id, string name);
         ~tmBind();
+        friend ostream &operator<<(ostream &out, tmBind &bind);
 
+        // Getters.
         unsigned BindId() { return mBindId; }
-        void SetBindId(unsigned val) { mBindId = val; }
         unsigned BindLineNumber() { return mBindLineNumber; }
-        void SetBindLineNumber(unsigned val) { mBindLineNumber = val; }
         string BindValue() { return mBindValue; }
+        string BindName() { return mBindName; }
+
+        // Setters.
+        void SetBindId(unsigned val) { mBindId = val; }
         void SetBindValue(string val) { mBindValue = val; }
+        void SetBindLineNumber(unsigned val) { mBindLineNumber = val; }
+        void SetBindName(string val) { mBindName = val; }
 
     protected:
 
@@ -26,6 +37,7 @@ class tmBind
         unsigned mBindId;
         unsigned mBindLineNumber;
         string mBindValue;
+        string mBindName;
 };
 
 #endif // TMBIND_H
