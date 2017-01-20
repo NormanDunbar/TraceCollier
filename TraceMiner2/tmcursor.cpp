@@ -1,5 +1,10 @@
 #include "tmcursor.h"
 
+/** @file tmcursor.cpp
+ * @brief Implementation file for the tmCursor object.
+ */
+
+
 /** @brief Constructor for tmCursor object.
  *
  * @param	id std::string. The cursorID including leading '#'.

@@ -1,6 +1,10 @@
 #ifndef TMTRACEFILE_H
 #define TMTRACEFILE_H
 
+/** @file tmtracefile.h
+ * @brief Header file for the tmTraceFile object.
+ */
+
 #include <string>
 #include <map>
 #include <iostream>

@@ -3,6 +3,10 @@
 // NOTE: None of these are case insensitive, it's up to the caller to
 //       ensure correct case is used. Just a thought!
 
+/** @file utilities.cpp
+ * @brief Implementation file for the various utilities in TraceMiner2.
+ */
+
 
 /** @brief Returns the file's extension, without the dot.
  *

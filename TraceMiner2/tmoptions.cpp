@@ -1,5 +1,9 @@
 #include "tmoptions.h"
 
+/** @file tmoptions.cpp
+ * @brief Implementation file for the tmOptions object.
+ */
+
 /** @brief Constructor for a tmOptions object.
  */
 tmOptions::tmOptions()

@@ -1,6 +1,10 @@
 #ifndef TMCURSOR_H
 #define TMCURSOR_H
 
+/** @file tmcursor.h
+ * @brief Header file for the tmCursor object.
+ */
+
 #include <string>
 #include <iostream>
 #include <map>

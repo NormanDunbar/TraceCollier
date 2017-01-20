@@ -1,6 +1,10 @@
 #ifndef TMOPTIONS_H
 #define TMOPTIONS_H
 
+/** @file tmoptions.h
+ * @brief Header file for the tmOptions object.
+ */
+
 #include <string>
 #include <iostream>
 

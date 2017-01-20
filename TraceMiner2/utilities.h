@@ -1,6 +1,10 @@
 #ifndef UTILITIES_H
 #define UTILITIES_H
 
+/** @file utilities.h
+ * @brief Header file for the utility functions used in TraceMiner2.
+ */
+
 #include <string>
 
 using std::string;

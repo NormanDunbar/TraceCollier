@@ -1,5 +1,9 @@
 #include "tmtracefile.h"
 
+/** @file tmtracefile.cpp
+ * @brief Implementation file for the tmTraceFile object.
+ */
+
 /** @brief Cleans up the cursor in the event that something was wrong.
  *
  * In the event that a parse goes badly, this function will be called

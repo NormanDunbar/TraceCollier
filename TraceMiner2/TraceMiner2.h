@@ -1,6 +1,10 @@
 #ifndef TRACEMINER2_H
 #define TRACEMINER2_H
 
+/** @file TraceMiner2.h
+ * @brief Header file for the TraceMiner2 application.
+ */
+
 #include <iostream>
 #include <fstream>
 #include <string>

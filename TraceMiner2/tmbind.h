@@ -1,6 +1,11 @@
 #ifndef TMBIND_H
 #define TMBIND_H
 
+/** @file tmbind.h
+ * @brief Header file for the tmBind object.
+ */
+
+
 #include <string>
 #include <iostream>
 

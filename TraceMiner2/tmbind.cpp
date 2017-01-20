@@ -1,5 +1,10 @@
 #include "tmbind.h"
 
+/** @file tmbind.cpp
+ * @brief Implementation file for the tmBind object.
+ */
+
+
 /** @brief Constructor for a tmBind object.
  *
  * @param id unsigned. The positional bind number. The first  bind in a SQL statement is bind 0, and so on.
