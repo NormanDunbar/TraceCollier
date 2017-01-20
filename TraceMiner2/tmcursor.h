@@ -16,6 +16,8 @@ using std::smatch;
 
 #include "tmbind.h"
 
+/** @brief A class representing a cursor variable in an Oracle trace file.
+ */
 class tmCursor
 {
     public:

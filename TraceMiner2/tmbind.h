@@ -12,6 +12,8 @@ using std::cout;
 using std::endl;
 
 
+/** @brief A class representing a bind variable in a SQL statement.
+ */
 class tmBind
 {
     public:

@@ -22,6 +22,8 @@ using std::stoul;
 
 #include "tmcursor.h"
 
+/** @brief A class representing an Oracle trace file.
+ */
 class tmTraceFile
 {
     public:
