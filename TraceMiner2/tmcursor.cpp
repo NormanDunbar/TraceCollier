@@ -1,6 +1,13 @@
 #include "tmcursor.h"
 
-tmCursor::tmCursor(string id, unsigned sqlSize, unsigned sqlLine) {
+/** @brief Constructor for tmCursor object.
+ *
+ * @param	id std::string. The cursorID including leading '#'.
+ * @param	sqlSize unsigned. The length of the SQL text.
+ * @param	sqlLine unsigned. The line in the trace file where the SQL statement begins.
+ * @return	None.
+ */
+ tmCursor::tmCursor(string id, unsigned sqlSize, unsigned sqlLine) {
     mCursorId = id;
     mSQLLineNumber = sqlLine;
     mSQLSize = sqlSize;
@@ -10,6 +17,8 @@ tmCursor::tmCursor(string id, unsigned sqlSize, unsigned sqlLine) {
 
 }
 
+/** @brief Destructor for tmCursor object.
+ */
 tmCursor::~tmCursor() {
     // Anything to do to kill a tmCursor?
     // Of course there is, get shot of all the binds in the map.
@@ -18,11 +27,12 @@ tmCursor::~tmCursor() {
 
 
 /** @brief Cleans up on destruction of a tmCursor and on changing the SQL.
-  *
-  * When a tmCursor is destroyed, we must cleam up all the assigned tmBinds
-  * from the map. This function is also called when the SQL Text is changed
-  * on reuse of the cursor.
-  */
+ *
+ * When a tmCursor is destroyed, we must clean up all the assigned tmBinds
+ * from the map. This function is also called when the SQL Text is changed
+ * on reuse of the cursor. That way we don't leak tmBinds all over the place
+ * when a cursor is closed and reused.
+ */
 void tmCursor::cleanUp() {
     for (map<unsigned, tmBind *>::iterator i = mBinds.begin(); i != mBinds.end(); ++i) {
         cerr << *(i->second);
@@ -33,30 +43,37 @@ void tmCursor::cleanUp() {
 
 
 /** @brief Allows a tmCursor to be streamed to an ostream.
-  *
-  * This function/operator allows a tmCursor to stream itself
-  * out to an ostream.
-  */
+ *
+ * @return	ostream & (reference).
+ *
+ * This function/operator allows a tmCursor to stream itself
+ * out to an ostream. It does not, at present, stream out
+ * a cursor's binds.
+ *
+ * Only used for debugging and verbose output.
+ */
 ostream &operator<<(ostream &out, tmCursor &cursor) {
     out << "CursorID: " << cursor.CursorId() << endl;
     out << "SQL Line Number: " << cursor.SQLLineNumber() << endl;
     out << "SQL Text Length: " << cursor.SQLLength() << endl;
     out << "SQL Parse Line: " << cursor.SQLParseLine() << endl;
     out << "SQL Text = [" << cursor.SQLText() << "]" << endl << endl;
-    out << "Bind Count: " << cursor.BindCount() << endl;
-    // Mayeb dump the binds here too?
+    out << "Bind Count: " << cursor.BindCount() << endl << endl;
     return out;
 }
 
 
-/** @brief Initialises the list of Bind objects when the SQL changes.
-  *
-  * When a cursor gets a new SQL statement, the binds are extracted
-  * and a tmBind map set up where the key is the bind name (:xxx) and
-  * the rest is the bind stuff itself.
-  * If a statement uses the same bind more than once, that's acceptable
-  * the second and subsequent uses will be flagged as "no oacdef for this bind".
-  */
+/** @brief Updates the SQL statement & binds when the SQL changes.
+ *
+ * @param std::string val. The (new) SQL statement for this tmCursor.
+ *
+ * When a cursor gets a new SQL statement, the binds are extracted
+ * and a tmBind map set up where the key is the bind name (:xxx) and
+ * the rest is the bind stuff itself.
+ *
+ * If a statement uses the same bind more than once, that's acceptable
+ * as the bind map is keyed on the bind number not the name.
+ */
 void tmCursor::SetSQLText(string val) {
 
     // Assign the (new) SQL statement.
@@ -67,6 +84,16 @@ void tmCursor::SetSQLText(string val) {
 }
 
 
+/** @brief Initialises the list of Bind objects when the SQL changes.
+ *
+ * @return bool.
+ *
+ * This function does the hard work of extracting the bind variables
+ * when a cursor has a (new) SQL statement assigned. Old ones are removed
+ * and cleaned up.
+ *
+ * A return of true indicates success, false otherwise.
+ */
 bool tmCursor::buildBindMap(const string &sql) {
 
     // If we have any binds, clean them out.

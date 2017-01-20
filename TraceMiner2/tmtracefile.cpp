@@ -1,10 +1,11 @@
 #include "tmtracefile.h"
 
 /** @brief Cleans up the cursor in the event that something was wrong.
-  *
-  * In the event that a parse goes badly, this function will be called
-  * to clean up whatever mess there is, lying around in the object.
-  */
+ *
+ * In the event that a parse goes badly, this function will be called
+ * to clean up whatever mess there is, lying around in the tmTraceFile
+ * object.
+ */
 void tmTraceFile::cleanUp() {
     // If still open, close the trace file.
     if (mIfs) {
@@ -30,12 +31,12 @@ void tmTraceFile::cleanUp() {
 
 
 /** @brief Initialises the internals of a trace file object.
-  *
-  * When I had two different constructors, I needed to initialise
-  * the members in each. Extracted that code to this function.
-  * Since then, I've removed all but one of the constructors, but
-  * I have not decided yet, that I'll stick with that option.
-  */
+ *
+ * When I had two different constructors, I needed to initialise
+ * the members in each. Extracted that code to this function.
+ * Since then, I've removed all but one of the constructors, but
+ * I have not decided yet, that I'll stick with that option.
+ */
 void tmTraceFile::init() {
     mTraceFileName = "";
     mOriginalTraceFileName = "";
@@ -49,11 +50,13 @@ void tmTraceFile::init() {
 }
 
 
-/** @brief Constructor with known trace file name.
-  *
-  * Constructs a new tmTraceFile class, knowing the name of the trace file to
-  * be used.
-  */
+/** @brief Constructor for a tmTraceFile object.
+ *
+ * @param TraceFileName std::string.
+ *
+ * Constructs a new tmTraceFile class, knowing the name of the trace file to
+ * be used.
+ */
 tmTraceFile::tmTraceFile(string TraceFileName)
 {
     init();
@@ -61,10 +64,9 @@ tmTraceFile::tmTraceFile(string TraceFileName)
 }
 
 
-/** @brief Destructor.
-  *
-  * Nothing to see here. Cleans up as required.
-  */
+/** @brief Destructor for a tmTraceFile object.
+ *
+ */
 tmTraceFile::~tmTraceFile()
 {
     // Destructor.
@@ -74,11 +76,15 @@ tmTraceFile::~tmTraceFile()
 
 
 /** @brief Parses a trace file.
-  *
-  * If a trace file is known, the Parse() function will parse it and report
-  * the various binds etc used in the EXEC lines found. Only 'DEP=0' EXECs are
-  * considered. Returns a boolean indicating success or failure.
-  */
+ *
+ * @return bool.
+ *
+ * This function will parse the main body of a trace file and report on the SQL and
+ * the various binds etc used in the EXEC lines found. Only 'DEP=0' EXECs are
+ * considered.
+ *
+ * Returns true to indicate success or false for a failure.
+ */
 bool tmTraceFile::parseTraceFile()
 {
     // Process a trace file.
@@ -152,14 +158,12 @@ bool tmTraceFile::parseTraceFile()
 
 
 /** @brief Parses a trace file header.
-  *
-  * Validates that this looks to be an Oracle trace file, then
-  * reads in a few details from the header.
-  *
-  * On exit from here, the next read will read the first line
-  * after the first "==============" which should normally be
-  * a PARSING IN CURSOR line. Normally!
-  */
+ *
+ * @return bool.
+ *
+ * Validates that this looks to be an Oracle trace file, then
+ * reads in a few details from the header.
+ */
 bool tmTraceFile::parseHeader() {
 
     string traceLine;
@@ -236,9 +240,13 @@ bool tmTraceFile::parseHeader() {
 
 
 /** @brief Opens a trace file.
-  *
-  * Open a trace file and read in the header details.
-  */
+ *
+ * @return bool.
+ *
+ * Open a trace file and calls parseHeader() to read in the header details.
+ *
+ * A return of true indicates success, false indicates some failure occurred.
+ */
 bool tmTraceFile::openTraceFile()
 {
 
@@ -268,11 +276,14 @@ bool tmTraceFile::openTraceFile()
 
 
 /** @brief Reads a single line from a trace file.
-  *
-  * Reads a single line from a trace file. Updates the current
-  * line number within the trace file. Returns bool parameter if we
-  * are still good for more reading.
-  */
+ *
+ * @param aLine *std::string. Pointer to a string to receive a single line read from the trace file.
+ * @return bool
+ *
+ * Reads a single line from a trace file. Updates the current
+ * line number within the trace file.
+ * Returns true if we are still good for more reading, false otherwise.
+ */
 bool tmTraceFile::readTraceLine(string *aLine) {
     try {
         getline(*mIfs, *aLine);
@@ -286,16 +297,21 @@ bool tmTraceFile::readTraceLine(string *aLine) {
 }
 
 
-/** @brief Parses out a PARSING IN CURSOR line.
-  *
-  * Parses a line form the trace file. The line is expected
-  * to be the PARSING IN CURSOR line. We are only interested in
-  * cursors at depth = 1.
-  * Creates a tmCursor object and appends it to the map<string, tmCursor *>
-  * that we use to hold these things, if the depth is zero. Only one
-  * cursor can be added to the map - it's got a unique key.
-  * Returns true if all ok.
-  */
+/** @brief Parses a "PARSING IN CURSOR" line.
+ *
+ * @param thisLine &std::string. A reference to a single line from the tarce file. This
+ *        will always be the "PARSING IN CURSOR" line.
+ * @return bool.
+ *
+ * Parses a line form the trace file. The line is expected
+ * to be the PARSING IN CURSOR line. We are only interested in
+ * cursors at depth = 0.
+ *
+ * Creates a tmCursor object and appends it to the map<string, tmCursor *>
+ * that we use to hold these things, if the depth is zero.
+ *
+ * Returns true if all ok. False otherwise.
+ */
 bool tmTraceFile::parsePARSING(const string &thisLine) {
 
     // PARSING IN CURSOR #4572676384 len=229 dep=1 ...
@@ -393,16 +409,16 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
 
 }
 
-/** @brief Parses out a PARSE line.
-  *
-  * Parses a line form the trace file. The line is expected
-  * to be the PARSING IN CURSOR line. We are only interested in
-  * cursors at depth = 1.
-  * Creates a tmCursor object and appends it to the map<string, tmCursor *>
-  * that we use to hold these things, if the depth is zero. Only one
-  * cursor can be added to the map - it's got a unique key.
-  * Returns true if all ok.
-  */
+/** @brief Parses a "PARSE" line.
+ *
+ * Parses a line from the trace file. The line is expected
+ * to be the PARSE #cursor line.
+ *
+ * The tmCursor associated with this PARSE is found, and updated to the new
+ * source file line number. Only the most recent PASRE is stored for each tmCursor.
+ *
+ * Returns true if all ok. False otherwise.
+ */
 bool tmTraceFile::parsePARSE(const string &thisLine) {
 
     // PARSE #4572676384 ... dep=1 ...
@@ -455,10 +471,13 @@ bool tmTraceFile::parsePARSE(const string &thisLine) {
 
 
 /** @brief Finds a cursor in the cursor list.
-  *
-  * Searches the mCursors map for a given key.
-  * Returns a valid iterator if all ok, otherwise returns mCursors.end().
-  */
+ *
+ * @param cursorID const std::string&. The cursor we are looking for.
+ * @return map<string, tmCursor *>::iterator. An iterator to the desired cursor, or if not found, a pointer to the end.
+ *
+ * Searches the mCursors map for a given key.
+ * Returns a valid iterator if all ok, otherwise returns mCursors.end().
+ */
 map<string, tmCursor *>::iterator tmTraceFile::findCursor(const string &cursorID) {
 
         // Find an existing cursor in the map.

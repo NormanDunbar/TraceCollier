@@ -38,3 +38,6 @@
 *.save
 *.depend
 *.layout
+
+# DoxyGen output.
+TraceMiner2/doxygen/

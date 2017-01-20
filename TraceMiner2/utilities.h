@@ -16,19 +16,10 @@ using std::string;
 const int returnFilePath = 0;
 const int returnFileName = 1;
 
-// Return the file extension for a given file name.
-string fileExtension(const string &fullPath);
-
-// Return the file name part, including extension, for a full path.
-string fileName(const string &fullPath);
-
-// Return the file path for a given file name.
-string filePath(const string &fullPath);
-
-// Return the file's name, not including the extension, or the dot.
-string fileNameOnly(const string &fullPath);
-
-// Return a string with the file name extension changed.
-string replaceFileExtension(const string &fullPath, const string &newExtension);
+string fileExtension(const string &fullPath);   /**< Return the file extension for a given file name. */
+string fileName(const string &fullPath);        /**< Return the file name part, including extension, for a full path. */
+string filePath(const string &fullPath);        /**< Return the file path for a given file name. */
+string fileNameOnly(const string &fullPath);    /**< Return the file's name, not including the extension, or the dot.  */
+string replaceFileExtension(const string &fullPath, const string &newExtension);    /**< Return a string with the file name extension changed. */
 
 #endif // UTILITIES_H

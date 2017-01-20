@@ -20,24 +20,24 @@ class tmBind
         friend ostream &operator<<(ostream &out, tmBind &bind);
 
         // Getters.
-        unsigned BindId() { return mBindId; }
-        unsigned BindLineNumber() { return mBindLineNumber; }
-        string BindValue() { return mBindValue; }
-        string BindName() { return mBindName; }
+        unsigned BindId() { return mBindId; }                   /**< Returns the bind number. */
+        unsigned BindLineNumber() { return mBindLineNumber; }   /**< Returns the linenumber the bind was last seen at. */
+        string BindValue() { return mBindValue; }               /**< Returns the most recent value for this bind. */
+        string BindName() { return mBindName; }                 /**< Returns the bind variable name as used in the SQL. */
 
         // Setters.
-        void SetBindId(unsigned val) { mBindId = val; }
-        void SetBindValue(string val) { mBindValue = val; }
-        void SetBindLineNumber(unsigned val) { mBindLineNumber = val; }
-        void SetBindName(string val) { mBindName = val; }
+        void SetBindId(unsigned val) { mBindId = val; }         /**< Sets a bind number. */
+        void SetBindValue(string val) { mBindValue = val; }     /**< Sets a new bind value. */
+        void SetBindLineNumber(unsigned val) { mBindLineNumber = val; } /**< Sets a new bind line number. */
+        void SetBindName(string val) { mBindName = val; }       /**< Sets the bind variable name. */
 
     protected:
 
     private:
-        unsigned mBindId;
-        unsigned mBindLineNumber;
-        string mBindValue;
-        string mBindName;
+        unsigned mBindId;               /**< The bind number within the SQL statement. */
+        unsigned mBindLineNumber;       /**< The line number the bind details were found at. */
+        string mBindValue;              /**< The current EXEC statement's value for this bind. */
+        string mBindName;               /**< The name of the bind variable in the SQL statement. */
 };
 
 #endif // TMBIND_H

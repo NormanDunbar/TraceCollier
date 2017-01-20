@@ -4,7 +4,14 @@
 //       ensure correct case is used. Just a thought!
 
 
-// Returns the file's extension, without the dot.
+/** @brief Returns the file's extension, without the dot.
+ *
+ * @param fullPath const std::string&. The full path from which to extract the extension.
+ * @return std::string.
+ *
+ * Scans the supplied full path for a filename and returns the (usually) three character extension part only.
+ * The dot prefix for the extension, is not returned.
+ */
 string fileExtension(const string &fullPath) {
 
     if (fullPath.empty())
@@ -33,21 +40,39 @@ static string splitFile(const string &fullPath, int whichPart) {
 }
 
 
-// Return the file's name, including the extension.
+/** @brief Return the file's name, including the extension.
+ *
+ * @param fullPath const std::string&. The full path from which to extract the terminal filename and extension.
+ * @return std::string
+ *
+ * Scans the supplied full path for a filename and extension and returns them.
+ */
 string fileName(const string &fullPath) {
 
     return splitFile(fullPath, returnFileName);
 }
 
 
-// Return the file's path only.
+/** @brief Return the file's path.
+ *
+ * @param fullPath const std::string&. The full path from which to extract the path.
+ * @return std::string
+ *
+ * Scans the supplied full path and returns everything prior to the terminal filename.
+ */
 string filePath(const string &fullPath) {
 
     return splitFile(fullPath, returnFilePath);
 }
 
 
-// Return the file's name, not including the extension, or the dot.
+/** @brief Return the file's name, not including the extension, or the dot.
+ *
+ * @param fullPath const std::string&. The full path from which to extract the filename but not the extension.
+ * @return std::string
+ *
+ * Scans the supplied full path and returns the terminal filename without any extension.
+ */
 string fileNameOnly(const string &fullPath) {
 
     string result = splitFile(fullPath, returnFileName);
@@ -66,7 +91,14 @@ string fileNameOnly(const string &fullPath) {
 }
 
 
-// Strips off the existing extension, and adds on the required replacement.
+/** @brief Strips off the existing extension, and adds on the required replacement.
+ *
+ * @param fullPath const string&. The full path to the original filename.
+ * @param newExtension const string&. The desired new file extension.
+ * @return string
+ *
+ * Returns the input filename with the old extension stripped off and a new one added.
+ */
 string replaceFileExtension(const string &fullPath, const string &newExtension) {
 
    size_t dot = fullPath.rfind('.', fullPath.length());

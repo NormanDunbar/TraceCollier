@@ -1,5 +1,7 @@
 #include "tmoptions.h"
 
+/** @brief Constructor for a tmOptions object.
+ */
 tmOptions::tmOptions()
 {
     mHelp = false;
@@ -10,6 +12,8 @@ tmOptions::tmOptions()
     mDebugFile = "";
 }
 
+/** @brief Destructor for a tmOptions object.
+ */
 tmOptions::~tmOptions()
 {
     // Nothing to do here!
@@ -17,10 +21,14 @@ tmOptions::~tmOptions()
 
 
 /** @brief Parses the command line arguments.
-  *
-  * Checks for various flags, and makes sure we have a single file name.
-  * Returns true if all ok.
-  */
+ *
+ * @param argc int. Number of command line arguments supplied. Plus 1 for the program name.
+ * @param argv[] char*. Array of command line arguments.
+ * @return bool.
+ *
+ * Checks for various flags, and makes sure we have a single trace file name.
+ * Returns true if all ok, displays usage() and returns false otherwise.
+ */
 bool tmOptions::ParseArgs(int argc, char *argv[]) {
 
     bool invalidArgs = false;
@@ -112,10 +120,10 @@ bool tmOptions::ParseArgs(int argc, char *argv[]) {
     return true;
 }
 
-/** @brief Online help!
-  *
-  * Displays brief details of how to use the utility.
-  */
+/** @brief Display brief TraceMiner2 usage details.
+ *
+ * Displays brief details of how to use TraceMiner2.
+ */
 void tmOptions::usage() {
 
     cerr << endl << "USAGE:" << endl << endl;

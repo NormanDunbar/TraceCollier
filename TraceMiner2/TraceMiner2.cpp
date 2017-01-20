@@ -1,5 +1,5 @@
 //==============================================//
-// Copyright (c) Norman Dunbar, 2016.
+// Copyright (c) Norman Dunbar, 2017.
 //==============================================//
 // If you wish to use this code, be my guest.
 // Just leave my copyright intact, and add a
