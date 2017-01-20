@@ -94,66 +94,71 @@ bool tmTraceFile::parseTraceFile()
     // Process a trace file.
     string traceLine;
 
+    // Regex to extract the first command on the line.
+    regex reg("(.*?)\\s#\\d+.*");
+    smatch match;
+
     // The main parsing loop. What kind of line have we
     // read? Deal with it accordingly.
     while (readTraceLine(&traceLine)) {
 
-        // Start with the shortest substr() that gives
-        // a unique string for any "verbs"!
-        string chunk = traceLine.substr(0, 7);
+        if (regex_match(traceLine, match, reg)) {
 
-        // PARSING IN CURSOR #cursorID
-        if (chunk == "PARSING") {
-            if (!parsePARSING(traceLine)) {
-                return false;
-            };
-            continue;
+            // Start with the shortest substr() that gives
+            // a unique string for any "verbs"!
+            string chunk = match[1];
+
+            // PARSING IN CURSOR #cursorID
+            if (chunk == "PARSING IN CURSOR") {
+                if (!parsePARSING(traceLine)) {
+                    return false;
+                };
+                continue;
+            }
+
+            // PARSE ERROR
+            if (chunk == "PARSE ERROR") {
+                continue;
+            }
+
+            // XCTEND (COMMIT/ROLLBACK)
+            if (chunk == "XCTEND ") {
+                continue;
+            }
+
+            // PARSE #cursorID
+            if (chunk == "PARSE") {
+                if (!parsePARSE(traceLine)) {
+                    return false;
+                };
+                continue;
+            }
+
+            // BINDS #cursorID
+            if (chunk == "BINDS") {
+                continue;
+            }
+
+            // CLOSE #cursorID
+            if (chunk == "CLOSE") {
+                // At present, we no longer care about CLOSEing a cursor.
+                continue;
+            }
+
+            // ERROR #cursorID
+            if (chunk == "ERROR") {
+                continue;
+            }
+
+            if (chunk == "EXEC") {
+                continue;
+            }
+
+            // We don't need the continue above, to be honest.
+            // But if I ever add another check here, I'll probably
+            // forget to add one in the check above. It's what I do! :(
+
         }
-
-        // PARSE ERROR
-        if (chunk == "PARSE E") {
-            continue;
-        }
-
-        // XCTEND (COMMIT/ROLLBACK)
-        if (chunk == "XCTEND ") {
-            continue;
-        }
-
-        // PARSE #cursorID
-        if (chunk == "PARSE #") {
-            if (!parsePARSE(traceLine)) {
-                return false;
-            };
-            continue;
-        }
-
-        // BINDS #cursorID
-        if (chunk == "BINDS #") {
-            continue;
-        }
-
-        // CLOSE #cursorID
-        if (chunk == "CLOSE #") {
-            // At present, we no longer care about CLOSEing a cursor.
-            continue;
-        }
-
-        // ERROR #cursorID
-        if (chunk == "ERROR #") {
-            continue;
-        }
-
-        // Need to shorten things if we get this far!
-        // EXEC #cursorID
-        chunk = chunk.substr(0, 6);
-        if (chunk == "EXEC #") {
-            continue;
-        }
-
-        // We don't need the continue above, to be honest.
-        // But if I ever add another check here, I'll probably
-        // forget to add one in the check above. It's what I do! :(
     }
 
     // We have a good parse.
