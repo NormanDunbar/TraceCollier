@@ -17,6 +17,7 @@ using std::pair;
 using std::map;
 using std::regex;
 using std::smatch;
+using std::ostream;
 
 #include "tmbind.h"
 
@@ -27,7 +28,7 @@ class tmCursor
     public:
         tmCursor(string id, unsigned sqlSize, unsigned sqlLine);
         ~tmCursor();
-        friend ostream &operator<<(ostream &out, tmCursor &cursor);
+        friend ostream &operator<<(ostream &out, const tmCursor &cursor);
 
         // Getters.
         string CursorId() { return mCursorId; }                 /**< Returns the cursor id, including  the # prefix. */

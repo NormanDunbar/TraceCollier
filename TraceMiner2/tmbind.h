@@ -15,6 +15,7 @@ using std::endl;
 using std::cerr;
 using std::cout;
 using std::endl;
+using std::ostream;
 
 
 /** @brief A class representing a bind variable in a SQL statement.
@@ -24,7 +25,7 @@ class tmBind
     public:
         tmBind(unsigned id, string name);
         ~tmBind();
-        friend ostream &operator<<(ostream &out, tmBind &bind);
+        friend ostream &operator<<(ostream &out, const tmBind &bind);
 
         // Getters.
         unsigned BindId() { return mBindId; }                   /**< Returns the bind number. */

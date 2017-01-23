@@ -36,11 +36,11 @@ tmBind::~tmBind()
  * This function/operator allows a tmBind to stream itself
  * out to an ostream.
  */
-ostream &operator<<(ostream &out, tmBind &bind) {
-    out << "BindID: " << bind.BindId() << endl;
-    out << "Bind Line Number: " << bind.BindLineNumber() << endl;
-    out << "Bind Name: " << bind.BindName() << endl;
-    out << "Bind Value: " << bind.BindValue() << endl << endl;
+ostream &operator<<(ostream &out, const tmBind &bind) {
+    out << "BindID: " << bind.mBindId << endl;
+    out << "Bind Line Number: " << bind.mBindLineNumber << endl;
+    out << "Bind Name: " << bind.mBindName << endl;
+    out << "Bind Value: " << bind.mBindValue << endl << endl;
     return out;
 }
 

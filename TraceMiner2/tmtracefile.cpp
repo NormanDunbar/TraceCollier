@@ -104,8 +104,7 @@ bool tmTraceFile::parseTraceFile()
 
         if (regex_match(traceLine, match, reg)) {
 
-            // Start with the shortest substr() that gives
-            // a unique string for any "verbs"!
+            // Extract the command from the first grouping.
             string chunk = match[1];
 
             // PARSING IN CURSOR #cursorID

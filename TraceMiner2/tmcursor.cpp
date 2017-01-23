@@ -57,13 +57,13 @@ void tmCursor::cleanUp() {
  *
  * Only used for debugging and verbose output.
  */
-ostream &operator<<(ostream &out, tmCursor &cursor) {
-    out << "CursorID: " << cursor.CursorId() << endl;
-    out << "SQL Line Number: " << cursor.SQLLineNumber() << endl;
-    out << "SQL Text Length: " << cursor.SQLLength() << endl;
-    out << "SQL Parse Line: " << cursor.SQLParseLine() << endl;
-    out << "SQL Text = [" << cursor.SQLText() << "]" << endl << endl;
-    out << "Bind Count: " << cursor.BindCount() << endl << endl;
+ostream &operator<<(ostream &out, const tmCursor &cursor) {
+    out << "CursorID: " << cursor.mCursorId << endl;
+    out << "SQL Line Number: " << cursor.mSQLLineNumber << endl;
+    out << "SQL Text Length: " << cursor.mSQLSize << endl;
+    out << "SQL Parse Line: " << cursor.mSQLParseLine << endl;
+    out << "SQL Text = [" << cursor.mSQLText << "]" << endl << endl;
+    out << "Bind Count: " << cursor.mBindCount << endl << endl;
     return out;
 }
 
