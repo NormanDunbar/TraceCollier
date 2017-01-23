@@ -41,3 +41,6 @@
 
 # DoxyGen output.
 TraceMiner2/doxygen/
+
+# Gnu G++ Stuff.
+bin/*
