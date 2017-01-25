@@ -122,37 +122,24 @@ tmOptions options;
 int main(int argc, char *argv[])
 {
     // Parse command line args and bale if problems detected.
-    bool allOk = options.ParseArgs(argc, argv);
+    bool allOk = options.parseArgs(argc, argv);
     if (!allOk) {
         return 1;
     }
 
     // Show help and exit requested?
-    if (options.Help()) {
+    if (options.help()) {
         return 0;
     }
 
     // This is it, here is where we hit the big time! :)
-    tmTraceFile *traceFile = new tmTraceFile(options.traceFile());
+    tmTraceFile *traceFile = new tmTraceFile(&options);
+    allOk = traceFile->parse();
 
-    // Assume everything worked.
-    int result = 0;
-
-    // Open the trace file and parse the header.
-    if (!traceFile->openTraceFile()) {
-        cerr << "TraceMiner2: Failed to open "
-             << options.traceFile() << endl;
-        result = 1;
-    } else {
-        // Parse the remainder of the trace file.
-        if (!traceFile->parseTraceFile()) {
-            cerr << "TraceMiner2: Failed to parse "
-                 << options.traceFile() << endl;
-            result = 1;
-        }
+    // All done.
+    if (traceFile) {
+        delete traceFile;
     }
 
-    // Clean up.
-    delete traceFile;
-    return result;
+    return allOk ? 0 : 1;
 }

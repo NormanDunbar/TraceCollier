@@ -23,9 +23,9 @@ class tmOptions
         virtual ~tmOptions();
 
         // Getters.
-        bool Verbose() { return mVerbose; }             /**< Returns verbose mode flag. */
-        bool Html() { return mHtml; }                   /**< Returns HTML mode flag. */
-        bool Help() { return mHelp; }                   /**< Returns help mode flag. */
+        bool verbose() { return mVerbose; }             /**< Returns verbose mode flag. */
+        bool html() { return mHtml; }                   /**< Returns HTML mode flag. */
+        bool help() { return mHelp; }                   /**< Returns help mode flag. */
 
         string traceFile() { return mTraceFile; }       /**< Returns trace file name. */
         string reportFile() { return mReportFile; }     /**< Returns report file name. */
@@ -35,10 +35,11 @@ class tmOptions
         string reportExtension() { return mReportExtension; }   /**< Returns TEXT report file extension. */
         string debugExtension() { return mDebugExtension; }     /**< Returns debug information file extension. */
 
-        // There are no Setters.
+        // Setters.
+        void setVerbose(bool verbose) { mVerbose = verbose; }   /**< Sets the verbose flag, if required. */
 
         void usage();                               /**< Display usage and force an exit. */
-        bool ParseArgs(int argc, char *argv[]);     /**< Parses command line arguments and sets various flags etc. */
+        bool parseArgs(int argc, char *argv[]);     /**< Parses command line arguments and sets various flags etc. */
 
     protected:
 

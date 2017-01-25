@@ -31,19 +31,19 @@ class tmCursor
         friend ostream &operator<<(ostream &out, const tmCursor &cursor);
 
         // Getters.
-        string CursorId() { return mCursorId; }                 /**< Returns the cursor id, including  the # prefix. */
-        unsigned SQLLineNumber() { return mSQLLineNumber; }     /**< Returns the line number where the SQL can be found. */
-        unsigned SQLLength() { return mSQLSize; }               /**< Returns the size of the SQL statement. */
-        string SQLText() { return mSQLText; }                   /**< Returns the SQL statement. */
-        unsigned SQLParseLine() { return mSQLParseLine; }       /**< Returns the most recent parse line number for this statement. */
-        unsigned BindCount() { return mBindCount; }             /**< Returns the number of binds for this statement. */
+        string cursorId() { return mCursorId; }                 /**< Returns the cursor id, including  the # prefix. */
+        unsigned sqlLineNumber() { return mSQLLineNumber; }     /**< Returns the line number where the SQL can be found. */
+        unsigned sqlLength() { return mSQLSize; }               /**< Returns the size of the SQL statement. */
+        string sqlText() { return mSQLText; }                   /**< Returns the SQL statement. */
+        unsigned sqlParseLine() { return mSQLParseLine; }       /**< Returns the most recent parse line number for this statement. */
+        unsigned bindCount() { return mBindCount; }             /**< Returns the number of binds for this statement. */
 
         // Setters.
-        void SetSQLText(string val);                            /**< Changes the SQL statement for this cursor. */
-        void SetSQLLength(unsigned val) { mSQLSize = val; }     /**< Changes the size of the SQL text. */
-        void SetSQLParseLine(unsigned val) { mSQLParseLine = val; }     /**< Changes the parse line number. */
-        void SetSQLLineNumber(unsigned val) { mSQLLineNumber = val; }   /**< Changes the SQL line number. */
-        void SetBindCount(unsigned val) { mBindCount = val; }   /**< Changes the number of binds for the statement. */
+        void setSQLText(string val);                            /**< Changes the SQL statement for this cursor. */
+        void setSQLLength(unsigned val) { mSQLSize = val; }     /**< Changes the size of the SQL text. */
+        void setSQLParseLine(unsigned val) { mSQLParseLine = val; }     /**< Changes the parse line number. */
+        void setSQLLineNumber(unsigned val) { mSQLLineNumber = val; }   /**< Changes the SQL line number. */
+        void setBindCount(unsigned val) { mBindCount = val; }   /**< Changes the number of binds for the statement. */
 
     protected:
 

@@ -79,7 +79,7 @@ ostream &operator<<(ostream &out, const tmCursor &cursor) {
  * If a statement uses the same bind more than once, that's acceptable
  * as the bind map is keyed on the bind number not the name.
  */
-void tmCursor::SetSQLText(string val) {
+void tmCursor::setSQLText(string val) {
 
     // Assign the (new) SQL statement.
     mSQLText = val;

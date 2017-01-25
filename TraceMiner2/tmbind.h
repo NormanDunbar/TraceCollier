@@ -28,16 +28,16 @@ class tmBind
         friend ostream &operator<<(ostream &out, const tmBind &bind);
 
         // Getters.
-        unsigned BindId() { return mBindId; }                   /**< Returns the bind number. */
-        unsigned BindLineNumber() { return mBindLineNumber; }   /**< Returns the linenumber the bind was last seen at. */
-        string BindValue() { return mBindValue; }               /**< Returns the most recent value for this bind. */
-        string BindName() { return mBindName; }                 /**< Returns the bind variable name as used in the SQL. */
+        unsigned bindId() { return mBindId; }                   /**< Returns the bind number. */
+        unsigned bindLineNumber() { return mBindLineNumber; }   /**< Returns the linenumber the bind was last seen at. */
+        string bindValue() { return mBindValue; }               /**< Returns the most recent value for this bind. */
+        string bindName() { return mBindName; }                 /**< Returns the bind variable name as used in the SQL. */
 
         // Setters.
-        void SetBindId(unsigned val) { mBindId = val; }         /**< Sets a bind number. */
-        void SetBindValue(string val) { mBindValue = val; }     /**< Sets a new bind value. */
-        void SetBindLineNumber(unsigned val) { mBindLineNumber = val; } /**< Sets a new bind line number. */
-        void SetBindName(string val) { mBindName = val; }       /**< Sets the bind variable name. */
+        void setBindId(unsigned val) { mBindId = val; }         /**< Sets a bind number. */
+        void setBindValue(string val) { mBindValue = val; }     /**< Sets a new bind value. */
+        void setBindLineNumber(unsigned val) { mBindLineNumber = val; } /**< Sets a new bind line number. */
+        void setBindName(string val) { mBindName = val; }       /**< Sets the bind variable name. */
 
     protected:
 

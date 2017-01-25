@@ -4,45 +4,14 @@
  * @brief Implementation file for the tmTraceFile object.
  */
 
-/** @brief Cleans up the cursor in the event that something was wrong.
+/** @brief Constructor for a tmTraceFile object.
  *
- * In the event that a parse goes badly, this function will be called
- * to clean up whatever mess there is, lying around in the tmTraceFile
- * object.
- */
-void tmTraceFile::cleanUp() {
-    // If still open, close the trace file.
-    if (mIfs) {
-        if (mIfs->is_open()) {
-            mIfs->close();
-        }
-
-        delete mIfs;
-        mIfs = NULL;
-    }
-
-    // If we have any cursors, clean them out.
-    //Beware, clear() doesn't destruct classes!
-    if (mCursors.size()) {
-        for (map<string, tmCursor *>::iterator i = mCursors.begin(); i != mCursors.end(); ++i) {
-            cerr << endl << "FREEING CURSOR: " << i->second->CursorId() << endl;
-            cerr << *(i->second);
-            mCursors.erase(i);
-            delete i->second;
-        }
-    }
-}
-
-
-/** @brief Initialises the internals of a trace file object.
+ * @param options *tmOptions.
  *
- * When I had two different constructors, I needed to initialise
- * the members in each. Extracted that code to this function.
- * Since then, I've removed all but one of the constructors, but
- * I have not decided yet, that I'll stick with that option.
+ * Constructs a new tmTraceFile class, using the parsed command line options.
  */
-void tmTraceFile::init() {
-    mTraceFileName = "";
+tmTraceFile::tmTraceFile(tmOptions *options)
+{
     mOriginalTraceFileName = "";
     mDatabaseVersion = "";
     mOracleHome = "";
@@ -51,20 +20,10 @@ void tmTraceFile::init() {
     mNodeName = "";
     mLineNumber = 0;
     mIfs = NULL;
-}
+    mOfs = NULL;
+    mDbg = NULL;
 
-
-/** @brief Constructor for a tmTraceFile object.
- *
- * @param TraceFileName std::string.
- *
- * Constructs a new tmTraceFile class, knowing the name of the trace file to
- * be used.
- */
-tmTraceFile::tmTraceFile(string TraceFileName)
-{
-    init();
-    mTraceFileName = TraceFileName;
+    mOptions = options;
 }
 
 
@@ -78,6 +37,76 @@ tmTraceFile::~tmTraceFile()
     cleanUp();
 }
 
+
+/** @brief Parses a complete trace file.
+ *
+ * @return bool.
+ *
+ * This function will parse an Oracle trace file and report on the SQL and
+ * the various binds etc used in the EXEC lines found. Only 'DEP=0' EXECs are
+ * considered.
+ *
+ * If the report file fails to open, consider that fatal. However, if the
+ * debug file fails to open, just turn off verbose mode and try to carry on.
+ *
+ * Returns true to indicate success or false for a failure of some kind.
+ */
+bool tmTraceFile::parse()
+{
+    // We might need the debug file, but if we fail to open it, just carry on.
+    if (mOptions->verbose()) {
+        if (!openDebugFile()) {
+            cerr << "TraceMiner2: Attempting to continue." << endl;
+            mOptions->setVerbose(false);
+        }
+    }
+
+    if (mOptions->verbose()) {
+        *mDbg << "parse(): Entry." << endl;
+    }
+
+    // We need the report file here.
+    if (!openReportFile()) {
+        return false;
+    }
+
+    // Ready to go, lets parse a trace file.
+    if (!openTraceFile()) {
+        if (mOptions->verbose()) {
+            *mDbg << "parse(): Cannot open trace file. Exit." << endl;
+        }
+
+        return false;
+    }
+
+    // Read in the header stuff, and attempt to validate this file
+    // as an Oracle trace file. It could be something else!
+    if (!parseHeader()) {
+        cleanUp();
+
+        if (mOptions->verbose()) {
+            *mDbg << "parse(): parseHeader() failed. Error exit." << endl;
+        }
+
+        return false;
+    }
+
+    // File is open, header is parsed.
+    if (!parseTraceFile()) {
+        if (mOptions->verbose()) {
+            *mDbg << "parse(): Cannot parse trace file. Exit." << endl;
+        }
+
+        return false;
+    }
+
+    // It was a good parse.
+    if (mOptions->verbose()) {
+        *mDbg << "parse(): Exit." << endl;
+    }
+
+    return true;
+}
 
 /** @brief Parses a trace file.
  *
@@ -106,6 +135,11 @@ bool tmTraceFile::parseTraceFile()
 
             // Extract the command from the first grouping.
             string chunk = match[1];
+
+            // Verbose?
+            if (mOptions->verbose()) {
+                *mDbg << "parseTraceFile(): Matching [" << chunk << "] ...";
+            }
 
             // PARSING IN CURSOR #cursorID
             if (chunk == "PARSING IN CURSOR") {
@@ -157,6 +191,11 @@ bool tmTraceFile::parseTraceFile()
             // But if I ever add another check here, I'll probably
             // forget to add one in the check above. It's what I do! :(
 
+            // Verbose?
+            if (mOptions->verbose()) {
+                *mDbg << " No match [" << chunk << "]" << endl;;
+            }
+
         }
     }
 
@@ -174,12 +213,23 @@ bool tmTraceFile::parseTraceFile()
  */
 bool tmTraceFile::parseHeader() {
 
+    if (mOptions->verbose()) {
+        *mDbg << "parseHeader(): Entry." << endl;
+    }
+
     string traceLine;
     bool ok = readTraceLine(&traceLine);
 
     if (!ok) {
         cerr << "parseHeader(): Cannot read first line from "
-             << mTraceFileName << endl;
+             << mOptions->traceFile() << endl;
+
+        if (mOptions->verbose()) {
+            *mDbg << "parseHeader(): Cannot read first line from "
+                  << mOptions->traceFile() << endl
+                  << "parseHeader(): Error exit." << endl;
+        }
+
         return false;
     }
 
@@ -187,13 +237,25 @@ bool tmTraceFile::parseHeader() {
     if (traceLine.length() > 10) {
         string chunk = traceLine.substr(0, 10);
         if (!(chunk == "Trace file")) {
-            cerr << mTraceFileName << " is not an Oracle trace file." << endl;
+            cerr << mOptions->traceFile() << " is not an Oracle trace file." << endl;
             cerr << "Missing 'Trace file' in header." << endl;
+
+            if (mOptions->verbose()) {
+                *mDbg << "parseHeader(): Not an Oracle trace file. " << endl
+                      << "parseHeader(): Error exit." << endl;
+            }
+
             return false;
         }
     } else {
-        cerr << mTraceFileName << " is not an Oracle trace file." << endl;
+        cerr << mOptions->traceFile() << " is not an Oracle trace file." << endl;
         cerr << "Missing 'Trace file' in header." << endl;
+
+            if (mOptions->verbose()) {
+                *mDbg << "parseHeader(): Not an Oracle trace file. " << endl
+                      << "parseHeader(): Error exit." << endl;
+            }
+
         return false;
     }
 
@@ -206,7 +268,7 @@ bool tmTraceFile::parseHeader() {
         ok = readTraceLine(&traceLine);
         if (!ok) {
             cerr << "parseHeader(): Cannot read header line(s) from "
-                 << mTraceFileName << endl;
+                 << mOptions->traceFile() << endl;
             break;
         }
 
@@ -240,7 +302,10 @@ bool tmTraceFile::parseHeader() {
         if (chunk == "==========") {
             break;
         }
+    }
 
+    if (mOptions->verbose()) {
+        *mDbg << "parseHeader(): Exit." << endl;
     }
 
     return ok;
@@ -257,29 +322,105 @@ bool tmTraceFile::parseHeader() {
  */
 bool tmTraceFile::openTraceFile()
 {
+    string traceFileName = mOptions->traceFile();
 
-    if (mTraceFileName.empty()) {
-        return false;
+    if (mOptions->verbose()) {
+        *mDbg << "openTraceFile(): Entry." << endl
+              << "Trace File: [" << traceFileName << ']' << endl;
     }
 
-    mIfs = new ifstream(mTraceFileName);
+    mIfs = new ifstream(traceFileName);
 
     if (!mIfs->good()) {
-        cerr << "Cannot open trace file " << mTraceFileName << endl;
+        cerr << "TraceMiner2: Cannot open trace file "
+             << traceFileName << endl;
         cleanUp();
+
+        if (mOptions->verbose()) {
+            *mDbg << "openTraceFile(): Error exit." << endl;
+        }
+
         return false;
     }
 
-    // Read in the header stuff, and attempt to validate this file
-    // as an Oracle trace file. It could be something else!
-    if (!parseHeader()) {
-        cleanUp();
-        return false;
-    };
-
     // Looks like a valid trace file.
+    if (mOptions->verbose()) {
+        *mDbg << "openTraceFile(): Exit." << endl;
+    }
+
     return true;
 
+}
+
+
+/** @brief Opens a debug file.
+ *
+ * @return bool.
+ *
+ * Open a debug file, if required.
+ *
+ * A return of true indicates success, false indicates some failure occurred.
+ */
+bool tmTraceFile::openDebugFile()
+{
+    string debugFileName = mOptions->debugFile();
+
+    if (debugFileName.empty()) {
+        // Very unlikely.
+        return false;
+    }
+
+    mDbg = new ofstream(debugFileName);
+
+    if (!mDbg->good()) {
+        // Don't clean up if this fails to open. We ignore it later.
+        cerr << "TraceMiner2: Cannot open debug file "
+             << debugFileName << endl;
+        return false;
+    }
+
+    // Looks like a valid debug file.
+    return true;
+}
+
+
+/** @brief Opens a report file.
+ *
+ * @return bool.
+ *
+ * Open a report file.
+ *
+ * A return of true indicates success, false indicates some failure occurred.
+ */
+bool tmTraceFile::openReportFile()
+{
+    string reportFileName = mOptions->reportFile();
+
+    if (mOptions->verbose()) {
+        *mDbg << "openReportFile(): Entry." << endl
+              << "Report File: [" << reportFileName << ']' << endl;
+    }
+
+    mOfs = new ofstream(reportFileName);
+
+    if (!mOfs->good()) {
+        cerr << "TraceMiner2: Cannot open report file "
+             << reportFileName << endl;
+        cleanUp();
+
+        if (mOptions->verbose()) {
+            *mDbg << "openReportFile(): Error exit." << endl;
+        }
+
+        return false;
+    }
+
+    // Looks like a valid report file.
+    if (mOptions->verbose()) {
+        *mDbg << "openReportFile(): Exit." << endl;
+    }
+
+    return true;
 }
 
 
@@ -293,14 +434,16 @@ bool tmTraceFile::openTraceFile()
  * Returns true if we are still good for more reading, false otherwise.
  */
 bool tmTraceFile::readTraceLine(string *aLine) {
-    try {
-        getline(*mIfs, *aLine);
-    } catch (exception e) {
-        cerr << "EXCEPTION: readTraceLine(): " << e.what() << "." << endl;
-        return false;
+
+    getline(*mIfs, *aLine);
+    mLineNumber++;
+
+    // Verbose?
+    if (mOptions->verbose()) {
+        *mDbg << "readTraceLine(" << mLineNumber << "): [" << *aLine << "]"
+              << " EOF = " << std::boolalpha << mIfs->eof() << endl;
     }
 
-    mLineNumber++;
     return mIfs->good();
 }
 
@@ -322,9 +465,16 @@ bool tmTraceFile::readTraceLine(string *aLine) {
  */
 bool tmTraceFile::parsePARSING(const string &thisLine) {
 
+    if (mOptions->verbose()) {
+        *mDbg << "matched"     << endl;
+        *mDbg << "parsePARSING(): Entry." << endl;
+    }
+
     // PARSING IN CURSOR #4572676384 len=229 dep=1 ...
     regex reg("PARSING IN CURSOR\\s(#\\d+)\\slen=(\\d+)\\sdep=(\\d+).*");
     smatch match;
+
+    std::stringstream ss;
 
     // Extract the cursorID, the length and the depth.
     if (!regex_match(thisLine, match, reg)) {
@@ -351,68 +501,86 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
     // We only care about user level SQL so depth 0 only gets saved away.
     // This does mean that SQL executed in a PL/SQL call is ignored though.
     // So far, that's what my customer(s) want. (Hello Rich.)
-    // It's a pity that the trace doesn't show an easy way to find a parent depth
-    // zero cursor for all the cursors with depth > zero. That would be nice.
-    if (!depth) {
-        tmCursor *thisCursor = new tmCursor(cursorID, sqlLength, sqlLine);
-        if (!thisCursor) {
-            cerr << "parsePARSING(): Cannot allocate a new tmCursor." << endl;
-            return false;
+    if (depth) {
+        // Nothing to do here.
+        return true;
+    }
+
+    tmCursor *thisCursor = new tmCursor(cursorID, sqlLength, sqlLine);
+    if (!thisCursor) {
+        cerr << "parsePARSING(): Cannot allocate a new tmCursor." << endl;
+
+        if (mOptions->verbose()) {
+            *mDbg << "parsePARSING(): Cannot allocate a new tmCursor." << endl
+                  << "parsePARSING(): Exit." << endl;
         }
 
-        // Extract the SQL Text.
-        // For efficiency, pre-allocate the current sql length, plus a bit.
-        string sqlText = "";
-        string aLine;
-        sqlText.reserve(sqlLength + 20);
+        return false;
+    }
 
-        while (readTraceLine(&aLine)) {
-            if (aLine.substr(0, 11) == "END OF STMT") {
-                break;
-            }
+    // Extract the SQL Text into a stream. This handles end of line for us.
 
-            if (!sqlText.empty()) {
-                    sqlText += string("\n");
-            }
+    string aLine;
 
-            sqlText += aLine;
+    while (readTraceLine(&aLine)) {
+        if (aLine.substr(0, 11) == "END OF STMT") {
+            break;
         }
 
-        // An iterator for the insert into the map. AKA where are we?
-        pair<map<string, tmCursor *>::iterator, bool> exists;
-
-        // Stash this new cursor. If the cursor exists, update it. Maps are weird!
-        // CusrorIDs are like Highlanders. There can be only one! ;)
-        exists = mCursors.insert(pair<string, tmCursor *>(cursorID, thisCursor));
-
-        // If the bool is false, the insert failed - already there.
-        // So we simply update.
-        //
-        // Exists is a pair<mCursors::iterator, bool>. It indexes the map at the
-        // position of the inserted or already existing cursor data.
-        // Exists.second is the bool. True=inserted, False=already exists.
-        // Exists.first is an iterator (pseudo pointer) to a pair <string, tmCursor *>.
-        // Exists.first->first is the string, aka the cursorID.
-        // Exists.first->second is the tmCursor pointer.
-        //
-        // Phew!
-
-        // So, after all that, did we insert or find our cursor?
-        if (!exists.second) {
-            // Update existing cursor details. Only the
-            // SQL details will have changed. At the moment.
-            // And we have not yet parsed this SQL text.
-            exists.first->second->SetSQLLineNumber(sqlLine);
-            exists.first->second->SetSQLLength(sqlLength);
-            exists.first->second->SetSQLParseLine(0);
-            delete thisCursor;
+        // Append this new SQL line to the existing lines.
+        if (!ss.str().empty()) {
+            // Append a system dependent newline to the current text.
+            ss << endl;
         }
+        // And append this new line of text.
+        ss << aLine;
+    }
 
-        // Then set the SQL Text, regardless.
-        exists.first->second->SetSQLText(sqlText);
+    // An iterator for the insert into the map. AKA where are we?
+    pair<map<string, tmCursor *>::iterator, bool> exists;
+
+    // Stash this new cursor. If the cursor exists, update it. Maps are weird!
+    // CusrorIDs are like Highlanders. There can be only one! ;)
+    exists = mCursors.insert(pair<string, tmCursor *>(cursorID, thisCursor));
+
+    // If the bool is false, the insert failed - already there.
+    // So we simply update.
+    //
+    // Exists is a pair<mCursors::iterator, bool>. It indexes the map at the
+    // position of the inserted or already existing cursor data.
+    // Exists.second is the bool. True=inserted, False=already exists.
+    // Exists.first is an iterator (pseudo pointer) to a pair <string, tmCursor *>.
+    // Exists.first->first is the string, aka the cursorID.
+    // Exists.first->second is the tmCursor pointer.
+    //
+    // Phew!
+
+    // So, after all that, did we insert or find our cursor?
+    if (!exists.second) {
+        // Update existing cursor details. Only the
+        // SQL details will have changed. At the moment.
+        // And we have not yet parsed this SQL text.
+        exists.first->second->setSQLLineNumber(sqlLine);
+        exists.first->second->setSQLLength(sqlLength);
+        exists.first->second->setSQLParseLine(0);
+        delete thisCursor;
+    }
+
+    // Then set the SQL Text, regardless.
+    exists.first->second->setSQLText(ss.str());
+
+    // Verbose?
+    if (mOptions->verbose()) {
+        *mDbg << endl << "parsePARSING(): Creating Cursor: "
+              << exists.first->first << endl
+              << *(exists.first->second);
     }
 
     // Looks like a good parse.
+    if (mOptions->verbose()) {
+        *mDbg << "parsePARSING(): Exit." << endl;
+    }
+
     return true;
 
 }
@@ -429,6 +597,11 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
  */
 bool tmTraceFile::parsePARSE(const string &thisLine) {
 
+    if (mOptions->verbose()) {
+        *mDbg << "matched" << endl
+              << "parsePARSE(): Entry." << endl;
+    }
+
     // PARSE #4572676384 ... dep=1 ...
     regex reg("PARSE\\s(#\\d+).*?dep=(\\d+).*");
     smatch match;
@@ -437,6 +610,13 @@ bool tmTraceFile::parsePARSE(const string &thisLine) {
     if (!regex_match(thisLine, match, reg)) {
         cerr << "parsePARSE(): Cannot match regex against PARSE # at line: "
              <<  mLineNumber << "." << endl;
+
+        if (mOptions->verbose()) {
+            *mDbg << "parsePARSE(): Cannot match regex against PARSE # at line: "
+                  <<  mLineNumber << "." << endl
+                  << "parsePARSE(): Exit." << endl;
+        }
+
         return false;
     }
 
@@ -463,16 +643,27 @@ bool tmTraceFile::parsePARSE(const string &thisLine) {
             // i is an iterator to a pair<string, tmCursor *>
             // So i->first is the string.
             // And i->second is the tmCursor pointer.
-            i->second->SetSQLParseLine(mLineNumber);
+            i->second->setSQLParseLine(mLineNumber);
         } else {
             // Not found. Oh dear!
             cerr << "parsePARSE(): Found PARSE for cursor " << cursorID
                  << " but not found in existing cursor list." << endl;
+
+            if (mOptions->verbose()) {
+                *mDbg << "parsePARSE(): Found PARSE for cursor " << cursorID
+                      << " but not found in existing cursor list." << endl
+                      << "parsePARSE(): Exit." << endl;
+            }
+
             return false;
         }
     }
 
     // Looks like a good parse.
+    if (mOptions->verbose()) {
+        *mDbg << "parsePARSE(): Exit." << endl;
+    }
+
     return true;
 
 }
@@ -488,6 +679,86 @@ bool tmTraceFile::parsePARSE(const string &thisLine) {
  */
 map<string, tmCursor *>::iterator tmTraceFile::findCursor(const string &cursorID) {
 
-        // Find an existing cursor in the map.
-        return mCursors.find(cursorID);
+    // Find an existing cursor in the map.
+
+    if (mOptions->verbose()) {
+        *mDbg << "findCursor(): Entry." << endl
+              << "findCursor(): Looking for cursor: " << cursorID << endl;
+    }
+
+    map<string, tmCursor *>::iterator i = mCursors.find(cursorID);
+
+    if (mOptions->verbose()) {
+        if (i != mCursors.end()) {
+            // Not found.
+            *mDbg << "findCursor(): Cursor: " << cursorID
+                  << " found." << endl;
+        } else {
+            // Not found.
+            *mDbg << "findCursor(): Cursor: " << cursorID
+                  << " not found." << endl;
+        }
+    }
+
+    if (mOptions->verbose()) {
+        *mDbg << "findCursor(): Exit." << endl;
+    }
+
+    return i;
 }
+
+
+
+
+/** @brief Cleans up the cursor in the event that something was wrong.
+ *
+ * In the event that a parse goes badly, this function will be called
+ * to clean up whatever mess there is, lying around in the tmTraceFile
+ * object.
+ */
+void tmTraceFile::cleanUp() {
+    // If still open, close the trace/output/debug files.
+    if (mIfs) {
+        if (mIfs->is_open()) {
+            mIfs->close();
+        }
+
+        delete mIfs;
+        mIfs = NULL;
+    }
+
+    if (mOfs) {
+        if (mOfs->is_open()) {
+            mOfs->close();
+        }
+
+        delete mOfs;
+        mOfs = NULL;
+    }
+
+    // If we have any cursors, clean them out.
+    //Beware, clear() doesn't destruct classes!
+    if (mCursors.size()) {
+        for (map<string, tmCursor *>::iterator i = mCursors.begin(); i != mCursors.end(); ++i) {
+            if (mOptions->verbose()) {
+                *mDbg << endl << "cleanUP(): Freeing cursor: " << i->second->cursorId() << endl;
+                *mDbg << *(i->second);
+            }
+            mCursors.erase(i);
+            delete i->second;
+        }
+    }
+
+    // we must do this last of all, or the above might blow up!
+    if (mDbg) {
+        if (mDbg->is_open()) {
+            mDbg->close();
+        }
+
+        delete mDbg;
+        mDbg = NULL;
+    }
+
+}
+
+

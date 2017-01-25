@@ -33,14 +33,14 @@ tmOptions::~tmOptions()
  * Checks for various flags, and makes sure we have a single trace file name.
  * Returns true if all ok, displays usage() and returns false otherwise.
  */
-bool tmOptions::ParseArgs(int argc, char *argv[]) {
+bool tmOptions::parseArgs(int argc, char *argv[]) {
 
     bool invalidArgs = false;
     bool gotTraceAlready = false;
 
     if (argc < 2) {
         // Insufficient args.
-        cerr << "TraceMiner2: no arguments supplied." << endl;
+        cerr << "TraceMiner2: No arguments supplied." << endl;
         return false;
     }
 
@@ -91,7 +91,7 @@ bool tmOptions::ParseArgs(int argc, char *argv[]) {
             gotTraceAlready = true;
         } else {
             // Too many tracefiles.
-            cerr << "TraceMiner2: too many trace files. (" << argv[arg] << ")." << endl;
+            cerr << "TraceMiner2: Too many trace files. (" << argv[arg] << ")." << endl;
             invalidArgs = true;
         }
 
@@ -99,7 +99,7 @@ bool tmOptions::ParseArgs(int argc, char *argv[]) {
 
     // We need at least a trace file.
     if (mTraceFile.empty()) {
-        cerr << "TraceMiner2: no trace file supplied." << endl;
+        cerr << "TraceMiner2: No trace file supplied." << endl;
         invalidArgs = true;
     }
 
