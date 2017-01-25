@@ -25,7 +25,7 @@
     #if GCC_VERSION >= 40900
         #define USE_REGEX 1
     #else
-        #error "GNU g++ compiler cannot compile REGEXes properly.
+        #error "GNU g++ compiler cannot compile REGEXes properly."
     #endif // GCC_VERSION
 #else
     // "Not using GNU compiler. Regex is ok."

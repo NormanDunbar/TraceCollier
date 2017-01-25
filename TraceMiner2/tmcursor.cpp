@@ -64,6 +64,16 @@ ostream &operator<<(ostream &out, const tmCursor &cursor) {
     out << "SQL Parse Line: " << cursor.mSQLParseLine << endl;
     out << "SQL Text = [" << cursor.mSQLText << "]" << endl << endl;
     out << "Bind Count: " << cursor.mBindCount << endl << endl;
+
+    // If we have any binds, print them out.
+    if (cursor.mBinds.size()) {
+        for (map<unsigned, tmBind *>::const_iterator i = cursor.mBinds.begin(); i != cursor.mBinds.end(); ++i) {
+            out << *(i->second);
+        }
+    }
+
+    out << endl;
+
     return out;
 }
 

@@ -10,7 +10,11 @@
 #include <iostream>
 #include <fstream>
 #include <exception>
-#include <regex>
+
+#if defined (USE_REGEX)
+    #include <regex>
+#endif // defined
+
 #include <sstream>
 
 using std::string;
@@ -22,12 +26,22 @@ using std::cout;
 using std::endl;
 using std::getline;
 using std::exception;
-using std::regex;
-using std::smatch;
+
+#if defined (USE_REGEX)
+    using std::regex;
+    using std::smatch;
+#endif // defined
+
 using std::stoul;
+using std::numpunct;
+using std::locale;
+
 
 #include "tmcursor.h"
 #include "tmoptions.h"
+
+// Some constants used to format the (text) report.
+const int MAXLINENUMBER=7;
 
 /** @brief A class representing an Oracle trace file.
  */
@@ -84,7 +98,34 @@ class tmTraceFile
         // Parsing stuff.
         bool parsePARSING(const string &thisLine);  /**< Parses a PARSING IN CURSOR line. */
         bool parsePARSE(const string &thisLine);    /**< Parses a PARSE line. */
+        bool parseEXEC(const string &thisLine);    /**< Parses an EXEC line. */
+        bool parseBINDS(const string &thisLine);    /**< Parses a BINDS line. */
+        bool parsePARSEERROR(const string &thisLine);    /**< Parses a PARSE line. */
+        bool parseXCTEND(const string &thisLine);    /**< Parses a PARSE line. */
+        bool parseERROR(const string &thisLine);    /**< Parses a PARSE line. */
 
 };
+
+// Stolen from http://stackoverflow.com/questions/4728155/how-do-you-set-the-cout-locale-to-insert-commas-as-thousands-separators
+// to allow me to automagically insert ',' (or '.' depending on the locale) into big numbers.
+// I'll be using this on the report and debug files - if I can!
+template<typename T> class ThousandsSeparator : public numpunct<T> {
+public:
+    ThousandsSeparator(T Separator) : m_Separator(Separator) {}
+
+protected:
+    T do_thousands_sep() const  {
+        return m_Separator;
+    }
+
+    virtual string do_grouping() const
+    {
+        return "\03";  // Ie, every three digits.
+    }
+
+private:
+    T m_Separator;
+};
+
 
 #endif // TMTRACEFILE_H

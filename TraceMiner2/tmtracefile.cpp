@@ -136,16 +136,11 @@ bool tmTraceFile::parseTraceFile()
             // Extract the command from the first grouping.
             string chunk = match[1];
 
-            // Verbose?
-            if (mOptions->verbose()) {
-                *mDbg << "parseTraceFile(): Matching [" << chunk << "] ...";
-            }
-
             // PARSING IN CURSOR #cursorID
             if (chunk == "PARSING IN CURSOR") {
                 if (!parsePARSING(traceLine)) {
                     return false;
-                };
+                }
                 continue;
             }
 
@@ -154,16 +149,11 @@ bool tmTraceFile::parseTraceFile()
                 continue;
             }
 
-            // XCTEND (COMMIT/ROLLBACK)
-            if (chunk == "XCTEND ") {
-                continue;
-            }
-
             // PARSE #cursorID
             if (chunk == "PARSE") {
                 if (!parsePARSE(traceLine)) {
                     return false;
-                };
+                }
                 continue;
             }
 
@@ -184,6 +174,9 @@ bool tmTraceFile::parseTraceFile()
             }
 
             if (chunk == "EXEC") {
+                if (!parseEXEC(traceLine)) {
+                    return false;
+                }
                 continue;
             }
 
@@ -191,11 +184,17 @@ bool tmTraceFile::parseTraceFile()
             // But if I ever add another check here, I'll probably
             // forget to add one in the check above. It's what I do! :(
 
-            // Verbose?
-            if (mOptions->verbose()) {
-                *mDbg << " No match [" << chunk << "]" << endl;;
-            }
+        } else {
 
+            // XCTEND (COMMIT/ROLLBACK).
+            // Beware, there is no cursorID here, so no #.
+            // So no regex_match()!
+            if (traceLine.substr(0, 6) == "XCTEND") {
+                if (!parseXCTEND(traceLine)) {
+                    return false;
+                }
+                continue;
+            }
         }
     }
 
@@ -379,6 +378,10 @@ bool tmTraceFile::openDebugFile()
         return false;
     }
 
+    // Allow thousands separator.
+    // Affects *every* number >= 1000 sent to *mDbg.
+    mDbg->imbue(locale(mDbg->getloc(), new ThousandsSeparator<char>(',')));
+
     // Looks like a valid debug file.
     return true;
 }
@@ -414,6 +417,10 @@ bool tmTraceFile::openReportFile()
 
         return false;
     }
+
+    // Allow thousands separator.
+    // Affects *every* number >= 1000 sent to *mOfs.
+    mOfs->imbue(locale(mOfs->getloc(), new ThousandsSeparator<char>(',')));
 
     // Looks like a valid report file.
     if (mOptions->verbose()) {
@@ -466,7 +473,6 @@ bool tmTraceFile::readTraceLine(string *aLine) {
 bool tmTraceFile::parsePARSING(const string &thisLine) {
 
     if (mOptions->verbose()) {
-        *mDbg << "matched"     << endl;
         *mDbg << "parsePARSING(): Entry." << endl;
     }
 
@@ -591,15 +597,14 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
  * to be the PARSE #cursor line.
  *
  * The tmCursor associated with this PARSE is found, and updated to the new
- * source file line number. Only the most recent PASRE is stored for each tmCursor.
+ * source file line number. Only the most recent PARSE is stored for each tmCursor.
  *
  * Returns true if all ok. False otherwise.
  */
 bool tmTraceFile::parsePARSE(const string &thisLine) {
 
     if (mOptions->verbose()) {
-        *mDbg << "matched" << endl
-              << "parsePARSE(): Entry." << endl;
+        *mDbg << "parsePARSE(): Entry." << endl;
     }
 
     // PARSE #4572676384 ... dep=1 ...
@@ -665,8 +670,155 @@ bool tmTraceFile::parsePARSE(const string &thisLine) {
     }
 
     return true;
-
 }
+
+
+
+/** @brief Parses a "BINDS" line.
+ *
+ * Parses a line from the trace file. The line is expected
+ * to be the BINDS #cursor line.
+ *
+ * This function extracts the values for all listed binds
+ * for the given cursor. The values are used to update
+ * the binds map member of the appropriate tmCursor object.
+ *
+ * Returns true if all ok. False otherwise.
+ */
+bool tmTraceFile::parseBINDS(const string &thisLine) {
+
+    // Looks like a good parse.
+    if (mOptions->verbose()) {
+        *mDbg << "parseBINDS(): Exit." << endl;
+    }
+
+    return true;
+}
+
+
+/** @brief Parses a "PARSE ERROR" line.
+ *
+ * Parses a line from the trace file. The line is expected
+ * to be the PARSE ERROR #cursor line.
+ *
+ * Returns true if all ok. False otherwise.
+ */
+bool tmTraceFile::parsePARSEERROR(const string &thisLine) {
+
+    // Looks like a good parse.
+    if (mOptions->verbose()) {
+        *mDbg << "parsePARSEERROR(): Exit." << endl;
+    }
+
+    return true;
+}
+
+
+/** @brief Parses a "XCTEND" line.
+ *
+ * Parses a line from the trace file. The line is expected
+ * to be the XCTEND line indicating COMMIT or ROLLBACK.
+ * It should be noted that this line has no cursor ID.
+ *
+ * Returns true if all ok. False otherwise.
+ */
+bool tmTraceFile::parseXCTEND(const string &thisLine) {
+
+    if (mOptions->verbose()) {
+        *mDbg << "parseXCTEND(): Entry." << endl;
+    }
+
+    // XCTEND rlbk=0, rd_only=0, tim=524545341395
+    regex reg("XCTEND\\srlbk=(\\d+).*?rd_only=(\\d+).*");
+    smatch match;
+
+    // Extract the rollback and read only flags.
+    if (!regex_match(thisLine, match, reg)) {
+        cerr << "parseXCTEND(): Cannot match regex against XCTEND at line: "
+             <<  mLineNumber << "." << endl;
+
+        if (mOptions->verbose()) {
+            *mDbg << "parseXCTEND(): Cannot match regex against XCTEND at line: "
+                  <<  mLineNumber << "." << endl
+                  << "parseXCTEND(): Exit." << endl;
+        }
+
+        return false;
+    }
+
+    unsigned rollBack = stoul(match[1], NULL, 10);
+    unsigned readOnly = stoul(match[2], NULL, 10);
+
+    // This is temporary *****************************
+    mOfs->width(MAXLINENUMBER);
+    *mOfs << mLineNumber << ' ';
+
+    if (!rollBack) {
+        *mOfs << "COMMIT: ";
+    } else {
+        *mOfs << "ROLLBACK: ";
+    }
+    *mOfs <<  (readOnly ? "(Read Only)" : "(Read Write)") << endl;
+    // This is temporary *****************************
+
+    // Looks like a good parse.
+    if (mOptions->verbose()) {
+        *mDbg << "parseXCTEND(): Exit." << endl;
+    }
+
+    return true;
+}
+
+
+/** @brief Parses an "ERROR" line.
+ *
+ * Parses a line from the trace file. The line is expected
+ * to be an ERROR #cursor line.
+ *
+ * Returns true if all ok. False otherwise.
+ */
+bool tmTraceFile::parseERROR(const string &thisLine) {
+
+    if (mOptions->verbose()) {
+        *mDbg << "parseERROR(): Entry." << endl;
+    }
+
+    // ERROR #275452960:err=31013 tim=1075688943194
+    regex reg("ERROR\\s(#\\d+):err=(\\d+).*");
+    smatch match;
+
+    // Extract the cursorID and error code.
+    if (!regex_match(thisLine, match, reg)) {
+        cerr << "parseERROR(): Cannot match regex against ERROR at line: "
+             <<  mLineNumber << "." << endl;
+
+        if (mOptions->verbose()) {
+            *mDbg << "parseERROR(): Cannot match regex against ERROR at line: "
+                  <<  mLineNumber << "." << endl
+                  << "parseERROR(): Exit." << endl;
+        }
+
+        return false;
+    }
+
+    string cursroID = match[1];
+    unsigned errorCode = stoul(match[2], NULL, 10);
+
+    // This is temporary *****************************
+    mOfs->width(MAXLINENUMBER);
+    *mOfs << mLineNumber
+          << " ERROR: ORA-" << errorCode << endl;
+    // This is temporary *****************************
+
+
+    // Looks like a good parse.
+    if (mOptions->verbose()) {
+        *mDbg << "parseERROR(): Exit." << endl;
+    }
+
+    return true;
+}
+
 
 
 /** @brief Finds a cursor in the cursor list.
