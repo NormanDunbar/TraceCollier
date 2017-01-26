@@ -37,10 +37,11 @@ tmBind::~tmBind()
  * out to an ostream.
  */
 ostream &operator<<(ostream &out, const tmBind &bind) {
-    out << "BindID: " << bind.mBindId << endl;
-    out << "Bind Line Number: " << bind.mBindLineNumber << endl;
-    out << "Bind Name: " << bind.mBindName << endl;
-    out << "Bind Value: " << bind.mBindValue << endl << endl;
+    out << endl
+        << "BindID: " << bind.mBindId << endl
+        << "Bind Line Number: " << bind.mBindLineNumber << endl
+        << "Bind Name: " << bind.mBindName << endl
+        << "Bind Value: " << bind.mBindValue << endl;
     return out;
 }
 

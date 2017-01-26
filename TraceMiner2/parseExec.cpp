@@ -1,4 +1,4 @@
-/** @file parseExecc.cpp
+/** @file parseExec.cpp
  * @brief Implementation file for the tmTraceFile.parseEXEC() function.
  */
 
@@ -22,18 +22,19 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
         *mDbg << "parseEXEC(): Entry." << endl;
     }
 
-    // EXEC #5923197424:...dep=0...
+    // EXEC #5924310096:c=0,e=31,p=0,cr=0,cu=0,mis=0,r=0,dep=0,og=4,plh=1388734953,tim=526735705392
     regex reg("EXEC\\s(#\\d+).*?dep=(\\d+).*");
     smatch match;
 
     // Extract the cursorID and depth.
     if (!regex_match(thisLine, match, reg)) {
-        cerr << "parseEXEC(): Cannot match regex against EXEC at line: "
-             <<  mLineNumber << "." << endl;
+        stringstream s;
+        s << "parseEXEC(): Cannot match regex against EXEC at line: "
+          <<  mLineNumber << "." << endl;
+        cerr << s.str();
 
         if (mOptions->verbose()) {
-            *mDbg << "parseEXEC(): Cannot match regex against EXEC at line: "
-                  <<  mLineNumber << "." << endl
+            *mDbg << s.str() << endl
                   << "parseEXEC(): Exit." << endl;
         }
 
@@ -56,10 +57,12 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
     // Find the cursor for this exec.
     map<string, tmCursor *>::iterator i = findCursor(cursorID);
     if (i == mCursors.end()) {
-        cerr << "parseEXEC(): Cursor " << cursorID << " not found." << endl;
+        stringstream s;
+        s << "parseEXEC(): Cursor " << cursorID << " not found." << endl;
+        cerr << s.str();
 
         if (mOptions->verbose()) {
-            *mDbg << "parseEXEC(): Cursor " << cursorID << " not found." << endl
+            *mDbg << s.str() << endl
                   << "parseEXEC(): Exit." << endl;
         }
 
@@ -70,9 +73,13 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
     tmCursor *thisCursor = i->second;
 
     // This is temporary *****************************
-    mOfs->width(MAXLINENUMBER);
-    *mOfs << mLineNumber << ' '
-          << "EXEC " << cursorID << thisCursor->sqlText() << endl;
+    //mOfs->width(MAXLINENUMBER);
+    *mOfs << setw(MAXLINENUMBER) << mLineNumber << ' '
+          << setw(MAXLINENUMBER) << thisCursor->sqlParseLine() << ' '
+          << setw(MAXLINENUMBER) << thisCursor->sqlLineNumber() << ' '
+//          << setw(MAXCURSORWIDTH) << cursorID << ' '
+          << thisCursor->sqlText() << ' '
+          << endl;
     // This is temporary *****************************
 
     // Looks like a good parse.

@@ -8,6 +8,7 @@
 #include <string>
 #include <map>
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <exception>
 
@@ -21,6 +22,7 @@ using std::string;
 using std::map;
 using std::ifstream;
 using std::ofstream;
+using std::stringstream;
 using std::cerr;
 using std::cout;
 using std::endl;
@@ -35,13 +37,16 @@ using std::exception;
 using std::stoul;
 using std::numpunct;
 using std::locale;
-
+using std::setw;
+using std::setfill;
 
 #include "tmcursor.h"
 #include "tmoptions.h"
 
 // Some constants used to format the (text) report.
-const int MAXLINENUMBER=7;
+// Maximum of 9,999,999 for a line number.
+const int MAXLINENUMBER=10;
+const int MAXCURSORWIDTH=11+1;
 
 /** @brief A class representing an Oracle trace file.
  */
@@ -98,25 +103,31 @@ class tmTraceFile
         // Parsing stuff.
         bool parsePARSING(const string &thisLine);  /**< Parses a PARSING IN CURSOR line. */
         bool parsePARSE(const string &thisLine);    /**< Parses a PARSE line. */
-        bool parseEXEC(const string &thisLine);    /**< Parses an EXEC line. */
-        bool parseBINDS(const string &thisLine);    /**< Parses a BINDS line. */
+        bool parseEXEC(const string &thisLine);     /**< Parses an EXEC line. */
         bool parsePARSEERROR(const string &thisLine);    /**< Parses a PARSE line. */
-        bool parseXCTEND(const string &thisLine);    /**< Parses a PARSE line. */
+        bool parseXCTEND(const string &thisLine);   /**< Parses a PARSE line. */
         bool parseERROR(const string &thisLine);    /**< Parses a PARSE line. */
-
+        bool parseBINDS(const string &thisLine);    /**< Parses a BINDS line. */
+        bool parseBindData(tmBind *thisBind);       /**< Parses a bind's data lines. */
 };
 
 // Stolen from http://stackoverflow.com/questions/4728155/how-do-you-set-the-cout-locale-to-insert-commas-as-thousands-separators
 // to allow me to automagically insert ',' (or '.' depending on the locale) into big numbers.
-// I'll be using this on the report and debug files - if I can!
+// I'll be using this on the report and debug files.
+//
+// Note.
+// I'm not convinced that this requires the parameter or the do_thousands_sep()
+// function as without it, I still get commas - which I think are from the locale.
+// I might be wrong. It happens. But I'm leaving them out for now in the hope that
+// "foreign" locales will get their chosen separator too.
 template<typename T> class ThousandsSeparator : public numpunct<T> {
 public:
     ThousandsSeparator(T Separator) : m_Separator(Separator) {}
 
 protected:
-    T do_thousands_sep() const  {
-        return m_Separator;
-    }
+//    T do_thousands_sep() const  {
+//        return m_Separator;
+//    }
 
     virtual string do_grouping() const
     {

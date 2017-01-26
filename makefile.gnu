@@ -19,25 +19,27 @@ SOURCES=TraceMiner2/TraceMiner2.cpp \
         TraceMiner2/tmbind.cpp \
         TraceMiner2/tmcursor.cpp \
         TraceMiner2/tmtracefile.cpp \
-        TraceMiner2/utilities.cpp
+        TraceMiner2/utilities.cpp \
+        TraceMiner2/parseExec.cpp \
+        TraceMiner2/parseParsing.cpp \
+        TraceMiner2/parseParse.cpp \
+        TraceMiner2/parseBinds.cpp \
+        TraceMiner2/parseParseError.cpp \
+        TraceMiner2/parseXctend.cpp \
+        TraceMiner2/parseError.cpp
 
-OBJECTS=TraceMiner2/TraceMiner2.o \
-        TraceMiner2/tmoptions.o \
-        TraceMiner2/tmbind.o \
-        TraceMiner2/tmcursor.o \
-        TraceMiner2/tmtracefile.o \
-        TraceMiner2/utilities.o
+OBJECTS=$(VARIABLE:.cpp=.o)
 
 all:	traceminer2 $(BIN)
 
 traceminer2:	$(OBJECTS) $(BIN)
 	$(CPP) -o $(TARGET) $(OBJECTS)
-	
+
 
 $(BIN):
 	mkdir $(BIN)
 
-clean: 
+clean:
 	$(RM) $(OBJECTS)
 
 distclean: clean
