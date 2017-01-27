@@ -17,6 +17,7 @@
 #endif // defined
 
 #include <sstream>
+#include <vector>
 
 using std::string;
 using std::map;
@@ -28,6 +29,7 @@ using std::cout;
 using std::endl;
 using std::getline;
 using std::exception;
+using std::vector;
 
 #if defined (USE_REGEX)
     using std::regex;
@@ -109,6 +111,11 @@ class tmTraceFile
         bool parseERROR(const string &thisLine);    /**< Parses a PARSE line. */
         bool parseBINDS(const string &thisLine);    /**< Parses a BINDS line. */
         bool parseBindData(tmBind *thisBind);       /**< Parses a bind's data lines. */
+
+        // Data extraction from a vector of bind lines.
+        bool extractBindData(const vector<string> *bindStuff, tmBind *thisBind);    /**< Extracts the bind data from a vector. */
+        bool extractNumber(vector<string>::const_iterator i, const unsigned equalPos, unsigned &result);  /**< Extracts a numeric value. */
+        bool extractBindValue(vector<string>::const_iterator i, tmBind *thisBind);  /**< Extracts a string representing a bind's actual value. */
 };
 
 // Stolen from http://stackoverflow.com/questions/4728155/how-do-you-set-the-cout-locale-to-insert-commas-as-thousands-separators

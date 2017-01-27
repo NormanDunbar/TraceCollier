@@ -16,7 +16,7 @@
 bool tmTraceFile::parseERROR(const string &thisLine) {
 
     if (mOptions->verbose()) {
-        *mDbg << "parseERROR(): Entry." << endl;
+        *mDbg << "parseERROR(" << mLineNumber << "): Entry." << endl;
     }
 
     // ERROR #275452960:err=31013 tim=1075688943194

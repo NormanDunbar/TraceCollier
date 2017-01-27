@@ -17,7 +17,7 @@
 bool tmTraceFile::parsePARSE(const string &thisLine) {
 
     if (mOptions->verbose()) {
-        *mDbg << "parsePARSE(): Entry." << endl;
+        *mDbg << "parsePARSE(" << mLineNumber << "): Entry." << endl;
     }
 
     // PARSE #5924310096:c=0,e=28,p=0,cr=0,cu=0,mis=0,r=0,dep=0,og=4,plh=1388734953,tim=526735705337

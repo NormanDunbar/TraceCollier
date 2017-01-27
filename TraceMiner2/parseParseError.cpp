@@ -16,7 +16,7 @@ bool tmTraceFile::parsePARSEERROR(const string &thisLine) {
 
     // Looks like a good parse.
     if (mOptions->verbose()) {
-        *mDbg << "parsePARSEERROR(): Exit." << endl;
+        *mDbg << "parsePARSEERROR(" << mLineNumber << "): Exit." << endl;
     }
 
     return true;

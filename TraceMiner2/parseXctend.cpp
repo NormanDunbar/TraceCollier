@@ -17,7 +17,7 @@
 bool tmTraceFile::parseXCTEND(const string &thisLine) {
 
     if (mOptions->verbose()) {
-        *mDbg << "parseXCTEND(): Entry." << endl;
+        *mDbg << "parseXCTEND(" << mLineNumber << "): Entry." << endl;
     }
 
     // XCTEND rlbk=0, rd_only=0, tim=524545341395

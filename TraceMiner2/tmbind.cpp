@@ -15,6 +15,7 @@ tmBind::tmBind(unsigned id, string name) {
 
     mBindId = id;
     mBindLineNumber = 0;
+    mBindType=0;
     mBindValue = "";
     mBindName = name;
 }
@@ -40,6 +41,7 @@ ostream &operator<<(ostream &out, const tmBind &bind) {
     out << endl
         << "BindID: " << bind.mBindId << endl
         << "Bind Line Number: " << bind.mBindLineNumber << endl
+        << "Bind Type: " << bind.mBindType << endl
         << "Bind Name: " << bind.mBindName << endl
         << "Bind Value: " << bind.mBindValue << endl;
     return out;

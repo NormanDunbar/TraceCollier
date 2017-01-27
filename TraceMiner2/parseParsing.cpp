@@ -22,7 +22,7 @@
 bool tmTraceFile::parsePARSING(const string &thisLine) {
 
     if (mOptions->verbose()) {
-        *mDbg << "parsePARSING(): Entry." << endl;
+        *mDbg << "parsePARSING(" << mLineNumber << "): Entry." << endl;
     }
 
     // PARSING IN CURSOR #4572676384 len=229 dep=1 ...
