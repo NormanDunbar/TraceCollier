@@ -28,7 +28,7 @@ SOURCES=TraceMiner2/TraceMiner2.cpp \
         TraceMiner2/parseXctend.cpp \
         TraceMiner2/parseError.cpp
 
-OBJECTS=$(VARIABLE:.cpp=.o)
+OBJECTS=$(SOURCES:.cpp=.o)
 
 all:	traceminer2 $(BIN)
 
