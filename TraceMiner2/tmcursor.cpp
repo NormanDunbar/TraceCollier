@@ -19,6 +19,7 @@
     mSQLText = "";
     mSQLParseLine = 0;
     mBindCount = 0;
+    mCommandType = 0;
 
 }
 
@@ -40,7 +41,7 @@ tmCursor::~tmCursor() {
  */
 void tmCursor::cleanUp() {
     for (map<unsigned, tmBind *>::iterator i = mBinds.begin(); i != mBinds.end(); ++i) {
-        cerr << *(i->second);
+        //cerr << *(i->second);
         mBinds.erase(i);
         delete i->second;
     }
@@ -63,6 +64,7 @@ ostream &operator<<(ostream &out, const tmCursor &cursor) {
         << "SQL Text Length: " << cursor.mSQLSize << endl
         << "SQL Parse Line: " << cursor.mSQLParseLine << endl
         << "Bind Count: " << cursor.mBindCount << endl
+        << "Command Type: " << cursor.mCommandType << endl
         << "SQL Text = [" << cursor.mSQLText << "]" << endl;
 
     // If we have any binds, print them out.
@@ -138,6 +140,11 @@ bool tmCursor::buildBindMap(const string &sql) {
 
         // Save the Bind details.
         tmBind *thisBind = new tmBind(bindID, bindName);
+
+        // Tell the world.
+        cout << "    Bind: " << bindID
+             << " Name: '" << bindName
+             << " created." << endl;
 
         // An iterator for the insert into the bind map. AKA where are we?
         pair<map<unsigned, tmBind *>::iterator, bool> exists;

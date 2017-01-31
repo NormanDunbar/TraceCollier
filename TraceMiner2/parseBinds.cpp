@@ -3,8 +3,13 @@
  */
 
 #include "tmtracefile.h"
+#include <algorithm>
+using std::find;
 
 /** @brief Parses a "BINDS" line.
+ *
+ * @param thisLine const string&. The line containing, "BINDS #..."
+ * @return bool. Returns true if all ok. False otherwise.
  *
  * Parses a line from the trace file. The line is expected
  * to be the BINDS #cursor line.
@@ -12,8 +17,6 @@
  * This function extracts the values for all listed binds
  * for the given cursor. The values are used to update
  * the binds map member of the appropriate tmCursor object.
- *
- * Returns true if all ok. False otherwise.
  */
 bool tmTraceFile::parseBINDS(const string &thisLine) {
 
@@ -57,6 +60,9 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
 
     // We have a valid cursor.
     tmCursor *thisCursor = i->second;
+    if (mOptions->verbose()) {
+        *mDbg << "parseBINDS(): Found cursor: " << i->first << '.' << endl;
+    }
 
     // Any binds?
     unsigned bindCount = thisCursor->bindCount();
@@ -78,33 +84,124 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
         return false;
     }
 
-    // We have binds in the cursor, and we've found them
-    // in the trace file. Extract the appropriate values.
-    for (map<unsigned, tmBind *>::iterator i = thisCursor->binds()->begin();
-         i != thisCursor->binds()->end();
-         i++) {
-             tmBind *thisBind = i->second;
+    // Ok, now we have the right stuff ready, lets read
+    // every line relating to the binds for this cursor
+    // into memory for later processing.
+    // We start reading from the line " Bind#0" and stop
+    // after the first non-bind related line. (EXEC usually!)
+    vector<string>bindData;
+    string bindLine;
+    bool ok = true;
 
-             // Let's see if we can find the "value=" line for this bind.
-             if (!parseBindData(thisBind)) {
-                // Failed to parse. Hmmm.
-                stringstream s;
-                s << "parseBINDS(): Cursor " << cursorID
-                  << ", Bind#" << thisBind->bindId()
-                  << ": Failed to parse a value."
-                  << endl;
-                cerr << s.str();
+    while (ok) {
+        // Get next line.
+        ok = readTraceLine(&bindLine);
 
-                if (mOptions->verbose()) {
-                    *mDbg << s.str()
-                          << "parseBINDS(): Exit." << endl;
-                }
+        // Strip out those damned timestamp lines!
+        if (bindLine.substr(0, 4) == "*** ")
+        {
+            if (mOptions->verbose()) {
+                *mDbg << "parseBINDS(): Ignoring timestamp/empty line ["
+                      << bindLine << ']' << endl;
+            }
 
-        return false;
-             }
+            continue;
+        }
+
+        // Watch out for that nasty line!
+        if (bindLine.substr(2, 12) == "value= Bind#") {
+            bindData.push_back("  value=");
+            bindData.push_back(bindLine.substr(8));
+            continue;
+        }
+
+        // Finished yet?
+        string prefix = bindLine.substr(0, 6);
+        if (prefix == "EXEC #" ||
+            prefix == "  No o") {
+            break;
+        }
+
+        // Save the normal lines.
+        bindData.push_back(bindLine);
     }
 
+    // We have read one line too far. Save it for later processing.
+    // I tried saving the position before each read to allow me to
+    // reposition the file to the previous line, however, for some
+    // trace files this fails to work correctly and we get a rogue
+    // line read in next time, as opposed to the desired one. The
+    // rogue bears no resemblance to either the desired line, or the
+    // one prior. This solution appears to work!
+    if (mOptions->verbose()) {
+        *mDbg << "parseBINDS(): Pushing back this line: [" << bindLine << ']' << endl;
+    }
+    mUnprocessedLine = bindLine;
 
+    // We have binds in the cursor, and we've collected the data lines
+    // from the trace file. Try to extract the appropriate values.
+    for (map<unsigned, tmBind *>::iterator i = thisCursor->binds()->begin();
+         i != thisCursor->binds()->end();
+         i++)
+    {
+        tmBind *thisBind = i->second;
+        stringstream currentBind;
+        currentBind << " Bind#" << i->first;
+
+        if (mOptions->verbose()) {
+            *mDbg << "parseBINDS(): Processing: [" << currentBind.str() << ']' << endl;
+        }
+
+        // Save the "Bind last seen at" Line number.
+        //thisBind->setBindLineNumber(mLineNumber);
+
+        // Find the first line of this bind's data and the first of the next bind's data.
+        // The latter may not exist of course, if this is the final bind. The former must!
+        vector<string>::iterator start_i = find(bindData.begin(), bindData.end(), currentBind.str());
+
+        if (start_i == bindData.end()) {
+            stringstream s;
+
+            s << "parseBINDS(): Cannot locate bind data for" << currentBind.str() << endl;
+            cerr << s.str();
+
+            if (mOptions->verbose()) {
+                *mDbg << s.str()
+                      << "parseBINDS(): Exit." << endl;
+            }
+
+            return false;
+        }
+
+
+        stringstream nextBind;
+        nextBind << " Bind#" << i->first + 1;
+        vector<string>::iterator stop_i = find(start_i, bindData.end(), nextBind.str());
+
+        if (mOptions->verbose()) {
+            *mDbg << "parseBINDS(): start_i = [" << *start_i << ']' << endl;
+            if (stop_i != bindData.end()) {
+                *mDbg << "parseBINDS(): stop_i = [" << *stop_i << ']' << endl;
+            } else {
+                *mDbg << "parseBINDS(): stop_i = [NO MORE BINDS]" << endl;
+            }
+        }
+
+        // Now we have a start and stop iterator into the bind data
+        // for this particular bind. Extract the information we want.
+        if (!extractBindData(start_i, stop_i, thisBind)) {
+            stringstream s;
+            s << "parseBINDS(): Failed to extract bind data for" << currentBind.str() << '.' << endl;
+            cerr << s.str();
+
+            if (mOptions->verbose()) {
+                *mDbg << s.str()
+                      << "parseBINDS(): Exit." << endl;
+            }
+
+            return false;
+        }
+    }
 
     // Looks like a good parse.
     if (mOptions->verbose()) {
@@ -115,160 +212,12 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
 }
 
 
-/** @brief Parses a number of lines relating to a single bind variable..
- *
- * Parses a number of lines from the trace file which define the details
- * about a single bind variable.
- *
- * On entry, for each bind variable we read a single line and check that it
- * is the "Bind#n" line for the correct bind, otherwise we barf.
- *
- * Returns true if all ok. False otherwise.
- */
-bool tmTraceFile::parseBindData(tmBind *thisBind) {
-
-    if (mOptions->verbose()) {
-        *mDbg << "parseBindData(" << mLineNumber << "): Entry." << endl
-              << "parseBindData(): Bind #" << thisBind->bindId() << endl;
-    }
-
-    string thisLine;
-    bool ok;
-
-    // We need to read one line here to position on the "Binds#n" line.
-    ok = readTraceLine(&thisLine);
-    if (!ok) {
-        stringstream s;
-        s << "parseBindData(): Trace file read error." << endl;
-        cerr  << s.str();
-
-        if (mOptions->verbose()) {
-            *mDbg << s.str()
-                  << "parseBindData(): Exit." << endl;
-        }
-
-        return false;
-    }
-
-    // Did we read the correct line?
-    // " Bind#n"
-    regex reg("\\sBind#(\\d+)") ;
-    smatch match;
-
-    if (!regex_match(thisLine, match, reg)) {
-        stringstream s;
-        s << "parseBindData(): Expecting 'Bind#" << thisBind->bindId()
-          << "', found [" << thisLine << ']' << endl;
-        cerr  << s.str();
-
-        if (mOptions->verbose()) {
-            *mDbg << s.str()
-                  << "parseBindData(): Exit." << endl;
-        }
-
-        return false;
-    }
-
-    // Save the "Bind last seen at" Line number.
-    thisBind->setBindLineNumber(mLineNumber);
-
-    // Ok, collect all the stuff for this bind.
-    // Save it in a vector<string> as we might need
-    // to split that famous "value= Bind#n" line that turns up
-    // from time to time.
-    // We also need to push back the EXEC or next bind line.
-    vector<string> bindStuff;
-    unsigned long pos;
-    bool foundStrangeLine = false;
-
-    // Ok set true above.
-    while (ok) {
-        // Keep reading lines until we find:
-        // An EXEC line, or
-        // The next Bind#n line, or
-        // No oacdef for this bind, or
-        // EOF.
-
-        // Save previous line.
-        bindStuff.push_back(thisLine);
-
-        // Get current position.
-        pos = mIfs->tellg();
-
-        if (mOptions->verbose()) {
-            *mDbg << "parseBindData(): Pos: " << pos << endl;
-        }
-
-        // Not done, read on MacDuff!
-        ok = readTraceLine(&thisLine);
-
-        // Finished yet?
-        string prefix = thisLine.substr(0, 6);
-        if (prefix == "EXEC #" ||
-            prefix == " Bind#" ||
-            prefix == "  No o" ||
-            mIfs->eof()){
-            break;
-        }
-
-        // Found that funny line?
-        // Assume no value to extract, and we need to position backwards to the Bind#n.
-        if (thisLine == "  value= Bind#") {
-            if (mOptions->verbose()) {
-                *mDbg << "parseBindData(): Found this line [" << thisLine << ']' << endl;
-            }
-
-            // Ok, problem. We need to read the " Bind#" part on the next read
-            // so we need to position back to the space before the 'B'. However,
-            // are we on Windows or Unix? In other words do we go back one character
-            // for Unix and two for Windows? How to determine which one to use?
-            // Don't! Just set pos to pos + 8 which is the desired position.
-            pos += 8;
-            thisLine = thisLine.substr(0, 8);
-            foundStrangeLine = true;
-        }
-    }
-
-    // We have read past where we want to be, so set the position
-    // back to the start of the line we just read in.
-    mIfs->seekg(pos, mIfs->beg);
-    if (mOptions->verbose()) {
-        // Get current position.
-        pos = mIfs->tellg();
-        *mDbg << "parseBindData(): Loop exit: Pos: " << pos << endl;
-    }
-
-    // We need to adjust the line counter too, but only
-    // if we didn't find that strange "value= Bind#n" line.
-    mLineNumber -= (foundStrangeLine ? 0 : 1);
-
-
-    // Now, extract the Bind data from the vector.
-    if (!extractBindData(&bindStuff, thisBind)) {
-        // Damn!
-        stringstream s;
-        s << "parseBindData(): Failed to extract bind data for 'Bind#"
-          << thisBind->bindId() << '\'' << endl;
-        cerr  << s.str();
-
-        if (mOptions->verbose()) {
-            *mDbg << s.str()
-                  << "parseBindData(): Exit." << endl;
-        }
-
-        return false;
-    }
-
-    // Looks like a good parse.
-    if (mOptions->verbose()) {
-        *mDbg << "parseBindData(): Exit." << endl;
-    }
-
-    return true;
-}
-
-
 /** @brief Parses a vector of lines relating to a single bind variable to extract the value etc.
+ *
+ * @param start const vector<string>::iterator. Start of lines to scan.
+ * @param stop const vector<string>::iterator. Just after the last line to scan.
+ * @param thisBind tmBind*. The tmBind object who's data we are extracting.
+ * @return bool. Returns true for success, false otherwise.
  *
  * Parses a vector of lines, read in from the trace file,  which relate to a single
  * bind variable. The value for this current execution's bind variable is extracted and will
@@ -292,17 +241,17 @@ bool tmTraceFile::parseBindData(tmBind *thisBind) {
  *         25 = Unhandled data type.
  *         29 = Unhandled data type.
  *         96 = NCHAR. Dumped as Hex digits.
- *        123 = A buffer. Usually seen in DBMS_OUTPUT.GET_LINES(:LINES, :NUM_LINES). The :LINES bind will be type 123.
- * Avl = Average length. Sometimes means the number of characters in the ASCII representation of the bind's value.
+ *        123 = A buffer. A VARRAY. Usually seen in DBMS_OUTPUT.GET_LINES(:LINES, :NUM_LINES). The :LINES bind will be type 123.
+ * Avl = Average length. Sometimes means the number of characters in the ASCII representation of the bind's value. Zero indicates a NULL
+ *       or a PL/SQL OUT parameter.
  * Value = The bind's value. May be missing, or "invalid".
  * Mxl = Maximum length, but is not reliable. It's the internal format's maximum length.
  *
- * Returns true if all ok. False otherwise.
  */
-bool tmTraceFile::extractBindData(const vector<string> *bindStuff, tmBind *thisBind) {
+bool tmTraceFile::extractBindData(const vector<string>::iterator start, const vector<string>::iterator stop, tmBind *thisBind) {
 
     if (mOptions->verbose()) {
-        *mDbg << "extractBindData(" << mLineNumber << "): Entry." << endl
+        *mDbg << "extractBindData(): Entry." << endl
               << "extractBindData(): Extracting data for Bind #"
               << thisBind->bindId() << '.' << endl;
     }
@@ -312,7 +261,7 @@ bool tmTraceFile::extractBindData(const vector<string> *bindStuff, tmBind *thisB
     unsigned dataType = 0;
     unsigned averageLength = 0;
     string value = "";
-    vector<string>::const_iterator valueStartsHere = bindStuff->end();
+    vector<string>::const_iterator valueStartsHere = stop;
 
     // Flags.
     unsigned oacdtyPos = 0;
@@ -321,13 +270,13 @@ bool tmTraceFile::extractBindData(const vector<string> *bindStuff, tmBind *thisB
     unsigned valuePos = 0;
 
 
-    // Parse the vector for the data we want.
-    for (vector<string>::const_iterator i=bindStuff->begin();
-        i != bindStuff->end();
+    // Parse the bindData vector for the data we want.
+    for (vector<string>::const_iterator i=start;
+        i != stop;
         i++)
     {
         if (mOptions->verbose()) {
-           *mDbg << "extractBindData(): Scanning: [" << *i << ']' << endl;
+           *mDbg << "extractBindData(): Scanning line: [" << *i << ']' << endl;
         }
 
         // Set the flags.
@@ -433,14 +382,17 @@ bool tmTraceFile::extractBindData(const vector<string> *bindStuff, tmBind *thisB
     }
 
     // If averageLength is zero, or, we didn't find a "value="
-    // then this is most likely an OUT parameter for PL/SQL.
-    // Just use the name of the bind as the value.
+    // then this is most likely an OUT parameter for PL/SQL,
+    // OR, a NULL value for a BIND.
+    // Just use NULL as the value for now. MAYBE we should be looking at
+    // the tmCursor::commandType() to determine which is which?
     if (valuePos == string::npos ||
         averageLength == 0) {
-            thisBind->setBindValue(thisBind->bindName());
+            thisBind->setBindValue("NULL");
 
             if (mOptions->verbose()) {
-                *mDbg << "parseBindData(): Suspected OUT PL/SQL parameter found." << endl
+                *mDbg << "parseBindData(): Suspected OUT PL/SQL parameter found, or," << endl
+                      << "parseBindData(): NULL value for bind variable found." << endl
                       << "parseBindData(): Exit." << endl;
             }
 
@@ -448,7 +400,7 @@ bool tmTraceFile::extractBindData(const vector<string> *bindStuff, tmBind *thisB
 
         }
 
-    // We have a good bind, find the value.
+    // We have a good bind, with a value present, extract it.
     if (!extractBindValue(valueStartsHere, thisBind)) {
         // Damn!
         stringstream s;
@@ -483,7 +435,7 @@ bool tmTraceFile::extractBindData(const vector<string> *bindStuff, tmBind *thisB
 bool tmTraceFile::extractNumber(vector<string>::const_iterator i, const unsigned equalPos, unsigned &result) {
 
    if (mOptions->verbose()) {
-      *mDbg << "extractNumber(" << mLineNumber << "): Entry." << endl;
+      *mDbg << "extractNumber(): Entry." << endl;
    }
 
    try {
@@ -492,7 +444,7 @@ bool tmTraceFile::extractNumber(vector<string>::const_iterator i, const unsigned
        result = stoul(i->substr(equalPos + 1), NULL, 10);
    } catch (exception &e) {
        stringstream s;
-       s << "extractNumber(): Exception " << e.what() << endl
+       s << "extractNumber(): Exception: " << e.what() << endl
          << "extractNumber(): Failed to extract numeric data for bind." << endl;
        cerr << s.str();
 
@@ -514,12 +466,95 @@ bool tmTraceFile::extractNumber(vector<string>::const_iterator i, const unsigned
 }
 
 
+/** @brief Extracts a Hex value located in a string, between the '=' and the end of the string.
+ * data are stored in the tmBind object in ASCII format, between single quotes.
+ *
+ * @param i vector<string>::const_iterator. Iterator pointing at the string.
+ * @param equalPos const unsigned. Where the '=' is found in the string.
+ * @param result string&. Variable to receive the result.
+ * @return bool. True is success. False is otherwise.
+ */
+bool tmTraceFile::extractHex(vector<string>::const_iterator i, const unsigned equalPos, string &result) {
+
+
+    if (mOptions->verbose()) {
+       *mDbg << "extractHex(): Entry." << endl;
+    }
+
+    // Initialise result string.
+    result.clear();
+    result.push_back('\'');
+
+    // Convert a pile of hex values into ASCII by simply ignoring the
+    // leading '0' and taking the following hex as a character.
+    // Assumes the string starts with a '0' and a space. Bad idea?
+    string temp = i->substr(equalPos + 1);
+    unsigned digits;
+
+    // Stoul() stops at the first non digit.
+    while (true) {
+        // What are we looking at right now?
+        if (mOptions->verbose()) {
+           *mDbg << "extractHex(): Extracting digits [" << temp << ']' << endl;
+        }
+
+        // Strip leading space.
+        //if (temp.at(0) == ' ') {
+        //    temp = temp.substr(1);
+        //}
+
+        // Done yet?
+        if (temp.empty()) {
+            break;
+        }
+
+        // Should be leading digits now.
+        size_t spaceHere;
+        try {
+            digits = stoul(temp, &spaceHere , 16);
+        } catch (exception &e) {
+
+            stringstream s;
+            s << "extractHex(): Exception: " << e.what() << endl
+              << "extractHex(): Failed to extract hex data from '" << temp << '\'' << endl;
+            cerr << s.str();
+
+            if (mOptions->verbose()) {
+                *mDbg << s.str()
+                      << "extractHex(): Exit.";
+            }
+
+            return false;
+        }
+
+        // We ignore zero.
+        if (digits) {
+            char cc = digits;
+            result.push_back(cc);
+        }
+
+        // Strip off what we got.
+        temp = temp.substr(spaceHere + 1);
+    }
+
+    // Terminate result string.
+    result.push_back('\'');
+
+    if (mOptions->verbose()) {
+       *mDbg << "extractHex(): Result is "
+             << result << '.' << endl
+             << "extractHex(): Exit." << endl;
+    }
+
+    return true;
+}
+
+
 
 /** @brief Extract a binds actual value as a string.
  *
- * @param bindStuff const vector<string>*. Vector of bind data lines.
- * @param i vector<string>::const_iterator. Pointer to the value line in the vector.
- * @param thisBind tmBind*. The bind in question.
+ * @param i vector<string>::const_iterator. The line we are extracting a value from.
+ * @param thisBind tmBind*. The tmBind object who's value we are extracting.
  * @return bool. True means all ok. False means problems.
  *
  * The bind data types are:
@@ -536,7 +571,9 @@ bool tmTraceFile::extractNumber(vector<string>::const_iterator i, const unsigned
 bool tmTraceFile::extractBindValue(vector<string>::const_iterator i, tmBind *thisBind) {
 
    if (mOptions->verbose()) {
-      *mDbg << "extractBindValue(" << mLineNumber << "): Entry." << endl;
+      *mDbg << "extractBindValue(): Entry." << endl
+            << "extractBindValue(): Processing Bind#" << thisBind->bindId() << '.' << endl
+            << "extractBindValue(): Extracting Hex from [" << *i << ']' << endl;
    }
 
    unsigned equalPos = i->find("=");
@@ -545,43 +582,90 @@ bool tmTraceFile::extractBindValue(vector<string>::const_iterator i, tmBind *thi
    // We need the data type.
    unsigned dataType = thisBind->bindType();
    switch (dataType) {
-        case 1: // VARCHAR2 or NVARCHAR2.
+       //----------------------------------------------------------------------
+       // VARCHAR2 has a value="quoted string".
+       // NVARCHAR2 has hex data without quotes.
+       // Both drop into type 96, NCHAR, which is always hex data, but checks
+       // for a VARCHAR2 double quote first.
+       //----------------------------------------------------------------------
+       case 1: // VARCHAR2 or NVARCHAR2.
+                // Drop in below.
+
+       //----------------------------------------------------------------------
+       // NCHAR is always hex data. In case we are here from VARCHAR2 above, we
+       // check for a leading double quote first.
+       //----------------------------------------------------------------------
+       case 96: // NCHAR.
             if ((equalPos + 1) == quotePos) {
-                // This is a VARCHAR2.
-                string thisValue = i->substr(quotePos);
-                thisValue.at(0) = '\'';
-                thisValue.at(thisValue.length() - 1) = '\'';
-                thisBind->setBindValue(thisValue);
-                break;
+               // This is a VARCHAR2. We have a double-quoted string.
+               string thisValue = i->substr(quotePos);
+               thisValue.at(0) = '\'';
+               thisValue.at(thisValue.length() - 1) = '\'';
+               thisBind->setBindValue(thisValue);
             } else {
-                // This is an NVARCHAR2, extract the hex data instead.
-            }
-            break;
-        case 2: // NUMBER.
-            // Number data is on the same text line as the 'value=' text.
-            // If the "number" is "###" then we have an OUT parameter in PL/SQL.
-            // So, just replace the value with the bind name.
-            thisBind->setBindValue(i->substr(equalPos + 1));
-            if (thisBind->bindValue() == "###") {
-                thisBind->setBindValue(thisBind->bindName());
-            }
-            break;
-        case 11: // ROWID.
-            thisBind->setBindValue(i->substr(equalPos + 1));
-            break;
-        case 23: // RAW.
-            break;
-        case 25: // UNHANDLED DATA TYPE. (Drop in below).
-        case 29: // UNHANDLED DATA TYPE.
-            thisBind->setBindValue(i->substr(equalPos + 1));
-            break;
-        case 96: // NCHAR.
-            thisBind->setBindValue(i->substr(equalPos + 1));
-            break;
-        case 123: // A Data Buffer.valueStartsHere
-            break;
-        default: // I have no idea what you are!
-            break;
+               // This is an NCHAR or NVARCHAR2, extract the hex data.
+               string thisValue;
+               if (extractHex(i, equalPos, thisValue)) {
+                   thisBind->setBindValue(thisValue);
+               } else {
+                   stringstream s;
+                   s << "extractBindValue(): Failed to extract Hex." << endl;
+                   cerr << s.str();
+
+                   if (mOptions->verbose()) {
+                       *mDbg << s.str()
+                             << "extractBindValue(): Exit." << endl;
+                   }
+
+                   return false;
+               }
+           }
+           break;
+
+       //----------------------------------------------------------------------
+       // Numbers are always numerical and on the first line. If the number is
+       // "###" though, it's an output bind for PL/SQL.
+       //----------------------------------------------------------------------
+       case 2: // NUMBER.
+           thisBind->setBindValue(i->substr(equalPos + 1));
+           if (thisBind->bindValue() == "###") {
+               thisBind->setBindValue(thisBind->bindName());
+           }
+           break;
+
+       //----------------------------------------------------------------------
+       // ROWIDs and the two unhandled data types (Oracle's words not mine) are
+       // simple extractions of the remaining data on the line.
+       //----------------------------------------------------------------------
+       case 11: // ROWID. Drop in below.
+       case 25: // UNHANDLED DATA TYPE. (Drop in below).
+       case 29: // UNHANDLED DATA TYPE.
+           thisBind->setBindValue(i->substr(equalPos + 1));
+           break;
+
+       //----------------------------------------------------------------------
+       // RAW does what exactly? ***** TODO *****
+       //----------------------------------------------------------------------
+       case 23: // RAW.
+           break;
+
+       //----------------------------------------------------------------------
+       // VARRAY. Usually a PL/SQL return or OUT parameter. Just use the name.
+       //----------------------------------------------------------------------
+       case 123: // A Data Buffer.valueStartsHere
+           thisBind->setBindValue(thisBind->bindName());
+           break;
+
+       //----------------------------------------------------------------------
+       // OOPS! I assume just copy the data from the value line will suffice if
+       // we hit an unknown data type. Time will tell.
+       //----------------------------------------------------------------------
+       default: // I have no idea what you are!
+           thisBind->setBindValue(i->substr(equalPos + 1));
+           break;
+
+        // If we reach here, we are done.
+        return true;
    }
 
 

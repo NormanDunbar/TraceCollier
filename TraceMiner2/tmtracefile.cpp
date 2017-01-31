@@ -19,6 +19,7 @@ tmTraceFile::tmTraceFile(tmOptions *options)
     mSystemName = "";
     mNodeName = "";
     mLineNumber = 0;
+    mUnprocessedLine.clear();
     mIfs = NULL;
     mOfs = NULL;
     mDbg = NULL;
@@ -128,8 +129,27 @@ bool tmTraceFile::parseTraceFile()
     smatch match;
 
     // The main parsing loop. What kind of line have we
-    // read? Deal with it accordingly.
-    while (readTraceLine(&traceLine)) {
+    // read? Deal with it accordingly. If a parseBINDS() call
+    // Read too far, process that line rather than reading another.
+    while ((!mUnprocessedLine.empty()) ||
+           readTraceLine(&traceLine)) {
+
+        // Make sure we parse the unprocessed line from parseBINDS().
+        if (!mUnprocessedLine.empty()) {
+            traceLine = mUnprocessedLine;
+            mUnprocessedLine.clear();
+        }
+
+        // Strip out those damned timestamp lines!
+        if (traceLine.substr(0, 4) == "*** ")
+        {
+            if (mOptions->verbose()) {
+                *mDbg << "parseTraceFile(): Ignoring timestamp line ["
+                      << traceLine << ']' << endl;
+            }
+
+            continue;
+        }
 
         if (regex_match(traceLine, match, reg)) {
 
@@ -267,8 +287,6 @@ bool tmTraceFile::parseHeader() {
     }
 
     // We have a valid (hopefully!) trace file.
-    // Extract heading details.
-    // Position to the first real line.
     mOriginalTraceFileName = traceLine.substr(11);
 
     while (true) {
@@ -449,6 +467,11 @@ bool tmTraceFile::openReportFile()
     mOfs->imbue(locale(mOfs->getloc(), new ThousandsSeparator<char>(',')));
 
     // Headings.
+    *mOfs << "TraceMiner2" << endl
+          << "-----------" << endl;
+
+    *mOfs << "Processing Trace file: " << mOptions->traceFile() << endl << endl;
+
     *mOfs << setw(MAXLINENUMBER) << "EXEC Line" << ' '
           << setw(MAXLINENUMBER) << "PARSE Line" << ' '
           << setw(MAXLINENUMBER) << "SQL Line" << ' '
@@ -478,8 +501,15 @@ bool tmTraceFile::openReportFile()
  */
 bool tmTraceFile::readTraceLine(string *aLine) {
 
-    getline(*mIfs, *aLine);
-    mLineNumber++;
+    while (true && mIfs->good()) {
+        getline(*mIfs, *aLine);
+        mLineNumber++;
+
+        // We ignore empty lines, EOF() etc.
+        if (!aLine->empty()) {
+            break;
+        }
+    }
 
     // Verbose?
     if (mOptions->verbose()) {

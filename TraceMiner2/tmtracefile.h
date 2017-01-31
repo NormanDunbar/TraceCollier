@@ -101,6 +101,7 @@ class tmTraceFile
         bool parseTraceFile();              /**< Parses the trace file body. */
         bool readTraceLine(string *aLine);  /**< Read one line from the trace, update the current line number. */
         map<string, tmCursor *>::iterator findCursor(const string &cursorID);   /**< Finds a cursor id in the cursor list. */
+        string mUnprocessedLine;            /**< ParseBINDS() read ahead line. */
 
         // Parsing stuff.
         bool parsePARSING(const string &thisLine);  /**< Parses a PARSING IN CURSOR line. */
@@ -110,11 +111,12 @@ class tmTraceFile
         bool parseXCTEND(const string &thisLine);   /**< Parses a PARSE line. */
         bool parseERROR(const string &thisLine);    /**< Parses a PARSE line. */
         bool parseBINDS(const string &thisLine);    /**< Parses a BINDS line. */
-        bool parseBindData(tmBind *thisBind);       /**< Parses a bind's data lines. */
+        bool parseBindData(tmBind *thisBind, vector<string>::iterator i);       /**< Parses a bind's data lines. */
 
         // Data extraction from a vector of bind lines.
-        bool extractBindData(const vector<string> *bindStuff, tmBind *thisBind);    /**< Extracts the bind data from a vector. */
+        bool extractBindData(const vector<string>::iterator start, const vector<string>::iterator stop, tmBind *thisBind);    /**< Extracts the bind data from a vector. */
         bool extractNumber(vector<string>::const_iterator i, const unsigned equalPos, unsigned &result);  /**< Extracts a numeric value. */
+        bool extractHex(vector<string>::const_iterator i, const unsigned equalPos, string &result);  /**< Extracts a hex value. */
         bool extractBindValue(vector<string>::const_iterator i, tmBind *thisBind);  /**< Extracts a string representing a bind's actual value. */
 };
 

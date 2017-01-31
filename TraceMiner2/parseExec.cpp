@@ -7,14 +7,15 @@
 
 /** @brief Parses a "EXEC" line.
  *
+ * @param thisLine const string&. Trace file line containing EXEC.
+ * @return bool. Returns true if all ok. False otherwise.
+ *
  * Parses a line from the trace file. The line is expected
  * to be the EXEC #cursor line.
  *
  * The tmCursor associated with this PARSE is found, and its bind values
  * are extracted and merged into the SQL statement ready for output to
  * the report file.
- *
- * Returns true if all ok. False otherwise.
  */
 bool tmTraceFile::parseEXEC(const string &thisLine) {
 
@@ -71,16 +72,41 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
 
     // We have a valid cursor. Extract the SQL.
     tmCursor *thisCursor = i->second;
+    string sqlText = thisCursor->sqlText();
 
-    // This is temporary *****************************
-    //mOfs->width(MAXLINENUMBER);
+    // Find the binds map for this cursor.
+    map<unsigned, tmBind *> *binds = thisCursor->binds();
+
+    // Replace all the bind names we find, with the bind value.
+    for (map<unsigned, tmBind *>::iterator i = binds->begin();
+         i != binds->end();
+         i++)
+    {
+        unsigned bindPos = sqlText.find(i->second->bindName());
+        if (bindPos != string::npos) {
+            sqlText.replace(bindPos, i->second->bindName().length(), i->second->bindValue());
+        } else {
+            // Hmm. This should never happen!
+            stringstream s;
+            s << "parseEXEC(): Cannot find '" << i->second->bindName() << " in ["
+              << sqlText << "]." << endl;
+            cerr << s.str();
+
+            if (mOptions->verbose()) {
+                *mDbg << s.str()
+                      << "parseEXEC(): Exit." << endl;
+            }
+
+            return false;
+        }
+    }
+
+    // And write the replaced SQL to the report file.
     *mOfs << setw(MAXLINENUMBER) << mLineNumber << ' '
           << setw(MAXLINENUMBER) << thisCursor->sqlParseLine() << ' '
           << setw(MAXLINENUMBER) << thisCursor->sqlLineNumber() << ' '
-//          << setw(MAXCURSORWIDTH) << cursorID << ' '
-          << thisCursor->sqlText() << ' '
+          << sqlText << ' '
           << endl;
-    // This is temporary *****************************
 
     // Looks like a good parse.
     if (mOptions->verbose()) {

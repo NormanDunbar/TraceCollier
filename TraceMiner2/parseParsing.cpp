@@ -26,12 +26,12 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
     }
 
     // PARSING IN CURSOR #4572676384 len=229 dep=1 ...
-    regex reg("PARSING IN CURSOR\\s(#\\d+)\\slen=(\\d+)\\sdep=(\\d+).*");
+    regex reg("PARSING IN CURSOR\\s(#\\d+)\\slen=(\\d+)\\sdep=(\\d+).*?oct=(\\d+).*");
     smatch match;
 
     stringstream ss;
 
-    // Extract the cursorID, the length and the depth.
+    // Extract the cursorID, the length, recursion depth and command type.
     if (!regex_match(thisLine, match, reg)) {
         cerr << "parsePARSING(): Cannot match regex against PARSING IN CURSOR at line: "
              <<  mLineNumber << "." << endl;
@@ -40,10 +40,11 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
 
     // Found it!
     // Extract the goodies! We definitely have all three matches.
-    // Match[0] = "#12345678 len=123 dep=0"
+    // Match[0] = "#12345678 len=123 dep=0 ... oct=3"
     // Match[1] = "#12345678"
     // Match[2] = "123"
     // Match[3] = "0"
+    // Match[4] = "3"
 
     // No validation necessary, they are digits etc, as required.
 
@@ -52,6 +53,7 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
     string cursorID = match[1];
     unsigned sqlLength = stoul(match[2], NULL, 10);
     unsigned depth = stoul(match[3], NULL, 10);
+    unsigned commandType = stoul(match[4], NULL, 10);
 
     // We only care about user level SQL so depth 0 only gets saved away.
     // This does mean that SQL executed in a PL/SQL call is ignored though.
@@ -80,8 +82,14 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
         return false;
     }
 
-    // Extract the SQL Text into a stream. This handles end of line for us.
+    // Set the command type for later use.
+    thisCursor->setCommandType(commandType);
 
+    // Tell the world.
+    cout << "Cursor: " << thisCursor->cursorId()
+         << " created at line: " << thisCursor->sqlLineNumber() << endl;
+
+    // Extract the SQL Text into a stream. This handles end of line for us.
     string aLine;
 
     while (readTraceLine(&aLine)) {
@@ -135,12 +143,8 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
     if (mOptions->verbose()) {
         *mDbg << endl << "parsePARSING(): Creating Cursor: "
               << exists.first->first << endl
-              << *(exists.first->second);
-    }
-
-    // Looks like a good parse.
-    if (mOptions->verbose()) {
-        *mDbg << "parsePARSING(): Exit." << endl;
+              << *(exists.first->second)
+              << "parsePARSING(): Exit." << endl;
     }
 
     return true;

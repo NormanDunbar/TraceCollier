@@ -121,6 +121,10 @@ tmOptions options;
 
 int main(int argc, char *argv[])
 {
+    // Make sure that cout/cerr gets comma/dot separated thousands etc.
+    cout.imbue(locale(cout.getloc(), new ThousandsSeparator<char>(',')));
+    cerr.imbue(locale(cerr.getloc(), new ThousandsSeparator<char>(',')));
+
     // Parse command line args and bale if problems detected.
     bool allOk = options.parseArgs(argc, argv);
     if (!allOk) {

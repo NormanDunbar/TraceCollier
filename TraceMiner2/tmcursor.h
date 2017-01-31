@@ -37,14 +37,16 @@ class tmCursor
         string sqlText() { return mSQLText; }                   /**< Returns the SQL statement. */
         unsigned sqlParseLine() { return mSQLParseLine; }       /**< Returns the most recent parse line number for this statement. */
         unsigned bindCount() { return mBindCount; }             /**< Returns the number of binds for this statement. */
-        map<unsigned, tmBind *> *binds() { return &mBinds; }     /**< Returns a pointer to the binds for this statement. */
+        unsigned commandType() { return mCommandType; }         /**< Returns the command type for this statement. */
+        map<unsigned, tmBind *> *binds() { return &mBinds; }    /**< Returns a pointer to the binds for this statement. */
 
         // Setters.
         void setSQLText(string val);                            /**< Changes the SQL statement for this cursor. */
         void setSQLLength(unsigned val) { mSQLSize = val; }     /**< Changes the size of the SQL text. */
         void setSQLParseLine(unsigned val) { mSQLParseLine = val; }     /**< Changes the parse line number. */
         void setSQLLineNumber(unsigned val) { mSQLLineNumber = val; }   /**< Changes the SQL line number. */
-        void setBindCount(unsigned val) { mBindCount = val; }   /**< Changes the number of binds for the statement. */
+        void setBindCount(unsigned val) { mBindCount = val; }           /**< Changes the number of binds for the statement. */
+        void setCommandType(unsigned val) { mCommandType = val; }       /**< Changes the command type for the statement. */
 
     protected:
 
@@ -55,6 +57,7 @@ class tmCursor
         string mSQLText;                    /**< The actual SQL text, extracted from the trace file. */
         unsigned mSQLParseLine;             /**< Line in the trace file where this statement was most recently parsed. */
         unsigned mBindCount;                /**< How many binds are there in this statement? */
+        unsigned mCommandType;              /**< What command is executing in this statement? */
         map<unsigned, tmBind *> mBinds;     /**< A std::map of all found binds for this statement. Indexed by bind position. */
 
         bool buildBindMap(const string &sql);
