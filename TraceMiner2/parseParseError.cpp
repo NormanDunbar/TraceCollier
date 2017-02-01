@@ -41,11 +41,19 @@
 bool tmTraceFile::parsePARSEERROR(const string &thisLine) {
 
     // Write the replaced SQL to the report file.
-    *mOfs << setw(MAXLINENUMBER) << mLineNumber << ' '
-          << setw(MAXLINENUMBER) << ' ' << ' '
-          << setw(MAXLINENUMBER) << ' ' << ' '
-          << thisLine << ' '
-          << endl;
+    if (mOptions->html()) {
+        *mOfs << setw(MAXLINENUMBER) << mLineNumber << ' '
+              << setw(MAXLINENUMBER) << ' ' << ' '
+              << setw(MAXLINENUMBER) << ' ' << ' '
+              << thisLine << ' '
+              << endl;
+    } else {
+        *mOfs << "<tr><td class=\"number\">" << mLineNumber << "</td>"
+              << "<td>" << "&nbsp;" << "</td>"
+              << "<td>" << "&nbsp;" << "</td><td class=\"text\">"
+              << thisLine
+              << "</td></tr>" << endl;
+    }
 
 
     // Looks like a good parse.

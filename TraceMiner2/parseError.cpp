@@ -73,10 +73,19 @@ bool tmTraceFile::parseERROR(const string &thisLine) {
     // If we found it, it must be depth=0.
     // Otherwise, quietly ignore it, it's recursive.
     if (i != mCursors.end()) {
-        *mOfs << setw(MAXLINENUMBER) << mLineNumber << ' '
-              << setw(MAXLINENUMBER) << ' ' << ' '
-              << setw(MAXLINENUMBER) << ' ' << ' '
-              << " ERROR: ORA-" << errorCode << endl;
+        if (mOptions->html()) {
+            *mOfs << setw(MAXLINENUMBER) << mLineNumber << ' '
+                  << setw(MAXLINENUMBER) << ' ' << ' '
+                  << setw(MAXLINENUMBER) << ' ' << ' '
+                  << " ERROR: ORA-" << errorCode << endl;
+        } else {
+            *mOfs << "<tr><td class=\"number\">" << mLineNumber << "</td>"
+                  << "<td>" << "&nbsp;" << "</td>"
+                  << "<td>" << "&nbsp;" << "</td><td class=\"text\">"
+                  << " ERROR: ORA-" << errorCode
+                  << "</td></tr>" << endl;
+
+        }
     }
 
     // Looks like a good parse.
