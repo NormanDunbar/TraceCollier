@@ -127,6 +127,7 @@ void tmCursor::setSQLText(string val) {
 
 /** @brief Initialises the list of Bind objects when the SQL changes.
  *
+ * @param sql const string&. The full text of the SQL statement we are extracting binds from.
  * @return bool.
  *
  * This function does the hard work of extracting the bind variables

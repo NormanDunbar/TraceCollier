@@ -102,6 +102,10 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
     map<unsigned, tmBind *> *binds = thisCursor->binds();
 
     // Replace all the bind names we find, with the bind value.
+    // I would love to be able to do this by finding the offset and
+    // length of the bind name, at parse time for the SQL, but it
+    // seems either that it is not possible, or my ability to use the STL
+    // is lacking in skill. I suspect the latter!
     for (map<unsigned, tmBind *>::iterator i = binds->begin();
          i != binds->end();
          i++)
@@ -126,11 +130,19 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
     }
 
     // And write the replaced SQL to the report file.
-    *mOfs << setw(MAXLINENUMBER) << mLineNumber << ' '
-          << setw(MAXLINENUMBER) << thisCursor->sqlParseLine() << ' '
-          << setw(MAXLINENUMBER) << thisCursor->sqlLineNumber() << ' '
-          << sqlText << ' '
-          << endl;
+    if (!mOptions->html()) {
+        *mOfs << setw(MAXLINENUMBER) << mLineNumber << ' '
+              << setw(MAXLINENUMBER) << thisCursor->sqlParseLine() << ' '
+              << setw(MAXLINENUMBER) << thisCursor->sqlLineNumber() << ' '
+              << sqlText << ' '
+              << endl;
+    } else {
+        *mOfs << "<tr><td class=\"number\">" << mLineNumber << "</td>"
+              << "<td class=\"number\">" << thisCursor->sqlParseLine() << "</td>"
+              << "<td class=\"number\">" << thisCursor->sqlLineNumber() << "</td>"
+              << "<td class=\"text\">" << sqlText << "</td></tr>"
+              << endl;
+    }
 
     // Looks like a good parse.
     if (mOptions->verbose()) {

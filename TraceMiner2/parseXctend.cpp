@@ -67,14 +67,20 @@ bool tmTraceFile::parseXCTEND(const string &thisLine) {
     unsigned rollBack = stoul(match[1], NULL, 10);
     unsigned readOnly = stoul(match[2], NULL, 10);
 
-    // This is temporary *****************************
-    *mOfs << setw(MAXLINENUMBER) << mLineNumber << ' '
-          << setw(MAXLINENUMBER) << ' ' << ' '
-          << setw(MAXLINENUMBER) << ' ' << ' '
-//          << setw(MAXCURSORWIDTH) << ' ' << ' '
-          << (rollBack ? "ROLLBACK " : "COMMIT ")
-          << (readOnly ? "(Read Only)" : "(Read Write)") << endl;
-    // This is temporary *****************************
+    if (!mOptions->html()) {
+        *mOfs << setw(MAXLINENUMBER) << mLineNumber << ' '
+              << setw(MAXLINENUMBER) << ' ' << ' '
+              << setw(MAXLINENUMBER) << ' ' << ' '
+              << (rollBack ? "ROLLBACK " : "COMMIT ")
+              << (readOnly ? "(Read Only)" : "(Read Write)") << endl;
+    } else {
+        *mOfs << "<tr><td class=\"number\">" << mLineNumber << "</td>"
+              << "<td>" << "&nbsp;" << "</td>"
+              << "<td>" << "&nbsp;" << "</td><td class=\"text\">"
+              << (rollBack ? "ROLLBACK " : "COMMIT ")
+              << (readOnly ? "(Read Only)" : "(Read Write)")
+              << "</td></tr>" << endl;
+    }
 
     // Looks like a good parse.
     if (mOptions->verbose()) {

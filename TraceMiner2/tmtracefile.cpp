@@ -130,6 +130,12 @@ bool tmTraceFile::parse()
         *mDbg << "parse(): Exit." << endl;
     }
 
+    // Close the table if HTML requested.
+    if (mOptions->html()) {
+        *mOfs << endl
+              << "</table></body></html>" << endl;
+    }
+
     return true;
 }
 
@@ -490,20 +496,45 @@ bool tmTraceFile::openReportFile()
     // Yup, the comma is not required now. Should be locale dependent.
     mOfs->imbue(locale(mOfs->getloc(), new ThousandsSeparator<char>(',')));
 
-    // Headings.
+    // Headings. (TEXT)
+    if (!mOptions->html()) {
     *mOfs << "TraceMiner2" << endl
-          << "-----------" << endl;
+          << "-----------" << endl << endl;
 
     *mOfs << "Processing Trace file: " << mOptions->traceFile() << endl << endl;
 
     *mOfs << setw(MAXLINENUMBER) << "EXEC Line" << ' '
           << setw(MAXLINENUMBER) << "PARSE Line" << ' '
           << setw(MAXLINENUMBER) << "SQL Line" << ' '
-//          << setw(MAXCURSORWIDTH) << "Cursor ID" << ' '
           << "SQL Text"
           << endl
           << setw(200) << setfill('-') << '-'
           << setfill(' ') << endl;
+    } else {
+        // Headings. (HTML)
+    *mOfs << "<html lang=\"en\"><head>" << endl
+          << "<title>TraceMiner 2</title>" << endl
+          << "<meta charset=\"UTF-8\" />" << endl
+          << "<meta name=\"generator\" content=\"TraceMiner2\" />" << endl
+          << "<link rel=\"stylesheet\" href=\""
+          << fileName(mOptions->cssFileName()) << "\" />" << endl
+          << "</head>" << endl
+          << "<body>" << endl
+          << "<H1>TraceMiner2</H1>" << endl
+          << "<p><strong>Processing Trace File:</strong> "
+          << mOptions->traceFile() << "</p>" << endl;
+
+    // I'm a little p1553d off at the WWW for HTML5's inability
+    // to use CSS to specify a table or cell width in the CSS
+    // file. This is a bad thing as I have to recompile if I need
+    // to change the column widths.
+    *mOfs << "<table style=\"width:95%\";>" << endl
+          << "<tr><th style=\"width:6%\";>EXEC Line</th>"
+          << "<th style=\"width:6%\";>PARSE Line</th>"
+          << "<th style=\"width:6%\";>SQL Line</th>"
+          << "<th>SQL Text</th></tr>"
+          << endl;
+    }
 
     // Looks like a valid report file.
     if (mOptions->verbose()) {

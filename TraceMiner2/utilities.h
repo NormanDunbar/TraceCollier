@@ -36,8 +36,10 @@ using std::string;
 // Try to figure out the directory separator.
 #if defined(_WIN32) || defined(_WIN64)
     const string directorySeparator = "\\";
+    const string eol = "\n";
 #else
     const string directorySeparator = "/";
+    const string eol = "\n";
 #endif // _WINDOWS_
 
 // Some constants for internal use.

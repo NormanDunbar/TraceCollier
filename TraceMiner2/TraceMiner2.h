@@ -77,12 +77,6 @@ using std::exception;
 #include "tmoptions.h"
 #include "utilities.h"
 
-// Because Borland/Embarcadero doesn't have strcasecmp().
-#if defined(__BORLANDC__)
-    #define strcasecmp(s1, s2)   stricmp(s1, s2)
-#endif
-
-
 
 #endif // TRACEMINER2_H
 

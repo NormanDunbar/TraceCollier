@@ -38,6 +38,7 @@ tmOptions::tmOptions()
     mTraceFile = "";
     mReportFile = "";
     mDebugFile = "";
+    mCssFileName = "";
 }
 
 /** @brief Destructor for a tmOptions object.
@@ -78,22 +79,22 @@ bool tmOptions::parseArgs(int argc, char *argv[]) {
 
         // Try verbose first ...
         if ((thisArg == "--verbose") ||
-        (thisArg == "-v")) {
+            (thisArg == "-v")) {
             mVerbose = true;
             continue;
         }
 
         // Ok, try HTML instead ...
         if ((thisArg == "--html") ||
-        (thisArg == "-m")) {
+            (thisArg == "-m")) {
             mHtml = true;
             continue;
         }
 
         // Nope? Try help then ...
         if ((thisArg == "--help") ||
-        (thisArg == "-h")        ||
-        (thisArg == "-?")) {
+            (thisArg == "-h")     ||
+            (thisArg == "-?")) {
             mHelp = true;
             continue;
         }
@@ -121,6 +122,13 @@ bool tmOptions::parseArgs(int argc, char *argv[]) {
 
     }
 
+    // Did we just want help?
+    // Do it and bale out.
+    if (mHelp) {
+        usage();
+        return true;
+    }
+
     // We need at least a trace file.
     if (mTraceFile.empty()) {
         cerr << "TraceMiner2: No trace file supplied." << endl;
@@ -133,16 +141,15 @@ bool tmOptions::parseArgs(int argc, char *argv[]) {
         return false;
     }
 
-    // Dis we just want help?
-    if (mHelp) {
-        usage();
-        return true;
-    }
-
     // Set up the other files now.
     // Assumes mTraceFile is correct.
 
-    mReportFile = replaceFileExtension(mTraceFile, mReportExtension);
+    if (mHtml) {
+        mReportFile = replaceFileExtension(mTraceFile, mHtmlExtension);
+        mCssFileName = filePath(mTraceFile) + directorySeparator + "TraceMiner2.css";
+    } else {
+        mReportFile = replaceFileExtension(mTraceFile, mReportExtension);
+    }
     mDebugFile = replaceFileExtension(mTraceFile, mDebugExtension);
 
     return true;

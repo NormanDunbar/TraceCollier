@@ -29,6 +29,7 @@
 #include "tmtracefile.h"
 
 
+
 /** @brief Parses a "PARSE ERROR" line.
  *
  * @param thisLine const string&. The trace line with "PARSE ERROR" in.

@@ -42,7 +42,8 @@
  *
  * Unzip the download zip file, then:
  *
- * @code
+ * @code"}"
+
  * cd TraceMiner2-master\TraceMiner2
  * bcc32c -o ..\bin\TraceMiner2.exe *.cpp
  * @endcode
@@ -111,6 +112,7 @@
 
 #include "TraceMiner2.h"
 #include "utilities.h"
+#include "css.h"
 
 
 // Version number.
@@ -134,6 +136,31 @@ int main(int argc, char *argv[])
     // Show help and exit requested?
     if (options.help()) {
         return 0;
+    }
+
+    // Create a (new) CSS file, if HTML requested and
+    // there isn't one already.
+    if (options.html()) {
+        string cssFile = options.cssFileName();
+        ifstream *iCss = new ifstream(cssFile);
+        if (!iCss->good()) {
+            // Create a new file
+            ofstream *oCss = new ofstream(cssFile);
+            if (oCss->good()) {
+                    cout << "TraceMiner2: Creating CSS file: ["
+                         << cssFile << ']' << endl;
+                    *oCss << cssText << endl;
+                    cout << "TraceMiner2: Created." << endl;
+                    oCss->close();
+            } else {
+                cerr <<  "TraceMiner2: Cannot create CSS file: ["
+                     << cssFile << ']' << endl;
+            }
+        } else {
+            cout << "TraceMiner2: " << cssFile
+                 << " already exists." << endl;
+            iCss->close();
+        }
     }
 
     // This is it, here is where we hit the big time! :)

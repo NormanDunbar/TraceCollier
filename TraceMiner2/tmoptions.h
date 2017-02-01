@@ -58,6 +58,7 @@ class tmOptions
         string htmlExtension() { return mHtmlExtension; }       /**< Returns HTML report file extension. */
         string reportExtension() { return mReportExtension; }   /**< Returns TEXT report file extension. */
         string debugExtension() { return mDebugExtension; }     /**< Returns debug information file extension. */
+        string cssFileName() { return mCssFileName; }           /**< Returns default CSS filename. */
 
         // Setters.
         void setVerbose(bool verbose) { mVerbose = verbose; }   /**< Sets the verbose flag, if required. */
@@ -74,6 +75,7 @@ class tmOptions
         string mTraceFile;                  /**< Name of the trace file being parsed. */
         string mReportFile;                 /**< Name of the report file. */
         string mDebugFile;                  /**< Name of the debug information file. */
+        string mCssFileName;                /**< Full path & name of the actual CSS file. */
 
         string mReportExtension = "log";    /**< Default extension for the text report file. */
         string mHtmlExtension = "html";     /**< Default extension for the HTML report file. */
