@@ -23,6 +23,8 @@
  */
 
 #include "utilities.h"
+#include "css.h"
+#include "favicon.h"
 
 // NOTE: None of these are case insensitive, it's up to the caller to
 //       ensure correct case is used. Just a thought!
@@ -52,7 +54,7 @@ string fileExtension(const string &fullPath) {
         return(fullPath.substr(dot + 1, howBig - dot));
     }
 
-    return("");
+    return "";
 }
 
 
@@ -139,3 +141,73 @@ string replaceFileExtension(const string &fullPath, const string &newExtension) 
     return result;
 }
 
+
+/** @brief Determines if a given file name exists on the system.
+ *
+ * @param fullPath const string&. The full path to the original filename.
+ * @return bool. Returns true if the file exists, false otherwise.
+ */
+bool fileExists(const string &fullPath) {
+
+    ifstream *testFile = new ifstream(fullPath);
+    if (testFile->good()) {
+        // File exists. Hooray!
+        testFile->close();
+        delete testFile;
+        return true;
+    } else {
+        // File is missing.
+        return false;
+    }
+}
+
+
+/** @brief Creates a new 'TraceMiner2.css' file, in the same folder as the trace file.
+ *
+ * @param fullPath const string&. The full path of the CSS filename.
+ * @return bool. Returns true if the file was created, false otherwise.
+ */
+bool createCSSFile(const string &fullPath) {
+
+    ofstream *oCss = new ofstream(fullPath);
+    if (oCss->good()) {
+        *oCss << cssText << endl;
+        oCss->close();
+        delete oCss;
+        cout << "TraceMiner2: CSS file [" << fullPath << "] created ok." << endl;
+        return true;
+    } else {
+        cerr << "TraceMiner2: CSS file [" << fullPath << "] failed to create." << endl;
+        return false;
+    }
+}
+
+
+/** @brief Creates a new 'favicon.ico' file, in the same folder as the trace file.
+ *
+ * @param fullPath const string&. The full path of the favicon.ico file.
+ * @return bool. Returns true if the file was created, false otherwise.
+ */
+bool createFaviconFile(const string &fullPath) {
+
+    ofstream *oFav = new ofstream(fullPath, std::ofstream::out|std::ofstream::binary);
+    if (oFav->good()) {
+        // The string favIcon is an ASCII representation of the hex codes
+        // for the binary data that makes up the favicon.ico file. Pull
+        // out two characters at a time, and write them as a single byte
+        // (binary that is) to the file.
+        while (!favIcon.empty()) {
+            string byte = favIcon.substr(0, 2);
+            favIcon = favIcon.substr(2);
+            char binaryByte = stoul(byte, NULL, 16);
+            *oFav << binaryByte;
+        }
+        oFav->close();
+        delete oFav;
+        cout << "TraceMiner2: CSS file [" << fullPath << "] created ok." << endl;
+        return true;
+    } else {
+        cerr << "TraceMiner2: CSS file [" << fullPath << "] failed to create." << endl;
+        return false;
+    }
+}

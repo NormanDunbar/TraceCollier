@@ -112,8 +112,7 @@
 
 #include "TraceMiner2.h"
 #include "utilities.h"
-#include "css.h"
-
+#include "favicon.h"
 
 // Version number.
 const float version = 0.01;
@@ -138,30 +137,35 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    // Create a (new) CSS file, if HTML requested and
-    // there isn't one already.
     if (options.html()) {
+        // Create a (new) CSS file, if HTML requested and
+        // there isn't one already.
         string cssFile = options.cssFileName();
-        ifstream *iCss = new ifstream(cssFile);
-        if (!iCss->good()) {
-            // Create a new file
-            ofstream *oCss = new ofstream(cssFile);
-            if (oCss->good()) {
-                    cout << "TraceMiner2: Creating CSS file: ["
-                         << cssFile << ']' << endl;
-                    *oCss << cssText << endl;
-                    cout << "TraceMiner2: Created." << endl;
-                    oCss->close();
-            } else {
-                cerr <<  "TraceMiner2: Cannot create CSS file: ["
-                     << cssFile << ']' << endl;
-            }
+        if (fileExists(cssFile)) {
+            cout << "File exists: " << cssFile << endl;
         } else {
-            cout << "TraceMiner2: " << cssFile
-                 << " already exists." << endl;
-            iCss->close();
+            allOk = createCSSFile(cssFile);
+            if (!allOk) {
+                return 1;
+            }
+        }
+
+        // Likewise, a 'favicon.ico' icon file too.
+        string favIconFile = filePath(cssFile) + directorySeparator + "favicon.ico";
+        if (fileExists(favIconFile)) {
+            cout << "File exists: " << favIconFile << endl;
+        } else {
+            allOk = createFaviconFile(favIconFile);
+            if (allOk) {
+                cout << "TraceMiner2: 'favicon' file [" << favIconFile << "] created ok." << endl;
+            } else {
+                cout << "TraceMiner2: 'favicon' file [" << favIconFile << "] creation failed." << endl;
+                return 1;
+            }
         }
     }
+
+
 
     // This is it, here is where we hit the big time! :)
     tmTraceFile *traceFile = new tmTraceFile(&options);

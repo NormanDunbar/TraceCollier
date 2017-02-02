@@ -23,6 +23,8 @@
  */
 
 #include "tmoptions.h"
+#include "utilities.h"
+
 
 /** @file tmoptions.cpp
  * @brief Implementation file for the tmOptions object.

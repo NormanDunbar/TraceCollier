@@ -30,26 +30,36 @@
  */
 
 #include <string>
+#include <fstream>
+#include <iostream>
 
 using std::string;
+using std::ifstream;
+using std::ofstream;
+using std::endl;
+using std::cout;
+using std::cerr;
 
 // Try to figure out the directory separator.
 #if defined(_WIN32) || defined(_WIN64)
     const string directorySeparator = "\\";
-    const string eol = "\n";
 #else
     const string directorySeparator = "/";
-    const string eol = "\n";
 #endif // _WINDOWS_
 
 // Some constants for internal use.
 const int returnFilePath = 0;
 const int returnFileName = 1;
+const string eol = "\n";
 
 string fileExtension(const string &fullPath);   /**< Return the file extension for a given file name. */
 string fileName(const string &fullPath);        /**< Return the file name part, including extension, for a full path. */
 string filePath(const string &fullPath);        /**< Return the file path for a given file name. */
 string fileNameOnly(const string &fullPath);    /**< Return the file's name, not including the extension, or the dot.  */
 string replaceFileExtension(const string &fullPath, const string &newExtension);    /**< Return a string with the file name extension changed. */
+bool fileExists(const string &fullPath);        /**< Returns true if a given file path exists, false if not. */
+bool createCSSFile(const string &fullPath);     /**< Creates the default CSS file. Returns true if ok, False otherwise. */
+bool createFaviconFile(const string &fullPath); /**< Creates the favicon.ico file. Returns true if ok, False otherwise. */
+
 
 #endif // UTILITIES_H

@@ -32,8 +32,6 @@
 #include <string>
 #include <iostream>
 
-#include "utilities.h"
-
 using std::string;
 using std::cerr;
 using std::endl;

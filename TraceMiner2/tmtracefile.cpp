@@ -23,6 +23,7 @@
  */
 
 #include "tmtracefile.h"
+#include "utilities.h"
 
 /** @file tmtracefile.cpp
  * @brief Implementation file for the tmTraceFile object.
@@ -516,8 +517,10 @@ bool tmTraceFile::openReportFile()
           << "<title>TraceMiner 2</title>" << endl
           << "<meta charset=\"UTF-8\" />" << endl
           << "<meta name=\"generator\" content=\"TraceMiner2\" />" << endl
+          << "<meta name=\"author\" content=\"Norman (at) Dunbar-it (dot) co (dot) uk\" />" << endl
           << "<link rel=\"stylesheet\" href=\""
           << fileName(mOptions->cssFileName()) << "\" />" << endl
+          << "<link rel=\"icon\" href=\"favicon.ico\" type=\"image/x-icon\" />"
           << "</head>" << endl
           << "<body>" << endl
           << "<H1>TraceMiner2</H1>" << endl
