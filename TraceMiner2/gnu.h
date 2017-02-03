@@ -1,3 +1,4 @@
+
 /*
  * MIT License
  *
@@ -22,12 +23,13 @@
  * SOFTWARE.
  */
 
-#ifndef TRACEMINER2_H
-#define TRACEMINER2_H
+#ifndef GNU_H
+#define GNU_H
 
 
-/** @file TraceMiner2.h
- * @brief Header file for the TraceMiner2 application.
+/** @file gnu.h
+ * @brief Determines the version of the GCC/G++ compiler and
+ * whether it can do REGEXes correctly, or just core dump.
  */
 
 // Gnu c++ version 4.9.0 or above, is required to be able to use
@@ -54,27 +56,4 @@
     #define USE_REGEX
 #endif // defined
 
-
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <map>
-#include <exception>
-
-using std::string;
-using std::map;
-
-using std::cout;
-using std::cerr;
-using std::endl;
-using std::exception;
-
-#include "tmtracefile.h"
-#include "tmcursor.h"
-#include "tmbind.h"
-#include "tmoptions.h"
-#include "utilities.h"
-
-
-#endif // TRACEMINER2_H
-
+#endif     // GNU_H

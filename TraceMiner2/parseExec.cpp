@@ -27,7 +27,11 @@
  */
 
 #include "tmtracefile.h"
+#include "gnu.h"
 
+#ifndef USE_REGEX
+    #include "utilities.h"
+#endif
 
 /** @brief Parses a "EXEC" line.
  *
@@ -48,13 +52,33 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
     }
 
     // EXEC #5924310096:c=0,e=31,p=0,cr=0,cu=0,mis=0,r=0,dep=0,og=4,plh=1388734953,tim=526735705392
+    string cursorID = "";
+    unsigned depth = 0;
+    bool matchOk = true;
+
+#ifdef USE_REGEX
     regex reg("EXEC\\s(#\\d+).*?dep=(\\d+).*");
     smatch match;
 
-    // Extract the cursorID and depth.
-    if (!regex_match(thisLine, match, reg)) {
+    // Extract the cursorID, the length and the depth.
+    if (regex_match(thisLine, match, reg)) {
+        cursorID = match[1];
+        depth = stoul(match[2], NULL, 10);
+    } else {
+        matchOk = false;
+    }
+#else
+    cursorID = getCursor(thisLine, &matchOk);
+    if (matchOk) {
+        depth = getDigits(thisLine, "dep=", &matchOk);
+    }
+#endif  // USE_REGEX
+
+
+    // Did it all work?
+    if (!matchOk) {
         stringstream s;
-        s << "parseEXEC(): Cannot match regex against EXEC at line: "
+        s << "parseEXEC(): Cannot match against EXEC at line: "
           <<  mLineNumber << "." << endl;
         cerr << s.str();
 
@@ -66,9 +90,7 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
         return false;
     }
 
-    string cursorID = match[1];
-    unsigned depth = stoul(match[2], NULL, 10);
-
+    // We only care about user level SQL, so only depth 0.
     if (depth) {
         // Ignore this one.
         if (mOptions->verbose()) {

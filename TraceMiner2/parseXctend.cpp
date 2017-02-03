@@ -27,8 +27,11 @@
  */
 
 #include "tmtracefile.h"
+#include "gnu.h"
 
-
+#ifndef USE_REGEX
+    #include "utilities.h"
+#endif
 
 /** @brief Parses a "XCTEND" line.
  *
@@ -46,14 +49,36 @@ bool tmTraceFile::parseXCTEND(const string &thisLine) {
     }
 
     // XCTEND rlbk=0, rd_only=0, tim=524545341395
+
+    bool matchOK = true;
+    unsigned rollBack = 0;
+    unsigned readOnly = 0;
+
+#ifdef USE_REGEX
     regex reg("XCTEND\\srlbk=(\\d+).*?rd_only=(\\d+).*");
     smatch match;
 
     // Extract the rollback and read only flags.
-    if (!regex_match(thisLine, match, reg)) {
+    if (regex_match(thisLine, match, reg)) {
+        rollBack = stoul(match[1], NULL, 10);
+        readOnly = stoul(match[2], NULL, 10);
+    } else {
+        matchOK = false;
+    }
+
+
+#else
+    // Find Rollback & Read Only indicators.
+    rollBack = getDigits(thisLine, "rlbk=", &matchOK);
+    if (matchOK) {
+        readOnly = getDigits(thisLine, "rd_only=", &matchOK);
+    }
+#endif  // USE_REGEX
+
+    if (!matchOK) {
         stringstream s;
-        s << "parseXCTEND(): Cannot match regex against XCTEND at line: "
-          <<  mLineNumber << "." << endl;
+        s << "parseXCTEND(): Cannot match XCTEND at line: "
+          <<  mLineNumber << " - Trace file corrupt?" << endl;
         cerr << s.str();
 
         if (mOptions->verbose()) {
@@ -63,9 +88,6 @@ bool tmTraceFile::parseXCTEND(const string &thisLine) {
 
         return false;
     }
-
-    unsigned rollBack = stoul(match[1], NULL, 10);
-    unsigned readOnly = stoul(match[2], NULL, 10);
 
     if (!mOptions->html()) {
         *mOfs << setw(MAXLINENUMBER) << mLineNumber << ' '

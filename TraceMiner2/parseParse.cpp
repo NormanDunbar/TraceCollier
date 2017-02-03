@@ -27,6 +27,11 @@
  */
 
 #include "tmtracefile.h"
+#include "gnu.h"
+
+#ifndef USE_REGEX
+    #include "utilities.h"
+#endif
 
 /** @brief Parses a "PARSE" line.
  *
@@ -46,13 +51,32 @@ bool tmTraceFile::parsePARSE(const string &thisLine) {
     }
 
     // PARSE #5924310096:c=0,e=28,p=0,cr=0,cu=0,mis=0,r=0,dep=0,og=4,plh=1388734953,tim=526735705337
+    string cursorID = "";
+    unsigned depth = 0;
+    bool matchOk = true;
+
+#ifdef USE_REGEX
     regex reg("PARSE\\s(#\\d+).*?dep=(\\d+).*");
     smatch match;
 
     // Extract the cursorID, the length and the depth.
-    if (!regex_match(thisLine, match, reg)) {
+    if (regex_match(thisLine, match, reg)) {
+        cursorID = match[1];
+        depth = stoul(match[2], NULL, 10);
+    } else {
+        matchOk = false;
+    }
+#else
+    cursorID = getCursor(thisLine, &matchOk);
+    if (matchOk) {
+        depth = getDigits(thisLine, "dep=", &matchOk);
+    }
+#endif  // USE_REGEX
+
+    // Did it all work?
+    if (!matchOk) {
         stringstream s;
-        s << "parsePARSE(): Cannot match regex against PARSE # at line: "
+        s << "parsePARSE(): Cannot match against PARSE at line: "
           <<  mLineNumber << "." << endl;
         cerr << s.str();
 
@@ -63,18 +87,6 @@ bool tmTraceFile::parsePARSE(const string &thisLine) {
 
         return false;
     }
-
-    // Found it!
-    // Extract the goodies! We definitely have all three matches.
-    // Match[0] = the whole line!
-    // Match[1] = "#12345678"
-    // Match[2] = "0"
-
-    // No validation necessary, they are digits etc, as required.
-
-    // The SQL starts on the following line, not this one!
-    string cursorID = match[1];
-    unsigned depth = stoul(match[2], NULL, 10);
 
     // We only care about user level SQL, so only depth 0.
     if (depth) {

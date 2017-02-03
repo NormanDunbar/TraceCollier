@@ -27,6 +27,12 @@
  */
 
 #include "tmtracefile.h"
+#include "gnu.h"
+
+#ifndef USE_REGEX
+    #include "utilities.h"
+#endif
+
 
 /** @brief Parses a "PARSING IN CURSOR" line.
  *
@@ -50,34 +56,56 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
     }
 
     // PARSING IN CURSOR #4572676384 len=229 dep=1 ...
-    regex reg("PARSING IN CURSOR\\s(#\\d+)\\slen=(\\d+)\\sdep=(\\d+).*?oct=(\\d+).*");
-    smatch match;
 
-    stringstream ss;
-
-    // Extract the cursorID, the length, recursion depth and command type.
-    if (!regex_match(thisLine, match, reg)) {
-        cerr << "parsePARSING(): Cannot match regex against PARSING IN CURSOR at line: "
-             <<  mLineNumber << "." << endl;
-        return false;
-    }
-
-    // Found it!
-    // Extract the goodies! We definitely have all three matches.
-    // Match[0] = "#12345678 len=123 dep=0 ... oct=3"
-    // Match[1] = "#12345678"
-    // Match[2] = "123"
-    // Match[3] = "0"
-    // Match[4] = "3"
-
-    // No validation necessary, they are digits etc, as required.
+    bool matchOk = true;
+    string cursorID = "";
+    unsigned sqlLength = 0;
+    unsigned depth = 0;
+    unsigned commandType = 0;
 
     // The SQL starts on the following line, not this one!
     unsigned sqlLine = mLineNumber + 1;
-    string cursorID = match[1];
-    unsigned sqlLength = stoul(match[2], NULL, 10);
-    unsigned depth = stoul(match[3], NULL, 10);
-    unsigned commandType = stoul(match[4], NULL, 10);
+
+#ifdef USE_REGEX
+    regex reg("PARSING IN CURSOR\\s(#\\d+)\\slen=(\\d+)\\sdep=(\\d+).*?oct=(\\d+).*");
+    smatch match;
+
+    // Extract the cursorID, the length, recursion depth and command type.
+    if (regex_match(thisLine, match, reg)) {
+        cursorID = match[1];
+        sqlLength = stoul(match[2], NULL, 10);
+        depth = stoul(match[3], NULL, 10);
+        commandType = stoul(match[4], NULL, 10);
+    } else {
+        matchOk = false;
+    }
+#else
+    cursorID = getCursor(thisLine, &matchOk);
+    if (matchOk) {
+        sqlLength = getDigits(thisLine, "len=", &matchOk);
+        if (matchOk) {
+            depth = getDigits(thisLine, "dep=", &matchOk);
+            if (matchOk) {
+                commandType = getDigits(thisLine, "oct=", &matchOk);
+            }
+        }
+    }
+#endif // USE_REGEX
+
+    // Did it work?
+    if (!matchOk) {
+        stringstream s;
+        s << "parsePARSING(): Cannot match against PARSING IN CURSOR at line: "
+          <<  mLineNumber << "." << endl;
+        cerr << s.str();
+
+        if (mOptions->verbose()) {
+            *mDbg << s.str() << endl
+                  << "parsePARSING(): Exit." << endl;
+        }
+
+        return false;
+    }
 
     // We only care about user level SQL so depth 0 only gets saved away.
     // This does mean that SQL executed in a PL/SQL call is ignored though.
@@ -115,6 +143,7 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
 
     // Extract the SQL Text into a stream. This handles end of line for us.
     string aLine;
+    stringstream ss;
 
     while (readTraceLine(&aLine)) {
         if (aLine.substr(0, 11) == "END OF STMT") {

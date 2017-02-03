@@ -47,7 +47,7 @@ string cssText =
     + "table {" + eol
     + "    border-collapse: collapse;" + eol
     + "    background: beige;" + eol
-    + "    font-family: courier-new,lucida-console,mono;" + eol
+    + "    font-family: \"courier new\",\"lucida console\",mono;" + eol
     + "    font-size: smaller;" + eol
     + eol
     + "    /* If \"fixed\" is not used, the widths are ignored. Sigh */" + eol

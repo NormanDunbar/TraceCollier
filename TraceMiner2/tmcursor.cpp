@@ -168,7 +168,7 @@ bool tmCursor::buildBindMap(const string &sql) {
 
         // Tell the world.
         cout << "    Bind: " << bindID
-             << " Name: '" << bindName
+             << " Name: " << bindName
              << " created." << endl;
 
         // An iterator for the insert into the bind map. AKA where are we?

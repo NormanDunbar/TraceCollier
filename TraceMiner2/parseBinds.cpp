@@ -26,9 +26,16 @@
  * @brief Implementation file for the tmTraceFile.parseBINDS() function.
  */
 
-#include "tmtracefile.h"
 #include <algorithm>
 using std::find;
+
+#include "tmtracefile.h"
+#include "gnu.h"
+
+#ifndef USE_REGEX
+    #include "utilities.h"
+#endif
+
 
 /** @brief Parses a "BINDS" line.
  *
@@ -49,13 +56,26 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
     }
 
     // BINDS #5923197424:
+    bool matchOK = true;
+    string cursorID = "";
+
+#ifdef USE_REGEX
     regex reg("BINDS\\s(#\\d+):");
     smatch match;
 
     // Extract the cursorID.
-    if (!regex_match(thisLine, match, reg)) {
+    if (regex_match(thisLine, match, reg)) {
+            cursorID = match[1];
+    } else {
+        matchOK = false;
+    }
+#else
+    cursorID = getCursor(thisLine, &matchOK);
+#endif  // USE_REGEX
+
+    if (!matchOK) {
         stringstream s;
-        s << "parseBINDS(): Cannot match regex against BINDS # at line: "
+        s << "parseBINDS(): Cannot match against BINDS # at line: "
           <<  mLineNumber << "." << endl;
         cerr << s.str();
 
@@ -67,7 +87,6 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
         return false;
     }
 
-    string cursorID = match[1];
 
     // Find the cursor for this exec. If it's not there
     // then it's not a depth=0 cursor.

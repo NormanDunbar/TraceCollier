@@ -29,7 +29,6 @@
 #include "tmtracefile.h"
 
 
-
 /** @brief Parses a "PARSE ERROR" line.
  *
  * @param thisLine const string&. The trace line with "PARSE ERROR" in.
@@ -40,7 +39,7 @@
  */
 bool tmTraceFile::parsePARSEERROR(const string &thisLine) {
 
-    // Write the replaced SQL to the report file.
+    // Write the broken line to the report file.
     if (mOptions->html()) {
         *mOfs << setw(MAXLINENUMBER) << mLineNumber << ' '
               << setw(MAXLINENUMBER) << ' ' << ' '

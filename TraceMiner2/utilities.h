@@ -61,5 +61,7 @@ bool fileExists(const string &fullPath);        /**< Returns true if a given fil
 bool createCSSFile(const string &fullPath);     /**< Creates the default CSS file. Returns true if ok, False otherwise. */
 bool createFaviconFile(const string &fullPath); /**< Creates the favicon.ico file. Returns true if ok, False otherwise. */
 
+string getCursor(const string &thisLine, bool *ok); /**< Extract a cursor id from a trace line. */
+unsigned getDigits(const string &thisLine, const string &lookFor, bool *ok); /**< Extract a number from a trace line. */
 
 #endif // UTILITIES_H

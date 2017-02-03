@@ -27,7 +27,11 @@
  */
 
 #include "tmtracefile.h"
+#include "gnu.h"
 
+#ifndef USE_REGEX
+    #include "utilities.h"
+#endif
 
 
 /** @brief Parses an "ERROR" line.
@@ -45,13 +49,33 @@ bool tmTraceFile::parseERROR(const string &thisLine) {
     }
 
     // ERROR #275452960:err=31013 tim=1075688943194
+
+    string cursorID = "";
+    unsigned errorCode = 0;
+    bool matchOk = true;
+
+#ifdef USE_REGEX
     regex reg("ERROR\\s(#\\d+):err=(\\d+).*");
     smatch match;
 
     // Extract the cursorID and error code.
-    if (!regex_match(thisLine, match, reg)) {
+    if (regex_match(thisLine, match, reg)) {
+        cursorID = match[1];
+        errorCode = stoul(match[2], NULL, 10);
+    } else {
+        matchOk = false;
+    }
+#else
+    cursorID = getCursor(thisLine, &matchOk);
+    if (matchOk) {
+        errorCode = getDigits(thisLine, "err=", &matchOk);
+    }
+#endif  // USE_REGEX
+
+    // Did it all work?
+    if (!matchOk) {
         stringstream s;
-        s << "parseERROR(): Cannot match regex against ERROR at line: "
+        s << "parseERROR(): Cannot match against ERROR at line: "
           <<  mLineNumber << "." << endl;
         cerr << s.str();
 
@@ -63,8 +87,6 @@ bool tmTraceFile::parseERROR(const string &thisLine) {
         return false;
     }
 
-    string cursorID = match[1];
-    unsigned errorCode = stoul(match[2], NULL, 10);
 
     // This could be an error in recursive SQL, but check if we have
     // a cursor for the cursorID which would indicate user level SQL.

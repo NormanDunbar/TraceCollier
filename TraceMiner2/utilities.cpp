@@ -24,7 +24,8 @@
 
 #include "utilities.h"
 #include "css.h"
-#include "favicon.h"
+
+extern string favIcon;
 
 // NOTE: None of these are case insensitive, it's up to the caller to
 //       ensure correct case is used. Just a thought!
@@ -211,3 +212,61 @@ bool createFaviconFile(const string &fullPath) {
         return false;
     }
 }
+
+
+/** @brief Extracts a cursor ID from a string.
+ *
+ * @param thisLine const string&. The trace line containing the cursor id.
+ * @return string. The extracted cursor ID. Empty for not found.
+ *
+ */
+string getCursor(const string &thisLine, bool *ok) {
+
+    unsigned pos = thisLine.find("#");
+
+    // Everything EXCEPT the PARSING IN CURSOR line has a colon
+    // at the end of the cursor id. PARSING IN has a space.
+    unsigned colon = thisLine.find(":", pos);
+    if (colon == string::npos) {
+        colon = thisLine.find(" ", pos);
+    }
+
+    *ok = true;
+
+    // Extract the cursor ID, including the #.
+    if (pos != string::npos) {
+         return thisLine.substr(pos, colon - pos);
+    } else {
+        *ok = false;
+        return "";
+    }
+}
+
+/** @brief Extracts numeric text from a string.
+ *
+ * @param thisLine const string&. The trace line containing the numeric data.
+ * @param lookFor const string&. The text immediately prior to the numeric characters.
+ * @param ok bool*. Indicator to the success or failure of the extraction. True is good.
+ * @return unsigned. The extracted number. Zero if nothing extracted.
+ *
+ */
+unsigned getDigits(const string &thisLine, const string &lookFor, bool *ok) {
+
+    *ok = true;     // Assume all ok.
+
+    unsigned pos = thisLine.find(lookFor);
+
+    if (pos != string::npos) {
+        try {
+            pos += lookFor.length();
+            return stoul(thisLine.substr(pos), NULL, 10);
+        } catch (...) {
+            ;   //NULL statement.
+        }
+    }
+
+    // It didn't work.
+    *ok = false;
+    return 0;
+}
+
