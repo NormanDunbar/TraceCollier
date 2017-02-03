@@ -23,6 +23,12 @@
  */
 
 #include "tmcursor.h"
+#include "gnu.h"
+#undef USE_REGEX
+
+#ifndef USE_REGEX
+#include "utilities.h"
+#endif // USE_REGEX
 
 /** @file tmcursor.cpp
  * @brief Implementation file for the tmCursor object.
@@ -148,20 +154,36 @@ bool tmCursor::buildBindMap(const string &sql) {
     string thisSQL = sql;
     string bindName;
 
-    // Binds are a ":" followed by one or more underscors,
+#ifdef USE_REGEX
+    // Binds are a ":" followed by one or more underscores,
     // letters and/or digits. Double quotes optional.
     // This regex finds valid binds.
     regex reg("(:\"?\\w+\"?)");
     smatch match;
+#endif // USE_REGEX
 
     // Oracle numbers binds from 0, in the order that
     // they appear in the SQL.
     unsigned bindID = 0;
+    unsigned startPos = 0;
 
     // Scan the SQL looking for binds.
-    while (regex_search(thisSQL, match, reg)) {
+    while (true) {
+
+#ifdef USE_REGEX
+    if (!regex_search(thisSQL, match, reg)) {
+        break;
+    }
         // extract the bind name, including the colon.
         bindName = match[1];
+#else
+        cout << "ENTRY: bindName: [" << bindName << "]. StartPos = " << startPos << endl;
+        bindName = extractNextBind(thisSQL, startPos, &startPos);
+        cout << "EXIT: bindName: [" << bindName << "]. StartPos = " << startPos << endl;
+        if (bindName.empty()) {
+            break;
+        }
+#endif // USE_REGEX
 
         // Save the Bind details.
         tmBind *thisBind = new tmBind(bindID, bindName);
@@ -199,9 +221,12 @@ bool tmCursor::buildBindMap(const string &sql) {
         }
 
         // Search the rest of the SQL text next time around.
+#ifdef USE_REGEX
         thisSQL = match.suffix();
+#endif  // USE_REGEX
+
         bindID++;
-    }
+    }   // end while
 
     mBindCount = bindID;
 

@@ -194,15 +194,14 @@ bool tmTraceFile::parseTraceFile()
         if (matchOk) {
             // Extract the command from the first grouping.
             chunk = match[1];
-            cout << "REGEX: Chunk '" << chunk << "'" << endl;
         }
 #else
         // We can't use REGEX, so we have to do this the hard way!
         // Which means it complicates the order below!
         matchOk = true;
         chunk = traceLine.substr(0, 7);
-        cout << "SUBSTR: Chunk '" << chunk << "'" << endl;
 #endif // USE_REGEX
+
         if (matchOk) {
 
             // PARSING IN CURSOR #cursorID

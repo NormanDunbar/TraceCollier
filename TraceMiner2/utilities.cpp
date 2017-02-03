@@ -270,3 +270,63 @@ unsigned getDigits(const string &thisLine, const string &lookFor, bool *ok) {
     return 0;
 }
 
+
+/** @brief
+ *
+ * @param thisSQL const string&. The (remaining) text of the SQL Statement.
+ * @param startPos unsigned. Where to start searching.
+ * @param nextPos unsigned*. Where to start searching next time.
+ * @return string.
+ *
+ */
+string extractNextBind(const string &thisSQL, const unsigned &startPos, unsigned *nextPos) {
+
+    unsigned colon;
+    unsigned pos = startPos;
+    string result = "";
+
+    // Yup, there's a GOTO! Shock! Horror!
+scanColon:
+
+    *** THIS ALWAYS FINDS A COLON AT POSITION 0. ***
+
+    cout << "Scanning: [" << thisSQL << "]" << endl;
+    colon = thisSQL.find(':', pos);
+    if (colon == string::npos) {
+        // No (more) colons.
+        *nextPos = 0;
+        return result;
+    }
+
+    cout << "Found colon at " << pos << endl;
+
+    // PL/SQL assignment?
+    if (thisSQL.at(colon + 1) == '=') {
+        pos = colon + 2;
+        cout << "Found := at " << pos << endl;
+        goto scanColon;;
+    }
+
+    // We only get here when we found a colon, not followed by '='.
+    result.push_back(':');
+    pos++;
+
+    char cc = thisSQL.at(pos);
+    while (cc != ' ' &&
+           cc != ':' &&
+           cc != ',' &&
+           cc != ')' &&
+           cc != ';')
+    {
+        result.push_back(cc);
+        cout << ".... ["  << result << "]" << endl;
+        cc = thisSQL.at(++pos);
+            cout << "Pos = " << pos << endl;
+
+    }
+
+    // Indicate where we start searching next time.
+    *nextPos = ++pos;
+
+    return result;
+}
