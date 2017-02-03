@@ -23,7 +23,10 @@
  */
 
 #include "tmtracefile.h"
+#include "gnu.h"
+
 #include "utilities.h"
+
 
 /** @file tmtracefile.cpp
  * @brief Implementation file for the tmTraceFile object.
@@ -154,10 +157,14 @@ bool tmTraceFile::parseTraceFile()
 {
     // Process a trace file.
     string traceLine;
+    string chunk;
+    bool matchOk = true;
 
+#ifdef USE_REGEX
     // Regex to extract the first command on the line.
     regex reg("(.*?)\\s#\\d+.*");
     smatch match;
+#endif // USE_REGEX
 
     // The main parsing loop. What kind of line have we
     // read? Deal with it accordingly. If a parseBINDS() call
@@ -182,13 +189,25 @@ bool tmTraceFile::parseTraceFile()
             continue;
         }
 
-        if (regex_match(traceLine, match, reg)) {
-
+#ifdef USE_REGEX
+        matchOk = regex_match(traceLine, match, reg);
+        if (matchOk) {
             // Extract the command from the first grouping.
-            string chunk = match[1];
+            chunk = match[1];
+            cout << "REGEX: Chunk '" << chunk << "'" << endl;
+        }
+#else
+        // We can't use REGEX, so we have to do this the hard way!
+        // Which means it complicates the order below!
+        matchOk = true;
+        chunk = traceLine.substr(0, 7);
+        cout << "SUBSTR: Chunk '" << chunk << "'" << endl;
+#endif // USE_REGEX
+        if (matchOk) {
 
             // PARSING IN CURSOR #cursorID
-            if (chunk == "PARSING IN CURSOR") {
+            if (chunk == "PARSING IN CURSOR" ||
+                chunk == "PARSING") {
                 if (!parsePARSING(traceLine)) {
                     return false;
                 }
@@ -196,12 +215,14 @@ bool tmTraceFile::parseTraceFile()
             }
 
             // PARSE ERROR
-            if (chunk == "PARSE ERROR") {
+            if (chunk == "PARSE ERROR" ||
+                chunk == "PARSE E") {
                 continue;
             }
 
             // PARSE #cursorID
-            if (chunk == "PARSE") {
+            if (chunk == "PARSE" ||
+                chunk == "PARSE #") {
                 if (!parsePARSE(traceLine)) {
                     return false;
                 }
@@ -209,7 +230,8 @@ bool tmTraceFile::parseTraceFile()
             }
 
             // BINDS #cursorID
-            if (chunk == "BINDS") {
+            if (chunk == "BINDS" ||
+                chunk == "BINDS #") {
                 if (!parseBINDS(traceLine)) {
                     return false;
                 }
@@ -217,17 +239,20 @@ bool tmTraceFile::parseTraceFile()
             }
 
             // CLOSE #cursorID
-            if (chunk == "CLOSE") {
+            if (chunk == "CLOSE" ||
+                chunk == "CLOSE #") {
                 // At present, we no longer care about CLOSEing a cursor.
                 continue;
             }
 
             // ERROR #cursorID
-            if (chunk == "ERROR") {
+            if (chunk == "ERROR" ||
+                chunk == "ERROR #") {
                 continue;
             }
 
-            if (chunk == "EXEC") {
+            if (chunk == "EXEC" ||
+                chunk.substr(0, 6) == "EXEC #") {
                 if (!parseEXEC(traceLine)) {
                     return false;
                 }
