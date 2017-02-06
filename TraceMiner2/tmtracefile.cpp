@@ -530,6 +530,7 @@ bool tmTraceFile::openReportFile()
 
     *mOfs << setw(MAXLINENUMBER) << "EXEC Line" << ' '
           << setw(MAXLINENUMBER) << "PARSE Line" << ' '
+          << setw(MAXLINENUMBER) << "BINDS Line" << ' '
           << setw(MAXLINENUMBER) << "SQL Line" << ' '
           << "SQL Text"
           << endl
@@ -558,6 +559,7 @@ bool tmTraceFile::openReportFile()
     *mOfs << "<table style=\"width:95%\";>" << endl
           << "<tr><th style=\"width:6%\";>EXEC Line</th>"
           << "<th style=\"width:6%\";>PARSE Line</th>"
+          << "<th style=\"width:6%\";>BINDS# Line</th>"
           << "<th style=\"width:6%\";>SQL Line</th>"
           << "<th>SQL Text</th></tr>"
           << endl;

@@ -24,7 +24,6 @@
 
 #include "tmcursor.h"
 #include "gnu.h"
-#undef USE_REGEX
 
 #ifndef USE_REGEX
 #include "utilities.h"
@@ -70,7 +69,9 @@ tmCursor::~tmCursor() {
  * when a cursor is closed and reused.
  */
 void tmCursor::cleanUp() {
+
     for (map<unsigned, tmBind *>::iterator i = mBinds.begin(); i != mBinds.end(); ++i) {
+        // Dump the bind details for debugging.
         //cerr << *(i->second);
         mBinds.erase(i);
         delete i->second;
@@ -94,6 +95,7 @@ ostream &operator<<(ostream &out, const tmCursor &cursor) {
         << "SQL Text Length: " << cursor.mSQLSize << endl
         << "SQL Parse Line: " << cursor.mSQLParseLine << endl
         << "Bind Count: " << cursor.mBindCount << endl
+        << "Final \"BINDS " << cursor.mCursorId << ":\" Line for this cursor: " << cursor.mBindsLine << endl
         << "Command Type: " << cursor.mCommandType << endl
         << "SQL Text = [" << cursor.mSQLText << "]" << endl;
 
@@ -128,6 +130,7 @@ void tmCursor::setSQLText(string val) {
 
     // Build the binds list.
     buildBindMap(val);
+
 }
 
 
@@ -152,7 +155,7 @@ bool tmCursor::buildBindMap(const string &sql) {
     // Now, hunt down and extract any binds.
     // Beware, ":=" doesn't constitute a bind variable!
     string thisSQL = sql;
-    string bindName;
+    string bindName = "";
 
 #ifdef USE_REGEX
     // Binds are a ":" followed by one or more underscores,
@@ -160,12 +163,13 @@ bool tmCursor::buildBindMap(const string &sql) {
     // This regex finds valid binds.
     regex reg("(:\"?\\w+\"?)");
     smatch match;
+#else
+    unsigned colonPos = 0;
 #endif // USE_REGEX
 
     // Oracle numbers binds from 0, in the order that
     // they appear in the SQL.
     unsigned bindID = 0;
-    unsigned startPos = 0;
 
     // Scan the SQL looking for binds.
     while (true) {
@@ -177,11 +181,28 @@ bool tmCursor::buildBindMap(const string &sql) {
         // extract the bind name, including the colon.
         bindName = match[1];
 #else
-        cout << "ENTRY: bindName: [" << bindName << "]. StartPos = " << startPos << endl;
-        bindName = extractNextBind(thisSQL, startPos, &startPos);
-        cout << "EXIT: bindName: [" << bindName << "]. StartPos = " << startPos << endl;
-        if (bindName.empty()) {
+        // All of this code *should* have been in the extractNextBind function,
+        // but for some unknown, and undeterminable reason, looking for a colon
+        // in the string, passed as a parameter (reference, pointer etc) "found"
+        // one at the position 0, and at the position of EVERY space thereafter.
+        // Weird! Hence, I must look for the colon here, and extract the name
+        // in the function. Windows and Linux by the way.
+        colonPos = thisSQL.find(':', colonPos + bindName.length());
+        if (colonPos == string::npos) {
+            // No more colons anymore!
             break;
+        }
+
+        // Don't consider PL/SQL assignment as a bind variable.
+        if (thisSQL.at(colonPos + 1) == '=') {
+            colonPos += 2;
+            continue;
+        }
+
+        // Ok, extract a bind variable name.
+        if (!extractBindName(thisSQL, colonPos, bindName)) {
+            cerr << "buildBindMap(): extractBindName() failed." << endl;
+            return false;
         }
 #endif // USE_REGEX
 

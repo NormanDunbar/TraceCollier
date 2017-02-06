@@ -135,6 +135,12 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
         unsigned bindPos = sqlText.find(i->second->bindName());
         if (bindPos != string::npos) {
             sqlText.replace(bindPos, i->second->bindName().length(), i->second->bindValue());
+            if (mOptions->verbose()) {
+                *mDbg << "parseEXEC(): Cursor: " << cursorID << ": Bind #"
+                      << i->second->bindId() << ": Replacing: ["
+                      << i->second->bindName() << "] with ["
+                      << i->second->bindValue() << ']' << endl;
+            }
         } else {
             // Hmm. This should never happen!
             stringstream s;
@@ -155,12 +161,14 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
     if (!mOptions->html()) {
         *mOfs << setw(MAXLINENUMBER) << mLineNumber << ' '
               << setw(MAXLINENUMBER) << thisCursor->sqlParseLine() << ' '
+              << setw(MAXLINENUMBER) << thisCursor->bindsLine() << ' '
               << setw(MAXLINENUMBER) << thisCursor->sqlLineNumber() << ' '
               << sqlText << ' '
               << endl;
     } else {
         *mOfs << "<tr><td class=\"number\">" << mLineNumber << "</td>"
               << "<td class=\"number\">" << thisCursor->sqlParseLine() << "</td>"
+              << "<td class=\"number\">" << thisCursor->bindsLine() << "</td>"
               << "<td class=\"number\">" << thisCursor->sqlLineNumber() << "</td>"
               << "<td class=\"text\">" << sqlText << "</td></tr>"
               << endl;

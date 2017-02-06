@@ -127,8 +127,12 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
         return false;
     }
 
+    // The cursor should have binds, and we are currently looking at
+    // the BINDS #cursorID: line for it, so log the line number.
+    thisCursor->setBindsLine(mLineNumber);
+
     // Ok, now we have the right stuff ready, lets read
-    // every line relating to the binds for this cursor
+    // *every* line relating to *all* the binds for this cursor
     // into memory for later processing.
     // We start reading from the line " Bind#0" and stop
     // after the first non-bind related line. (EXEC usually!)
@@ -158,10 +162,13 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
             continue;
         }
 
-        // Finished yet?
+        // Finished yet? So far, all I've ever found that
+        // terminates a bind section is the EXEC for the cursor, or
+        // in PL/SQL cases, the "=====...====" line for the following
+        // recursive SQL statement.
         string prefix = bindLine.substr(0, 6);
         if (prefix == "EXEC #" ||
-            prefix == "  No o") {
+            prefix == "======") {
             break;
         }
 
@@ -243,6 +250,14 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
             }
 
             return false;
+        }
+
+        // We found the bind.
+        if (mOptions->verbose()) {
+            *mDbg << "parseBINDS(): Cursor: " << thisCursor->cursorId() << ": "
+                  << "Bind #" << thisBind->bindId() << ": BindName: ["
+                  << thisBind->bindName() << "] has value ["
+                  << thisBind->bindValue() << ']' << endl;
         }
     }
 

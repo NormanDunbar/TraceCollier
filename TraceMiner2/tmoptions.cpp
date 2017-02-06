@@ -36,7 +36,7 @@ tmOptions::tmOptions()
 {
     mHelp = false;
     mVerbose = false;
-    mHtml = false;
+    mHtml = true;
     mTraceFile = "";
     mReportFile = "";
     mDebugFile = "";
@@ -86,10 +86,10 @@ bool tmOptions::parseArgs(int argc, char *argv[]) {
             continue;
         }
 
-        // Ok, try HTML instead ...
-        if ((thisArg == "--html") ||
-            (thisArg == "-m")) {
-            mHtml = true;
+        // Ok, try TEXT instead ...
+        if ((thisArg == "--text") ||
+            (thisArg == "-t")) {
+            mHtml = false;
             continue;
         }
 
@@ -171,8 +171,8 @@ void tmOptions::usage() {
     cerr << "'-v' or '--verbose' Turn on verbose mode." << endl;
     cerr << "Lots of text is written to the debugfile." << endl << endl;
 
-    cerr << "'-m' or '--html' Turn on HTML mode. The report file will be in HTML format." << endl;
-    cerr << "The default is for the report to be in plain text format." << endl << endl;
+    cerr << "'-t' or '--text' Turn off HTML mode. The report file will be in TEXT format." << endl;
+    cerr << "The default is for the report to be in HTML format." << endl << endl;
 
     cerr << "'-?'. '-h' or '--help' Displays this help, and exits." << endl << endl;
 

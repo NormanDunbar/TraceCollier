@@ -75,7 +75,7 @@ class tmOptions
         string mDebugFile;                  /**< Name of the debug information file. */
         string mCssFileName;                /**< Full path & name of the actual CSS file. */
 
-        string mReportExtension = "log";    /**< Default extension for the text report file. */
+        string mReportExtension = "txt";    /**< Default extension for the text report file. */
         string mHtmlExtension = "html";     /**< Default extension for the HTML report file. */
         string mDebugExtension = "dbg";     /**< Default extension for the debug information file. */
 };

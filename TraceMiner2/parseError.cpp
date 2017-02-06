@@ -99,9 +99,11 @@ bool tmTraceFile::parseERROR(const string &thisLine) {
             *mOfs << setw(MAXLINENUMBER) << mLineNumber << ' '
                   << setw(MAXLINENUMBER) << ' ' << ' '
                   << setw(MAXLINENUMBER) << ' ' << ' '
+                  << setw(MAXLINENUMBER) << ' ' << ' '
                   << " ERROR: ORA-" << errorCode << endl;
         } else {
             *mOfs << "<tr><td class=\"number\">" << mLineNumber << "</td>"
+                  << "<td>" << "&nbsp;" << "</td>"
                   << "<td>" << "&nbsp;" << "</td>"
                   << "<td>" << "&nbsp;" << "</td><td class=\"text\">"
                   << " ERROR: ORA-" << errorCode

@@ -274,59 +274,50 @@ unsigned getDigits(const string &thisLine, const string &lookFor, bool *ok) {
 /** @brief
  *
  * @param thisSQL const string&. The (remaining) text of the SQL Statement.
- * @param startPos unsigned. Where to start searching.
- * @param nextPos unsigned*. Where to start searching next time.
+ * @param startPos const unsigned&. Where to start extracting.
+ * @param bindName string&. Somewhere to receive the extracted bind name.
  * @return string.
  *
  */
-string extractNextBind(const string &thisSQL, const unsigned &startPos, unsigned *nextPos) {
+bool extractBindName(const string &thisSQL, const unsigned &colonPos, string &bindName) {
 
-    unsigned colon;
-    unsigned pos = startPos;
-    string result = "";
+    bindName = "";
 
-    // Yup, there's a GOTO! Shock! Horror!
-scanColon:
-
-    *** THIS ALWAYS FINDS A COLON AT POSITION 0. ***
-
-    cout << "Scanning: [" << thisSQL << "]" << endl;
-    colon = thisSQL.find(':', pos);
-    if (colon == string::npos) {
-        // No (more) colons.
-        *nextPos = 0;
-        return result;
+    // We must be looking at a colon.
+    if (thisSQL.at(colonPos) != ':') {
+        cerr << "extractBindName(): Not looking at a colon. Cannot extract bind name." << endl;
+        return false;
     }
 
-    cout << "Found colon at " << pos << endl;
-
-    // PL/SQL assignment?
-    if (thisSQL.at(colon + 1) == '=') {
-        pos = colon + 2;
-        cout << "Found := at " << pos << endl;
-        goto scanColon;;
+    // If we have a quoted name, scan for the close quote.
+    if (thisSQL.at(colonPos + 1) == '"') {
+        // We have a shortcut!
+        unsigned closeQuote = thisSQL.find('"', colonPos + 2);
+        if (closeQuote != string::npos) {
+            bindName = thisSQL.substr(colonPos, closeQuote - colonPos + 1);
+            return true;
+        } else {
+            cerr << "extractBindName(): Malformed SQL. Missing \" in [" << thisSQL << "]." << endl;
+            return false;
+        }
     }
 
-    // We only get here when we found a colon, not followed by '='.
-    result.push_back(':');
-    pos++;
-
+    // No shortcut, do it the hard way.
+    // Stash the colon first.
+    unsigned pos = colonPos;
+    bindName.push_back(thisSQL.at(pos++));
     char cc = thisSQL.at(pos);
+
+    // Lop around, until we find something  that's not allowed in a bind name.
     while (cc != ' ' &&
            cc != ':' &&
            cc != ',' &&
            cc != ')' &&
            cc != ';')
     {
-        result.push_back(cc);
-        cout << ".... ["  << result << "]" << endl;
+        bindName.push_back(cc);
         cc = thisSQL.at(++pos);
-            cout << "Pos = " << pos << endl;
-
     }
 
-    // Indicate where we start searching next time.
-    *nextPos = ++pos;
-
-    return result;
+    return true;
 }
