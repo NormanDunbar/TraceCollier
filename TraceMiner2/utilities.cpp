@@ -52,9 +52,11 @@ string fileExtension(const string &fullPath) {
 
     string::size_type dot = fullPath.rfind('.', howBig);
     if (dot != string::npos) {
+        // We have a dot, so we have an extension.
         return(fullPath.substr(dot + 1, howBig - dot));
     }
 
+    // No dot, no extension.
     return "";
 }
 
@@ -62,12 +64,20 @@ string fileExtension(const string &fullPath) {
 // Internal use only. Splits a file into a path and full file name, with extension.
 // Works on Windows or Unix.
 static string splitFile(const string &fullPath, int whichPart) {
+    // Do we have a directory separator?
     size_t found = fullPath.find_last_of("/\\");
 
+    // Return path or filename as requested.
     if (whichPart == returnFilePath)
+        // If we have a separartor, no worries,
+        // if not, return current directory.
+    if (found != string::npos) {
         return fullPath.substr(0, found);
-    else
+    } else {
+        return "." + directorySeparator;
+    } else {
         return fullPath.substr(found + 1);
+    }
 }
 
 
