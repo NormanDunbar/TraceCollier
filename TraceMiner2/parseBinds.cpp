@@ -322,10 +322,10 @@ bool tmTraceFile::extractBindData(const vector<string>::iterator start, const ve
     vector<string>::const_iterator valueStartsHere = stop;
 
     // Flags.
-    unsigned oacdtyPos = 0;
-    unsigned avlPos = 0;
-    unsigned noOacdefPos = 0;
-    unsigned valuePos = 0;
+    string::size_type oacdtyPos = 0;
+    string::size_type avlPos = 0;
+    string::size_type noOacdefPos = 0;
+    string::size_type valuePos = 0;
 
 
     // Parse the bindData vector for the data we want.

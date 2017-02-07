@@ -50,7 +50,7 @@ string fileExtension(const string &fullPath) {
 
     size_t howBig = fullPath.length();
 
-    size_t dot = fullPath.rfind('.', howBig);
+    string::size_type dot = fullPath.rfind('.', howBig);
     if (dot != string::npos) {
         return(fullPath.substr(dot + 1, howBig - dot));
     }
@@ -205,10 +205,10 @@ bool createFaviconFile(const string &fullPath) {
         }
         oFav->close();
         delete oFav;
-        cout << "TraceMiner2: CSS file [" << fullPath << "] created ok." << endl;
+        cout << "TraceMiner2: Icon file [" << fullPath << "] created ok." << endl;
         return true;
     } else {
-        cerr << "TraceMiner2: CSS file [" << fullPath << "] failed to create." << endl;
+        cerr << "TraceMiner2: Icon file [" << fullPath << "] failed to create." << endl;
         return false;
     }
 }
@@ -222,11 +222,11 @@ bool createFaviconFile(const string &fullPath) {
  */
 string getCursor(const string &thisLine, bool *ok) {
 
-    unsigned pos = thisLine.find("#");
+    string::size_type pos = thisLine.find("#");
 
     // Everything EXCEPT the PARSING IN CURSOR line has a colon
     // at the end of the cursor id. PARSING IN has a space.
-    unsigned colon = thisLine.find(":", pos);
+    string::size_type colon = thisLine.find(":", pos);
     if (colon == string::npos) {
         colon = thisLine.find(" ", pos);
     }
@@ -279,7 +279,7 @@ unsigned getDigits(const string &thisLine, const string &lookFor, bool *ok) {
  * @return string.
  *
  */
-bool extractBindName(const string &thisSQL, const unsigned &colonPos, string &bindName) {
+bool extractBindName(const string &thisSQL, const string::size_type &colonPos, string &bindName) {
 
     bindName = "";
 
@@ -292,7 +292,7 @@ bool extractBindName(const string &thisSQL, const unsigned &colonPos, string &bi
     // If we have a quoted name, scan for the close quote.
     if (thisSQL.at(colonPos + 1) == '"') {
         // We have a shortcut!
-        unsigned closeQuote = thisSQL.find('"', colonPos + 2);
+        string::size_type closeQuote = thisSQL.find('"', colonPos + 2);
         if (closeQuote != string::npos) {
             bindName = thisSQL.substr(colonPos, closeQuote - colonPos + 1);
             return true;

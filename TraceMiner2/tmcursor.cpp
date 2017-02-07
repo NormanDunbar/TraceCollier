@@ -164,7 +164,7 @@ bool tmCursor::buildBindMap(const string &sql) {
     regex reg("(:\"?\\w+\"?)");
     smatch match;
 #else
-    unsigned colonPos = 0;
+    string::size_type colonPos = 0;
 #endif // USE_REGEX
 
     // Oracle numbers binds from 0, in the order that

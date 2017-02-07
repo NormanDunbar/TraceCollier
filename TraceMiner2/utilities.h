@@ -63,6 +63,6 @@ bool createFaviconFile(const string &fullPath); /**< Creates the favicon.ico fil
 
 string getCursor(const string &thisLine, bool *ok); /**< Extract a cursor id from a trace line. */
 unsigned getDigits(const string &thisLine, const string &lookFor, bool *ok); /**< Extract a number from a trace line. */
-bool extractBindName(const string &thisSQL, const unsigned &colonPos, string &bindName);   /**< Extract the bind variable name from a SQL Statement. */
+bool extractBindName(const string &thisSQL, const string::size_type &colonPos, string &bindName);   /**< Extract the bind variable name from a SQL Statement. */
 
 #endif // UTILITIES_H

@@ -132,7 +132,7 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
          i != binds->end();
          i++)
     {
-        unsigned bindPos = sqlText.find(i->second->bindName());
+        string::size_type bindPos = sqlText.find(i->second->bindName());
         if (bindPos != string::npos) {
             sqlText.replace(bindPos, i->second->bindName().length(), i->second->bindValue());
             if (mOptions->verbose()) {
