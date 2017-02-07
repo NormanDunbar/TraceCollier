@@ -74,6 +74,22 @@ using std::setfill;
 const int MAXLINENUMBER=10;
 const int MAXCURSORWIDTH=11+1;
 
+// Oracle Command codes. We only use COMMAND_PLSQL at the mnoment.
+const int COMMAND_INSERT = 2;
+const int COMMAND_SELECT = 3;
+const int COMMAND_UPDATE = 6;
+const int COMMAND_DELETE = 7;
+const int COMMAND_LOCK_TABLE = 26;
+const int COMMAND_COMMIT = 44;
+const int COMMAND_ROLLBACK = 45;
+const int COMMAND_SAVEPOINT = 46;
+const int COMMAND_PLSQL = 47;
+const int COMMAND_SET_TRANSACTION = 48;
+const int COMMAND_SET_ROLE = 55;
+const int COMMAND_SET_CONSTRAINTS = 90;
+const int COMMAND_CALL = 170;
+const int COMMAND_MERGE = 189;
+
 /** @brief A class representing an Oracle trace file.
  */
 class tmTraceFile
@@ -138,7 +154,7 @@ class tmTraceFile
         bool parseBindData(tmBind *thisBind, vector<string>::iterator i);       /**< Parses a bind's data lines. */
 
         // Data extraction from a vector of bind lines.
-        bool extractBindData(const vector<string>::iterator start, const vector<string>::iterator stop, tmBind *thisBind);    /**< Extracts the bind data from a vector. */
+        bool extractBindData(const vector<string>::iterator start, const vector<string>::iterator stop, tmCursor *thisCursor, tmBind *thisBind);    /**< Extracts the bind data from a vector. */
         bool extractNumber(vector<string>::const_iterator i, const unsigned equalPos, unsigned &result);  /**< Extracts a numeric value. */
         bool extractHex(vector<string>::const_iterator i, const unsigned equalPos, string &result);  /**< Extracts a hex value. */
         bool extractBindValue(vector<string>::const_iterator i, tmBind *thisBind);  /**< Extracts a string representing a bind's actual value. */

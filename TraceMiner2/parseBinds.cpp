@@ -239,7 +239,7 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
 
         // Now we have a start and stop iterator into the bind data
         // for this particular bind. Extract the information we want.
-        if (!extractBindData(start_i, stop_i, thisBind)) {
+        if (!extractBindData(start_i, stop_i, thisCursor, thisBind)) {
             stringstream s;
             s << "parseBINDS(): Failed to extract bind data for" << currentBind.str() << '.' << endl;
             cerr << s.str();
@@ -274,6 +274,7 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
  *
  * @param start const vector<string>::iterator. Start of lines to scan.
  * @param stop const vector<string>::iterator. Just after the last line to scan.
+ * @param thisCursor tmCursor*. The tmCurosr object who's data we are extracting.
  * @param thisBind tmBind*. The tmBind object who's data we are extracting.
  * @return bool. Returns true for success, false otherwise.
  *
@@ -284,7 +285,7 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
  *
  * In normal use, there should be a value. However, if a bind is used more than once, then
  * the second and subsequent uses will have no bind details at all, only a single line of
- * text stating "  No oacdef for this bind" in which case we need to look up the other binds
+ * text stating "No oacdef for this bind" in which case we need to look up the other binds
  * in the map to find the value to use. Oracle (currently) guarantees that one will exists
  * and that it will have been read already as it appears in the trace file prior to the current
  * bind.
@@ -306,7 +307,7 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
  * Mxl = Maximum length, but is not reliable. It's the internal format's maximum length.
  *
  */
-bool tmTraceFile::extractBindData(const vector<string>::iterator start, const vector<string>::iterator stop, tmBind *thisBind) {
+bool tmTraceFile::extractBindData(const vector<string>::iterator start, const vector<string>::iterator stop, tmCursor *thisCursor, tmBind *thisBind) {
 
     if (mOptions->verbose()) {
         *mDbg << "extractBindData(): Entry." << endl
@@ -315,7 +316,6 @@ bool tmTraceFile::extractBindData(const vector<string>::iterator start, const ve
     }
 
     // Storage for the data we are extracting from the vector.
-    bool noOacdefFound = false;
     unsigned dataType = 0;
     unsigned averageLength = 0;
     string value = "";
@@ -353,12 +353,51 @@ bool tmTraceFile::extractBindData(const vector<string>::iterator start, const ve
                *mDbg << "extractBindData(): 'No oacdef' found." << endl;
             }
 
-            // For now, only...
-            noOacdefFound = true;
-            value = "Some Other Bind";
+            // Get the cursor's bind map.
+            map<unsigned, tmBind *> *bindMap = thisCursor->binds();
 
-            // Nothing more to do.
-            break;
+            // Lookup the desired binds. It has to be one that
+            // has come before this one, so we don't look at them all.
+            for (unsigned i = 0; i < thisBind->bindId(); i++) {
+                map<unsigned, tmBind *>::iterator bi = bindMap->find(i);
+                if (bi != bindMap->end()) {
+                    // Find the bind with the same name.
+                    if (bi->second->bindName() == thisBind->bindName()) {
+                        // Copy  the value across.
+                        thisBind->setBindValue(bi->second->bindValue());
+                        // Update the tmBind object with the data type.
+                        thisBind->setBindType(bi->second->bindType());
+
+                        if (mOptions->verbose()) {
+                            *mDbg << "extractBindData(): Bind#" << thisBind->bindId()
+                                  << " has same data as Bind#" << bi->second->bindId()
+                                  << " Bind name [" << bi->second->bindName() << "]." << endl
+                                  << "extractBindData(): Exit." << endl;
+                        }
+
+                        // We have the bind's value, we are done here.
+                        return true;
+                    }
+                }
+            }
+
+            // Hmm. We exited the loop without finding the other bind
+            // that we were looking for. Bad news time.
+
+            stringstream s;
+
+            s << "extractBindData(): Bind#" << thisBind->bindId()
+              << " is a copy of another bind variable. However"
+              << " extractBindData() was unable to find it." << endl;
+
+            cerr << s.str();
+
+            if (mOptions->verbose()) {
+                *mDbg << s.str()
+                      << "extractBindData(): Exit." << endl;
+            }
+
+            return false;
         }
 
         //----------------------------------------------------------------
@@ -442,11 +481,17 @@ bool tmTraceFile::extractBindData(const vector<string>::iterator start, const ve
     // If averageLength is zero, or, we didn't find a "value="
     // then this is most likely an OUT parameter for PL/SQL,
     // OR, a NULL value for a BIND.
-    // Just use NULL as the value for now. MAYBE we should be looking at
-    // the tmCursor::commandType() to determine which is which?
     if (valuePos == string::npos ||
         averageLength == 0) {
-            thisBind->setBindValue("NULL");
+            // Find our current cursor's Oracle Action Code.
+            if (thisCursor->commandType() != COMMAND_PLSQL) {
+                // No value= means NULL value.
+                thisBind->setBindValue("NULL");
+            } else {
+                // PL/SQL = buffer, OUT parameter etc.
+                // Use the bind variable's name as it's value.
+                thisBind->setBindValue(thisBind->bindName());
+            }
 
             if (mOptions->verbose()) {
                 *mDbg << "parseBindData(): Suspected OUT PL/SQL parameter found, or," << endl

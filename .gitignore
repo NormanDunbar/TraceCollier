@@ -44,3 +44,8 @@ TraceMiner2/doxygen/
 
 # Gnu G++ Stuff.
 bin/*
+
+#Other non-essential stuff.
+*.pdf
+*.css
+
