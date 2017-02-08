@@ -39,7 +39,7 @@
  * @return bool. Returns true if all ok. False otherwise.
  *
  * Parses a line from the trace file. The line is expected
- * to be the PARSE #cursor line.
+ * to be the PARSE \#cursor line.
  *
  * The tmCursor associated with this PARSE is found, and updated to the new
  * source file line number. Only the most recent PARSE is stored for each tmCursor.

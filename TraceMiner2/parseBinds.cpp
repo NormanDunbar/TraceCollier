@@ -43,7 +43,7 @@ using std::find;
  * @return bool. Returns true if all ok. False otherwise.
  *
  * Parses a line from the trace file. The line is expected
- * to be the BINDS #cursor line.
+ * to be the BINDS \#cursor line.
  *
  * This function extracts the values for all listed binds
  * for the given cursor. The values are used to update
@@ -274,7 +274,7 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
  *
  * @param start const vector<string>::iterator. Start of lines to scan.
  * @param stop const vector<string>::iterator. Just after the last line to scan.
- * @param thisCursor tmCursor*. The tmCurosr object who's data we are extracting.
+ * @param thisCursor tmCursor*. The tmCursor object who's data we are extracting.
  * @param thisBind tmBind*. The tmBind object who's data we are extracting.
  * @return bool. Returns true for success, false otherwise.
  *

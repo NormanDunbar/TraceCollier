@@ -40,7 +40,7 @@
  * @return bool. Returns true if all ok. False otherwise.
  *
  * Parses a line from the trace file. The line is expected
- * to be an ERROR #cursor line.
+ * to be an ERROR \#cursor line.
  */
 bool tmTraceFile::parseERROR(const string &thisLine) {
 

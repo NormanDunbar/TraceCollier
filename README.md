@@ -1,3 +1,13 @@
+% TraceMiner2 Overview
+% Norman Dunbar
+% 9th February 2017
+
+# Image Credits
+
+![The Trace Miner!](Docs\miner-clipart-miner.png)
+
+The image used in TraceMiner's logo, as shown above, is used with gratitude. I obtained it from <http://www.clipartpanda.com/categories/miner-clipart>.
+
 # TraceMiner2
 An improved version of TraceMiner. Written in C++ and quite honestly, a better product altogether! Requires an Oracle 10g or upwards trace file, but can *probably* be changed to cope with 9i, at the very minimum, if necessary. Maybe. It depends.
 
@@ -20,7 +30,7 @@ It *may* not be faster, C++ never usually is, but it's a lot more thorough and s
 
 ## Download the Source
 
-Go to https://github.com/NormanDunbar/TraceMiner2 and click the clone or download button. Choose the option to download a zip file.
+Go to <https://github.com/NormanDunbar/TraceMiner2> and click the clone or download button. Choose the option to download a zip file.
 
 Save it somewhere safe, I use my ``SourceCode`` folder, and extract it. This will create a new folder named ``TraceMiner2-master`` - you can remove the ``-master`` bit if you wish, however, the following instructions assume that you didn't.
 
@@ -39,7 +49,7 @@ make -f makefile.gnu
 
 Just don't! Trust me, you don't need the grief. It's not like TraceMiner2 uses anything non-standard, just plain old C++ and the Standard Template Library, for maximum portability. But then again, I did mention standards didn't I? That's a problem with Microsoft. 
 
-Honestly, if you want to, try it. I haven't. TraceMiner of old took so many changes to basic C code to make it even think about compiling with Visual Studio, it's just not woprth it. 
+Honestly, try it if you want to. I haven't. TraceMiner of old needed so many changes to basic C code just to make it even think about compiling with Visual Studio, it's just not worth it. 
 
 Plus, I haven't even tried! :-)
 
@@ -56,7 +66,7 @@ There is a project file in the ``SourceCode\TraceMiner2-master\TraceMiner2`` sub
 
 ## Need a Free C++ Compiler?
 
-https://www.embarcadero.com/free-tools is the place to look for one. It's 32 bit and modern. It runs perfectly well on 64 bit Windows too.
+<https://www.embarcadero.com/free-tools> is the place to look for one. It's 32 bit and modern. It runs perfectly well on 64 bit Windows too.
 
 You will need to sign up, but other than a few special offers, and a couple of training course advisory emails, you won't get too much hassle. And it's worth it for one of the finest Windows C/C++ compilers for free.
 
@@ -111,6 +121,41 @@ Trace Miner 2 has been tested on the following:
 
 - Linux Mint 18.
 
+# Documentation
+
+The source code is documented with specially formatted comments which are collected by *Doxygen* <http://www.stack.nl/~dimitri/doxygen/>, and output as HTML files documenting all the source and header files, classes, variables, functions etc in the source code. Other output formats are available, but HTML is the default.
+
+There is a Doxygen configuration file included in the source code. It can be found in the folder ``SourceCode\TraceMiner2-master\Docs`` and is named ``TraceMiner2.doxyfile``. 
+
+Sadly this file doesn't appear to enable relative paths to be used when extracting from the source files, so if you desire to generate the documentation, you will have to edit the document in a number of places:
+
+ Option          | Current Value  |
+-----------      | -------------------------------------------------- |
+ PROJECT_LOGO     | C:/SourceCode/TraceMiner2/Docs/tm2_logo_25pct.png |
+ OUTPUT_DIRECTORY | C:/SourceCode/TraceMiner2/TraceMiner2/doxygen |
+ WARN_LOGFILE    | C:/SourceCode/TraceMiner2/TraceMiner2/doxygen/doxygen.log |
+ INPUT           | C:/SourceCode/TraceMiner2/TraceMiner2/ |
+ HAVE_DOT          |     YES
+ 
+Replace ``C:/SourceCode/TraceMiner2`` with your appropriate top level directory.
+
+The configuration file for Doxygen assumes the presence of the ``dot`` (aka ``Graphviz`` <http://www.graphviz.org/>) utility to draw the class, call and caller diagrams. If you don't have dot, or do not wish to generate these diagrams, then set ``HAVE_DOT`` to ``NO``.
+
+Once you have edited - and saved - the configuration file, run it as follows (assuming you have Doxygen installed and on your path):
+
+````
+doxygen /path/to/config/file
+````
+
+for example:
+
+````
+doxygen C:/SourceCode/TraceMiner2/Docs/TraceMiner2.doxyfile
+````
+
+The HTML folder, found in the location you set for ``OUTPUT_DIRECTORY`` above, will contain the ``index.html`` file that starts the documentation proper.
+
+If you have installed Doxygen, then there is a Wizrd that you can run to load the configuration file and generate the documentation. On Windows 7, it is found under ``start``->``all programs``->``doxygen``->``Doxywizard``.
 
 # Appendices
 
@@ -142,7 +187,6 @@ Command Code | Data Type             |
 90           | SET CONSTRAINTS       |
 170          | CALL                  |
 189          | MERGE                 |
-[Oracle Command Codes]
 
 At the moment, TraceMiner2 only considers the command type when it comes across a bind variable that is either a PL/SQL OUT parameter, or, a SQL statement where a NULL is being passed in (or out!). It uses the command code to determine which to substitute for the bind variable name in the statement.
 
@@ -167,12 +211,11 @@ Data Code | Data Type             |
 113       | BLOB                  |
 123       | VARRAY                |
 180       | TIMESTAMP             |
-[Oracle Bind Variable Data Types]
 
-TaceMner2 has a simple manner of extracting the bind variable value.
+TraceMiner2 has a simple manner of extracting the bind variable value.
 
 ### VARCHAR2 and NVARCHAR2
-If the data type is 1, and the first character of the value is a double quote (") then the data value is the string between the quotes. I replace the double quotes (") with a single one (') to match what the SQL statement probably had.
+If the data type is 1, and the value is wrapped in double quotes then the data value is simply the string between the quotes. TraceMiner2 replaces the double quotes with a single quotes to match those that the original SQL statement probably used.
 
 If the first character of a type 1 data bind is *not* a double quote, then the remainder of the trace line holds hex pairs in the format ``0 30 0 31 0 32 0 33`` etc (for '0123' in this example) and the data type is ``NVARCHAR2``.
 
@@ -265,7 +308,7 @@ Code | Character Set |
   kxsbbbfp=1109ffe98  bln=128  avl=22  flg=05
   value=0 34 0 32 0 35 0 33 0 35 0 32 0 2d 0 39 0 30 0 30 0 37 
 ````
-This bind has ``csi=2000`` so it is using the ALUTF16 chracter set for it's value, which happens to decode as '425352-9007'.
+This bind has ``csi=2000`` so it is using the ALUTF16 character set for it's value, which happens to decode as '425352-9007'.
 
 ````
  Bind#1
@@ -275,3 +318,8 @@ This bind has ``csi=2000`` so it is using the ALUTF16 chracter set for it's valu
   value="DUAL"
 ````
 This bind, on the other hand, has ``csi=31`` so it is using the WE8ISO8859P1 character set. You can see the value in the extract above.
+
+## Appendix E - Logo
+
+![TraceMiner2 Logo](Docs\tm2_logo.png)
+

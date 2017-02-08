@@ -39,7 +39,7 @@
  * @return bool. Returns true if all ok. False otherwise.
  *
  * Parses a line from the trace file. The line is expected
- * to be the EXEC #cursor line.
+ * to be the EXEC \#cursor line.
  *
  * The tmCursor associated with this PARSE is found, and its bind values
  * are extracted and merged into the SQL statement ready for output to

@@ -227,6 +227,7 @@ bool createFaviconFile(const string &fullPath) {
 /** @brief Extracts a cursor ID from a string.
  *
  * @param thisLine const string&. The trace line containing the cursor id.
+ * @param ok bool*. Success or failure indicator. True is good.
  * @return string. The extracted cursor ID. Empty for not found.
  *
  */
@@ -281,12 +282,13 @@ unsigned getDigits(const string &thisLine, const string &lookFor, bool *ok) {
 }
 
 
-/** @brief
+/** @brief Enter with a string and the pointer to a colon in that string. Extracts a
+ *         bind variable's name, including the colon, extracted from the string.
  *
- * @param thisSQL const string&. The (remaining) text of the SQL Statement.
- * @param startPos const unsigned&. Where to start extracting.
+ * @param thisSQL const string&. The text of the SQL Statement.
+ * @param colonPos const string::size_type&. Where to start extracting.
  * @param bindName string&. Somewhere to receive the extracted bind name.
- * @return string.
+ * @return bool. returns true if all ok, false otherwise.
  *
  */
 bool extractBindName(const string &thisSQL, const string::size_type &colonPos, string &bindName) {

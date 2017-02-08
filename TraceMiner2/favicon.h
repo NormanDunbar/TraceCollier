@@ -22,8 +22,9 @@
  * SOFTWARE.
  */
 
-/** @file favico.h
- * @brief Header file to allow our favico.ico to be generated.
+/** @file favicon.h
+ * @brief Header file to allow our favicon.ico to be generated. It is used by every browser
+ *        known to man, except Internet Explorer version 11. I wonder why that should be?
  */
 
 #ifndef FAVICO_H

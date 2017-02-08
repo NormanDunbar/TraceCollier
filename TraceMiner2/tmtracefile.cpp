@@ -576,7 +576,7 @@ bool tmTraceFile::openReportFile()
 
 /** @brief Reads a single line from a trace file.
  *
- * @param aLine *std::string. Pointer to a string to receive a single line read from the trace file.
+ * @param aLine string*. Pointer to a string to receive a single line read from the trace file.
  * @return bool
  *
  * Reads a single line from a trace file. Updates the current

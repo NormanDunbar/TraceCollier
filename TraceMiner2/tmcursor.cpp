@@ -114,7 +114,7 @@ ostream &operator<<(ostream &out, const tmCursor &cursor) {
 
 /** @brief Updates the SQL statement & binds when the SQL changes.
  *
- * @param std::string val. The (new) SQL statement for this tmCursor.
+ * @param val string. The (new) SQL statement for this tmCursor.
  *
  * When a cursor gets a new SQL statement, the binds are extracted
  * and a tmBind map set up where the key is the bind name (:xxx) and

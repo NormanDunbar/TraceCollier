@@ -169,7 +169,10 @@ class tmTraceFile
 // function as without it, I still get commas - which I think are from the locale.
 // I might be wrong. It happens. But I'm leaving them out for now in the hope that
 // "foreign" locales will get their chosen separator too.
-template<typename T> class ThousandsSeparator : public numpunct<T> {
+/** @brief A class that is 'imbued' onto the output streams to allow locale
+ *         dependant thousands separators to be applied to all numbers
+ *         output to that stream.
+ */template<typename T> class ThousandsSeparator : public numpunct<T> {
 public:
     ThousandsSeparator(T Separator) : m_Separator(Separator) {}
 
