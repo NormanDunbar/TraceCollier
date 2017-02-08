@@ -4,7 +4,7 @@
 
 # Image Credits
 
-![The Trace Miner!](Docs\miner-clipart-miner.png)
+![The Trace Miner!](Docs/miner-clipart-miner.png)
 
 The image used in TraceMiner's logo, as shown above, is used with gratitude. I obtained it from <http://www.clipartpanda.com/categories/miner-clipart>.
 
@@ -321,5 +321,5 @@ This bind, on the other hand, has ``csi=31`` so it is using the WE8ISO8859P1 cha
 
 ## Appendix E - Logo
 
-![TraceMiner2 Logo](Docs\tm2_logo.png)
+![TraceMiner2 Logo](Docs/tm2_logo.png)
 
