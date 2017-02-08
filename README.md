@@ -2,10 +2,6 @@
 % Norman Dunbar
 % 9th February 2017
 
-# Image Credits
-
-The image used in TraceMiner's logo - which you can see when you generate the documentation -  is used with gratitude. I obtained it from <http://www.clipartpanda.com/categories/miner-clipart>.
-
 # TraceMiner2
 An improved version of TraceMiner. Written in C++ and quite honestly, a better product altogether! Requires an Oracle 10g or upwards trace file, but can *probably* be changed to cope with 9i, at the very minimum, if necessary. Maybe. It depends.
 
@@ -120,6 +116,8 @@ Trace Miner 2 has been tested on the following:
 - Linux Mint 18.
 
 # Documentation
+
+![The Trace Miner!](Docs/miner-clipart-miner.png)
 
 The source code is documented with specially formatted comments which are collected by *Doxygen* <http://www.stack.nl/~dimitri/doxygen/>, and output as HTML files documenting all the source and header files, classes, variables, functions etc in the source code. Other output formats are available, but HTML is the default.
 
@@ -316,4 +314,8 @@ This bind has ``csi=2000`` so it is using the ALUTF16 character set for it's val
   value="DUAL"
 ````
 This bind, on the other hand, has ``csi=31`` so it is using the WE8ISO8859P1 character set. You can see the value in the extract above.
+
+# Image Credits
+
+The image used in TraceMiner's logo - which you can see when you generate the documentation -  is used with gratitude. I obtained it from <http://www.clipartpanda.com/categories/miner-clipart>.
 
