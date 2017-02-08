@@ -4,9 +4,7 @@
 
 # Image Credits
 
-![The Trace Miner!](Docs/miner-clipart-miner.png)
-
-The image used in TraceMiner's logo, as shown above, is used with gratitude. I obtained it from <http://www.clipartpanda.com/categories/miner-clipart>.
+The image used in TraceMiner's logo - which you can see when you generate the documentation -  is used with gratitude. I obtained it from <http://www.clipartpanda.com/categories/miner-clipart>.
 
 # TraceMiner2
 An improved version of TraceMiner. Written in C++ and quite honestly, a better product altogether! Requires an Oracle 10g or upwards trace file, but can *probably* be changed to cope with 9i, at the very minimum, if necessary. Maybe. It depends.
@@ -318,8 +316,4 @@ This bind has ``csi=2000`` so it is using the ALUTF16 character set for it's val
   value="DUAL"
 ````
 This bind, on the other hand, has ``csi=31`` so it is using the WE8ISO8859P1 character set. You can see the value in the extract above.
-
-## Appendix E - Logo
-
-![TraceMiner2 Logo](Docs/tm2_logo.png)
 
