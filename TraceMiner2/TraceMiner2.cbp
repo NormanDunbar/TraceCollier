@@ -11,7 +11,7 @@
 				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="bcc" />
-				<Option parameters='&quot;C:\Users\ndunbar\Downloads\Oracle-Azure stuff\TraceMinerTraces\azppd04_ora_17664.trc&quot;' />
+				<Option parameters='&quot;C:\Users\ndunbar\Downloads\Oracle-Azure stuff\TraceMinerTraces\azppd04_ora_17664.trc&quot; --verbose' />
 				<Compiler>
 					<Add option="-O2" />
 				</Compiler>
@@ -27,6 +27,16 @@
 		</Linker>
 		<Unit filename="TraceMiner2.cpp" />
 		<Unit filename="TraceMiner2.h" />
+		<Unit filename="css.h" />
+		<Unit filename="favicon.h" />
+		<Unit filename="gnu.h" />
+		<Unit filename="parseBinds.cpp" />
+		<Unit filename="parseError.cpp" />
+		<Unit filename="parseExec.cpp" />
+		<Unit filename="parseParse.cpp" />
+		<Unit filename="parseParseError.cpp" />
+		<Unit filename="parseParsing.cpp" />
+		<Unit filename="parseXctend.cpp" />
 		<Unit filename="tmbind.cpp" />
 		<Unit filename="tmbind.h" />
 		<Unit filename="tmcursor.cpp" />
