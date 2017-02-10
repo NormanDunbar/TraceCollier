@@ -280,7 +280,7 @@ value    | Value of the bind variable (See Appendix C).    |
 
 For some reason, TraceMiner2 refers to ``avl`` as *average* length, not *actual*. Sigh.
 
-## Appendix D - Character Set Codes
+## Appendix E - Character Set Codes
 
 Some data types use different character sets. These are coded in the ``csi`` field as listed above. Typical values that you may see here are as follows:
 
