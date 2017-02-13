@@ -272,7 +272,7 @@ unsigned getDigits(const string &thisLine, const string &lookFor, bool *ok) {
             pos += lookFor.length();
             return stoul(thisLine.substr(pos), NULL, 10);
         } catch (...) {
-            ;   //NULL statement.
+            ;   //NULL statement. Drops in below.
         }
     }
 

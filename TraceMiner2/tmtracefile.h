@@ -74,21 +74,8 @@ using std::setfill;
 const int MAXLINENUMBER=10;
 const int MAXCURSORWIDTH=11+1;
 
-// Oracle Command codes. We only use COMMAND_PLSQL at the mnoment.
-const int COMMAND_INSERT = 2;
-const int COMMAND_SELECT = 3;
-const int COMMAND_UPDATE = 6;
-const int COMMAND_DELETE = 7;
-const int COMMAND_LOCK_TABLE = 26;
-const int COMMAND_COMMIT = 44;
-const int COMMAND_ROLLBACK = 45;
-const int COMMAND_SAVEPOINT = 46;
+// Oracle Command codes. We only use COMMAND_PLSQL at the moment.
 const int COMMAND_PLSQL = 47;
-const int COMMAND_SET_TRANSACTION = 48;
-const int COMMAND_SET_ROLE = 55;
-const int COMMAND_SET_CONSTRAINTS = 90;
-const int COMMAND_CALL = 170;
-const int COMMAND_MERGE = 189;
 
 /** @brief A class representing an Oracle trace file.
  */
@@ -116,8 +103,9 @@ class tmTraceFile
     protected:
 
     private:
-        map<string, tmCursor *> mCursors;   /**< Std::map holding all depth=0 cursors for this trace file. */
-        unsigned mLineNumber;               /**< Current line number being parsed. */
+        map<string, tmCursor *> mCursors;    /**< Std::map holding all depth=0 cursors for this trace file. */
+        unsigned mLineNumber;                /**< Current line number being parsed. */
+        int mExecCount;                      /**< How many EXEC statements have we hit so far? */
         tmOptions *mOptions;                 /**< Pointer to (parsed) command line options. */
 
         // Stuff from the trace file header.
@@ -138,6 +126,7 @@ class tmTraceFile
         bool openTraceFile();               /**< Opens the trace file and parses the headings. */
         bool openDebugFile();               /**< Opens the debug file. */
         bool openReportFile();              /**< Opens the debug file. */
+        void reportHeadings();              /**< Prints HTML headings. */
         bool parseTraceFile();              /**< Parses the trace file body. */
         bool readTraceLine(string *aLine);  /**< Read one line from the trace, update the current line number. */
         map<string, tmCursor *>::iterator findCursor(const string &cursorID);   /**< Finds a cursor id in the cursor list. */

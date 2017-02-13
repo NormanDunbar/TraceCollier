@@ -48,6 +48,7 @@ class tmOptions
         bool verbose() { return mVerbose; }             /**< Returns verbose mode flag. */
         bool html() { return mHtml; }                   /**< Returns HTML mode flag. */
         bool help() { return mHelp; }                   /**< Returns help mode flag. */
+        int maxExecs() { return mMaxExecs; }       /**< Returns help mode flag. */
 
         string traceFile() { return mTraceFile; }       /**< Returns trace file name. */
         string reportFile() { return mReportFile; }     /**< Returns report file name. */
@@ -70,6 +71,7 @@ class tmOptions
         bool mVerbose;                      /**< Are we running in verbose mode? */
         bool mHtml;                         /**< Are we reporting in HTML? */
         bool mHelp;                         /**< Did the user request help? */
+        unsigned mMaxExecs;                 /**< Report file page size. */
         string mTraceFile;                  /**< Name of the trace file being parsed. */
         string mReportFile;                 /**< Name of the report file. */
         string mDebugFile;                  /**< Name of the debug information file. */

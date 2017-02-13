@@ -47,6 +47,7 @@ tmTraceFile::tmTraceFile(tmOptions *options)
     mSystemName = "";
     mNodeName = "";
     mLineNumber = 0;
+    mExecCount = -1;
     mUnprocessedLine.clear();
     mIfs = NULL;
     mOfs = NULL;
@@ -98,6 +99,11 @@ bool tmTraceFile::parse()
     if (!openReportFile()) {
         return false;
     }
+
+    // Report file is open.
+    // Reset the EXEC counter.
+    mExecCount = 0;
+
 
     // Ready to go, lets parse a trace file.
     if (!openTraceFile()) {
@@ -521,49 +527,7 @@ bool tmTraceFile::openReportFile()
     // Yup, the comma is not required now. Should be locale dependent.
     mOfs->imbue(locale(mOfs->getloc(), new ThousandsSeparator<char>(',')));
 
-    // Headings. (TEXT)
-    if (!mOptions->html()) {
-    *mOfs << "TraceMiner2" << endl
-          << "-----------" << endl << endl;
-
-    *mOfs << "Processing Trace file: " << mOptions->traceFile() << endl << endl;
-
-    *mOfs << setw(MAXLINENUMBER) << "EXEC Line" << ' '
-          << setw(MAXLINENUMBER) << "PARSE Line" << ' '
-          << setw(MAXLINENUMBER) << "BINDS Line" << ' '
-          << setw(MAXLINENUMBER) << "SQL Line" << ' '
-          << "SQL Text"
-          << endl
-          << setw(200) << setfill('-') << '-'
-          << setfill(' ') << endl;
-    } else {
-        // Headings. (HTML)
-    *mOfs << "<html lang=\"en\"><head>" << endl
-          << "<title>TraceMiner 2</title>" << endl
-          << "<meta charset=\"UTF-8\" />" << endl
-          << "<meta name=\"generator\" content=\"TraceMiner2\" />" << endl
-          << "<meta name=\"author\" content=\"Norman (at) Dunbar-it (dot) co (dot) uk\" />" << endl
-          << "<link rel=\"stylesheet\" href=\""
-          << fileName(mOptions->cssFileName()) << "\" />" << endl
-          << "<link rel=\"icon\" href=\"favicon.ico\" type=\"image/x-icon\" />"
-          << "</head>" << endl
-          << "<body>" << endl
-          << "<H1>TraceMiner2</H1>" << endl
-          << "<p><strong>Processing Trace File:</strong> "
-          << mOptions->traceFile() << "</p>" << endl;
-
-    // I'm a little p1553d off at the WWW for HTML5's inability
-    // to use CSS to specify a table or cell width in the CSS
-    // file. This is a bad thing as I have to recompile if I need
-    // to change the column widths.
-    *mOfs << "<table style=\"width:95%\";>" << endl
-          << "<tr><th style=\"width:6%\";>EXEC Line</th>"
-          << "<th style=\"width:6%\";>PARSE Line</th>"
-          << "<th style=\"width:6%\";>BINDS# Line</th>"
-          << "<th style=\"width:6%\";>SQL Line</th>"
-          << "<th>SQL Text</th></tr>"
-          << endl;
-    }
+    reportHeadings();
 
     // Looks like a valid report file.
     if (mOptions->verbose()) {
@@ -571,6 +535,90 @@ bool tmTraceFile::openReportFile()
     }
 
     return true;
+}
+
+
+/** @brief Writes the headings to the report file.
+ *
+ * If we hit a magic number of EXEC statements, we will throw
+ * a new set of headings in the report file. This is useful as
+ * large traces may require the reader to scroll up and down to
+ * determine what the numbers in the report lines actually  are!
+ *
+ */
+void tmTraceFile::reportHeadings() {
+
+    if (mOptions->verbose()) {
+        *mDbg << "reportHeadings(): EXEC count: " << mExecCount << " Entry." << endl;
+    }
+
+    if (!mOptions->html()) {
+        // Headings. (TEXT)
+
+        // Once per report file headings.
+        if (mExecCount == -1) {
+            *mOfs << "TraceMiner2" << endl
+                  << "-----------" << endl << endl;
+
+            *mOfs << "Processing Trace file: " << mOptions->traceFile() << endl << endl;
+        }
+
+        // Break up the report every MAXEXECS depth 0 EXEC statements.
+        if (mExecCount > 0) {
+            *mOfs << endl << endl;
+        }
+
+        *mOfs << setw(MAXLINENUMBER) << "EXEC Line" << ' '
+              << setw(MAXLINENUMBER) << "PARSE Line" << ' '
+              << setw(MAXLINENUMBER) << "BINDS Line" << ' '
+              << setw(MAXLINENUMBER) << "SQL Line" << ' '
+              << "SQL Text"
+              << endl
+              << setw(200) << setfill('-') << '-'
+              << setfill(' ') << endl;
+    } else {
+        // Headings. (HTML)
+        // Do we need to do the HTML headings at the very start?
+        if (mExecCount == -1) {
+            *mOfs << "<html lang=\"en\"><head>" << endl
+                  << "<title>TraceMiner 2</title>" << endl
+                  << "<meta charset=\"UTF-8\" />" << endl
+                  << "<meta name=\"generator\" content=\"TraceMiner2\" />" << endl
+                  << "<meta name=\"author\" content=\"Norman (at) Dunbar-it (dot) co (dot) uk\" />" << endl
+                  << "<link rel=\"stylesheet\" href=\""
+                  << fileName(mOptions->cssFileName()) << "\" />" << endl
+                  << "<link rel=\"icon\" href=\"favicon.ico\" type=\"image/x-icon\" />"
+                  << "</head>" << endl
+                  << "<body>" << endl
+                  << "<H1>TraceMiner2</H1>" << endl
+                  << "<p><strong>Processing Trace File:</strong> "
+                  << mOptions->traceFile() << "</p>" << endl;
+        }
+
+        // Are we in the middle of a trace? Start a new table if necessary.
+        // This makes reading the report a lot easier.
+        if (mExecCount > 0) {
+            *mOfs << "</table>" << endl
+                  << "<p>&nbsp;</p>" << endl << endl;
+        }
+
+        // I'm a little p1553d off at the WWW for HTML5's inability
+        // to use CSS to specify a table or cell width in the CSS
+        // file. This is a bad thing as I have to recompile if I need
+        // to change the column widths.
+        *mOfs << "<table style=\"width:95%\";>" << endl
+              << "<tr><th style=\"width:6%\";>EXEC Line</th>"
+              << "<th style=\"width:6%\";>PARSE Line</th>"
+              << "<th style=\"width:6%\";>BINDS# Line</th>"
+              << "<th style=\"width:6%\";>SQL Line</th>"
+              << "<th>SQL Text</th></tr>"
+              << endl;
+    }
+
+    if (mOptions->verbose()) {
+        *mDbg << "reportHeadings(): EXEC count: " << mExecCount << " Exit." << endl;
+    }
+
 }
 
 

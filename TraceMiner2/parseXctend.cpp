@@ -111,6 +111,8 @@ bool tmTraceFile::parseXCTEND(const string &thisLine) {
         *mDbg << "parseXCTEND(): Exit." << endl;
     }
 
+    // Increment  the EXEC count for a COMMIT or ROLLBACK.
+    mExecCount++;
     return true;
 }
 

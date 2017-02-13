@@ -37,6 +37,7 @@ tmOptions::tmOptions()
     mHelp = false;
     mVerbose = false;
     mHtml = true;
+    mMaxExecs = 25;     // One screen full on Firefox on Windows 7.
     mTraceFile = "";
     mReportFile = "";
     mDebugFile = "";
@@ -86,6 +87,25 @@ bool tmOptions::parseArgs(int argc, char *argv[]) {
             continue;
         }
 
+        // Try pagesize first ...
+        if ((thisArg.substr(0, 10) == "--pagesize") ||
+            (thisArg.substr(0, 2) == "-p")) {
+            bool pageOk = true;
+            unsigned temp = getDigits(thisArg, "--pagesize=", &pageOk);
+            if (pageOk) {
+                mMaxExecs = --temp;
+            } else {
+
+                // Try p instead ...
+                unsigned temp = getDigits(thisArg, "-p=", &pageOk);
+                if (pageOk) {
+                    mMaxExecs = --temp;
+                }
+            }
+
+            continue;
+        }
+
         // Ok, try TEXT instead ...
         if ((thisArg == "--text") ||
             (thisArg == "-t")) {
@@ -117,8 +137,8 @@ bool tmOptions::parseArgs(int argc, char *argv[]) {
             mTraceFile = string(argv[arg]);
             gotTraceAlready = true;
         } else {
-            // Too many tracefiles.
-            cerr << "TraceMiner2: Too many trace files. (" << argv[arg] << ")." << endl;
+            // Too many tracefiles? Spaces around '=' in pagesize?
+            cerr << "TraceMiner2: Parameter error. (" << argv[arg] << ")." << endl;
             invalidArgs = true;
         }
 
@@ -168,6 +188,11 @@ void tmOptions::usage() {
     cerr << "'trace_file' is the Oracle trace file name. It should have binds turned on." << endl << endl;
 
     cerr << "OPTIONS:" << endl << endl;
+    cerr << "'-p=nn' or '--pagesize=nn'. Define the page size for the report." << endl;
+    cerr << "The headings for the report are thrown every 'nn' EXECs (dep=0) found." << endl;
+    cerr << "The default is 25 which is a good size on Firefox on Windows 7!" << endl;
+    cerr << "There are no spaces permitted around the '=' sign." << endl << endl;
+
     cerr << "'-v' or '--verbose' Turn on verbose mode." << endl;
     cerr << "Lots of text is written to the debugfile." << endl << endl;
 

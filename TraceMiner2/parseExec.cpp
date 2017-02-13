@@ -48,7 +48,7 @@
 bool tmTraceFile::parseEXEC(const string &thisLine) {
 
     if (mOptions->verbose()) {
-        *mDbg << "parseEXEC(" << mLineNumber << "): Entry." << endl;
+        *mDbg << "parseEXEC(" << mLineNumber << "): Entry. EXEC Count so far: " << mExecCount << endl;
     }
 
     // EXEC #5924310096:c=0,e=31,p=0,cr=0,cu=0,mis=0,r=0,dep=0,og=4,plh=1388734953,tim=526735705392
@@ -116,7 +116,15 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
         return false;
     }
 
-    // We have a valid cursor. Extract the SQL.
+    // We have a depth 0 EXEC with a valid cursor, increment the EXEC counter.
+    // And check if we need a fresh set of report headings?
+    if ((mExecCount > mOptions->maxExecs())) {
+        // Throw a new set of headings to make reading easier.
+        reportHeadings();
+        mExecCount = 0;
+    }
+
+    // Get the SQL Statement & binds.
     tmCursor *thisCursor = i->second;
     string sqlText = thisCursor->sqlText();
 
@@ -179,6 +187,7 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
         *mDbg << "parseEXEC(): Exit." << endl;
     }
 
+    mExecCount++;
     return true;
 }
 

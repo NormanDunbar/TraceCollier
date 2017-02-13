@@ -209,11 +209,6 @@ bool tmCursor::buildBindMap(const string &sql) {
         // Save the Bind details.
         tmBind *thisBind = new tmBind(bindID, bindName);
 
-        // Tell the world.
-        cout << "    Bind: " << bindID
-             << " Name: " << bindName
-             << " created." << endl;
-
         // An iterator for the insert into the bind map. AKA where are we?
         pair<map<unsigned, tmBind *>::iterator, bool> exists;
 
