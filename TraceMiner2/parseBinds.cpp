@@ -166,9 +166,31 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
         // terminates a bind section is the EXEC for the cursor, or
         // in PL/SQL cases, the "=====...====" line for the following
         // recursive SQL statement.
+        //
+        // Update. This: WTF?
+        // BINDS #140136345356328:
+        //  Bind#0
+        //   oacdty=01 mxl=32(18) mxlc=00 mal=00 scl=00 pre=00
+        //   oacflg=03 fl2=1000000 frm=01 csi=31 siz=32 off=0
+        //   kxsbbbfp=7f7409169fe0  bln=32  avl=18  flg=05
+        //   value="AAAaPmAAGAAAW71AAV"
+        // XCTEND rlbk=0, rd_only=1, tim=1313055015575161
+        // EXEC #140136345356328:c=0,e=941,p=0,cr=0,cu=0,mis=1,r=0,dep=0,og=1,plh=530833069,tim=1313055015575178
+        //
+        // I was thinking, anything can terminate the BINDS section if it has no leading space? But then testing
+        // proved me wrong. NVARCHAR2 and NCHAR can have value= continuation lines that begin with a digit. Sigh.
+        // However, that's relatively uncommon.... (Famous Last Words!)
+
         string prefix = bindLine.substr(0, 6);
         if (prefix == "EXEC #" ||
-            prefix == "======") {
+            prefix == "======" ||
+            prefix == "XCTEND" ||
+            prefix == "WAIT #" ||
+            prefix == "STAT #" ||
+            prefix == "CLOSE " ||
+            prefix == "PARSIN" ||
+            prefix == "PARSE ")
+        {
             break;
         }
 
@@ -597,13 +619,9 @@ bool tmTraceFile::extractHex(vector<string>::const_iterator i, const unsigned eq
     // Stoul() stops at the first non digit.
     while (true) {
         // What are we looking at right now?
-        if (mOptions->verbose()) {
-           *mDbg << "extractHex(): Extracting digits [" << temp << ']' << endl;
-        }
-
-        // Strip leading space.
-        //if (temp.at(0) == ' ') {
-        //    temp = temp.substr(1);
+        // Handy if I need to debug stuff.
+        //if (mOptions->verbose()) {
+        //   *mDbg << "extractHex(): Extracting digits [" << temp << ']' << endl;
         //}
 
         // Done yet?
@@ -664,12 +682,29 @@ bool tmTraceFile::extractHex(vector<string>::const_iterator i, const unsigned eq
  *
  *   1 = VARCHAR2 or NVARCHAR2. VARCHAR2 values are in double quotes, NVARCHAR2 values are hex dumps.
  *   2 = NUMBER. Beware if the value is ### which I think is used for an OUT parameter.
- *  11 = ROWID.
- *  23 = RAW. A string of Hex digits.
+ *   8 = LONG. A string of Hex digits? Maybe?
+ *  11 = ROWID. Just the ROWID, no quotes etc.
+ *  12 = DATE.
+ *  23 = RAW. A string of Hex digits? Maybe?
+ *  24 = LONG RAW. A string of Hex digits? Maybe?
  *  25 = Unhandled data type.
  *  29 = Unhandled data type.
+ *  69 = ROWID. See Type 11. Oracle document 69 as ROWID. Tracefiles show type 11. Go figure!
  *  96 = NCHAR. Dumped as Hex digits.
- * 123 = A buffer. Usually seen in DBMS_OUTPUT.GET_LINES(:LINES, :NUM_LINES). The :LINES bind will be type 123.
+ * 100 = BINARY_FLOAT.
+ * 101 = BINARY_DOUBLE.
+ * 108 = User-defined type (object type, VARRAY, nested table)
+ * 111 = REF.
+ * 112 = CLOB or NCLOB.
+ * 113 = BLOB.
+ * 114 = BFILE.
+ * 123 = A buffer. VARRAY? Usually seen in DBMS_OUTPUT.GET_LINES(:LINES, :NUM_LINES). The :LINES bind will be type 123.
+ * 180 = TIMESTAMP.
+ * 181 = TIMESTAMP WITH TIME ZONE.
+ * 182 = INTERVAL YEAR TO MONTH.
+ * 183 = INTERVAL DAY TO SECOND.
+ * 208 = UROWID.
+ * 231 = TIMESTAMP WITH LOCAL TIME ZONE.
  */
 bool tmTraceFile::extractBindValue(vector<string>::const_iterator i, tmBind *thisBind) {
 
@@ -740,22 +775,28 @@ bool tmTraceFile::extractBindValue(vector<string>::const_iterator i, tmBind *thi
        // ROWIDs and the two unhandled data types (Oracle's words not mine) are
        // simple extractions of the remaining data on the line.
        //----------------------------------------------------------------------
-       case 11: // ROWID. Drop in below.
+       case 11: // ROWID. Convert from char to rowid. Actually seen in trace files.
+       case 69: // ROWID. Convert from char to rowid. From the 11gr2 docs.
+           thisBind->setBindValue("CHARTOROWID('" + i->substr(equalPos + 1) + "')");
+           break;
+
        case 25: // UNHANDLED DATA TYPE. (Drop in below).
        case 29: // UNHANDLED DATA TYPE.
            thisBind->setBindValue(i->substr(equalPos + 1));
            break;
 
        //----------------------------------------------------------------------
-       // RAW does what exactly? ***** TODO *****
+       // RAW does what exactly? ***** TODO ??*****
        //----------------------------------------------------------------------
        case 23: // RAW.
+           thisBind->setBindValue(i->substr(equalPos + 1));
            break;
 
        //----------------------------------------------------------------------
        // VARRAY. Usually a PL/SQL return or OUT parameter. Just use the name.
        //----------------------------------------------------------------------
-       case 123: // A Data Buffer.valueStartsHere
+       case 108: // A Data Buffer.valueStartsHere. From the 11gr2 docs.
+       case 123: // A Data Buffer.valueStartsHere. Actually seen in trace files.
            thisBind->setBindValue(thisBind->bindName());
            break;
 
