@@ -24,6 +24,7 @@ then
     PANDOC_COLOUR="blue"
     PANDOC_TOC="black"
     echo "Pandoc version ${PANDOC} is too old."
+    echo "Margins in the PDF may not be at the required size."
 else
     echo "Pandoc version ${PANDOC} is recent."
 fi

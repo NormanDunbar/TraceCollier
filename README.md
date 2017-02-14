@@ -121,6 +121,8 @@ Trace Miner 2 has been tested on the following:
 
 # Documentation
 
+**In development, `doxygen` version 1.8.13 was used. Versions previous to this *may* cause problems. Time and testing will tell.**
+
 ![The Trace Miner!](Docs/miner-clipart-miner.png)
 
 The source code is documented with specially formatted comments which are collected by *Doxygen* <http://www.stack.nl/~dimitri/doxygen/>, and output as HTML files documenting all the source and header files, classes, variables, functions etc in the source code. Other output formats are available, but HTML is the default.

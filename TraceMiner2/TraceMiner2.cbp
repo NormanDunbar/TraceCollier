@@ -11,7 +11,7 @@
 				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="bcc" />
-				<Option parameters='&quot;C:\Users\ndunbar\Downloads\Oracle-Azure stuff\TraceMinerTraces\azppd04_ora_17664.trc&quot; --verbose' />
+				<Option parameters='&quot;C:\Users\ndunbar\Downloads\Oracle-Azure stuff\TraceMinerTraces\jdepy1t_ora_48496808.trc&quot; --verbose --pagesize=50' />
 				<Compiler>
 					<Add option="-O2" />
 				</Compiler>
