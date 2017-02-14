@@ -129,14 +129,14 @@ There is a Doxygen configuration file included in the source code. It can be fou
 
 Sadly this file doesn't appear to enable relative paths to be used when extracting from the source files, so if you desire to generate the documentation, you will have to edit the document in a number of places:
 
- Option          | Current Value  |
------------      | -------------------------------------------------- |
- PROJECT_LOGO     | C:/SourceCode/TraceMiner2/Docs/tm2_logo_25pct.png |
- OUTPUT_DIRECTORY | C:/SourceCode/TraceMiner2/TraceMiner2/doxygen |
- WARN_LOGFILE    | C:/SourceCode/TraceMiner2/TraceMiner2/doxygen/doxygen.log |
- INPUT           | C:/SourceCode/TraceMiner2/TraceMiner2/ |
- HAVE_DOT          |     YES
- 
+Option            | Current Value                                                |
+----------------- | ------------------------------------------------------------ |
+PROJECT\_LOGO      | C:/SourceCode/TraceMiner2/Docs/tm2\_logo\_25pct.png            |
+OUTPUT\_DIRECTORY  | C:/SourceCode/TraceMiner2/TraceMiner2/doxygen                |
+WARN\_LOGFILE      | C:/SourceCode/TraceMiner2/TraceMiner2/doxygen/doxygen.log    |
+INPUT             | C:/SourceCode/TraceMiner2/TraceMiner2/                       |
+HAVE\_DOT          | YES                                                          |
+
 Replace `C:/SourceCode/TraceMiner2` with your appropriate top level directory.
 
 The configuration file for Doxygen assumes the presence of the `dot` (aka `Graphviz` <http://www.graphviz.org/>) utility to draw the class, call and caller diagrams. If you don't have dot, or do not wish to generate these diagrams, then set `HAVE_DOT` to `NO`.
