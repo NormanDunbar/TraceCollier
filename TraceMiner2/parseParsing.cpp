@@ -144,6 +144,11 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
     // Extract the SQL Text into a stream. This handles end of line for us.
     string aLine;
     stringstream ss;
+    string lineBreak = "<br>";
+
+    if (!mOptions->html()) {
+        lineBreak = "";
+    }
 
     while (readTraceLine(&aLine)) {
         if (aLine.substr(0, 11) == "END OF STMT") {
@@ -153,7 +158,8 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
         // Append this new SQL line to the existing lines.
         if (!ss.str().empty()) {
             // Append a system dependent newline to the current text.
-            ss << endl;
+            // If we are in HTML mode, add a "<BR>" too.
+            ss << lineBreak << endl;
         }
         // And append this new line of text.
         ss << aLine;
