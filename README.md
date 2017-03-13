@@ -216,6 +216,7 @@ Data Code | Data Type             |
 96 | CHAR or NCHAR         |
 100 | BINARY_FLOAT |
 101 | BINARY_DOUBLE |
+102 | REF_CURSOR |
 108 | User-defined type (object type, VARRAY, nested table) |
 111 | REF |
 112 | CLOB or NCLOB         |
@@ -289,7 +290,7 @@ The following are some of the fields used in the descriptions of each individual
 Code     | Description                                     |
 ------   | -------------------------------------------     |
 oacdty   | Data type code.                                 |
-mxl      | Maximum length of the bind variable value.      |       
+mxl      | Maximum length of the bind variable value.      |
 mal      | Array length.                                   |
 scl      | Scale - NUMBER data types only (oacdty = 2).    | 
 pre      | Precision - NUMBER data types only (oacdty = 2).|
@@ -330,7 +331,7 @@ Code | Character Set |
   kxsbbbfp=1109ffe98  bln=128  avl=22  flg=05
   value=0 34 0 32 0 35 0 33 0 35 0 32 0 2d 0 39 0 30 0 30 0 37 
 ````
-This bind has `csi=2000` so it is using the ALUTF16 character set for it's value, which happens to decode as '425352-9007'.
+This bind has `csi=2000` so it is using the ALUTF16 character set for its value, which happens to decode as '425352-9007'.
 
 ````
  Bind#1

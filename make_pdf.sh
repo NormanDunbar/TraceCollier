@@ -12,7 +12,7 @@
 #---------------------------------------------------------------
 PANDOC=`pandoc --version | head -1 | cut -d" " -f2`
 PANDOC_MINOR=`echo ${PANDOC} | cut -d"." -f2`
-PANDOC_COLOUR="Gray"
+PANDOC_COLOUR="Cool Grey"
 PANDOC_PDF="README.pdf"
 PANDOC_TOC="${PANDOC_COLOUR}"
 
@@ -32,7 +32,22 @@ fi
 echo "URLs and internal links will be ${PANDOC_COLOUR}."
 echo "Table of contents links will be ${PANDOC_TOC}."
 
-pandoc --from markdown --to latex --toc --toc-depth=3 --output "${PANDOC_PDF}" --variable linkcolor="${PANDOC_COLOUR}" --variable urlcolor="${PANDOC_COLOUR}" --variable toccolor="${PANDOC_COLOUR}" --variable margin-left=3cm --variable margin-right=3cm --variable margin-top=3cm --variable margin-bottom=4cm README.md
+pandoc --from markdown \
+--to latex \
+--output "${PANDOC_PDF}" \
+--table-of-contents \
+--toc-depth=3 \
+--listings \
+-H listings_setup.tex \
+--variable fontfamily="utopia" \
+--variable toccolor="${PANDOC_COLOUR}" \
+--variable linkcolor="${PANDOC_COLOUR}" \
+--variable urlcolor="${PANDOC_COLOUR}" \
+--variable margin-top=3cm \
+--variable margin-left=3cm \
+--variable margin-right=3cm \
+--variable margin-bottom=4cm \
+README.md
 
 if [ "${?}" -eq "0" ]
 then
