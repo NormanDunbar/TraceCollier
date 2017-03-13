@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-/** @file parseParse.cpp
- * @brief Implementation file for the tmTraceFile.parsePARSE() function.
+/** @file parseClose.cpp
+ * @brief Implementation file for the tmTraceFile.parseCLOSE() function.
  */
 
 #include "tmtracefile.h"
@@ -33,30 +33,30 @@
     #include "utilities.h"
 #endif
 
-/** @brief Parses a "PARSE" line.
+/** @brief Parses a "CLOSE" line.
  *
- * @param thisLine const string&. The line of text with "PARSE" in.
+ * @param thisLine const string&. The line of text with "CLOSE" in.
  * @return bool. Returns true if all ok. False otherwise.
  *
  * Parses a line from the trace file. The line is expected
- * to be the PARSE \#cursor line.
+ * to be the CLOSE \#cursor line.
  *
- * The tmCursor associated with this PARSE is found, and updated to the new
- * source file line number. Only the most recent PARSE is stored for each tmCursor.
+ * The tmCursor associated with this CLOSE is found, and the closed flag updated.
+ * Depth is ignored. A buig in Oracle, it seems, can PARSE at DEP=1 but CLOSE at DEP=0!
  */
-bool tmTraceFile::parsePARSE(const string &thisLine) {
+bool tmTraceFile::parseCLOSE(const string &thisLine) {
 
     if (mOptions->verbose()) {
-        *mDbg << "parsePARSE(" << mLineNumber << "): Entry." << endl;
+        *mDbg << "parseCLOSE(" << mLineNumber << "): Entry." << endl;
     }
 
-    // PARSE #5924310096:c=0,e=28,p=0,cr=0,cu=0,mis=0,r=0,dep=0,og=4,plh=1388734953,tim=526735705337
+    // CLOSE #4155332696:c=0,e=1,dep=1,type=3,tim=1039827725793
     string cursorID = "";
     unsigned depth = 0;
     bool matchOk = true;
 
 #ifdef USE_REGEX
-    regex reg("PARSE\\s(#\\d+).*?dep=(\\d+).*");
+    regex reg("CLOSE\\s(#\\d+).*?dep=(\\d+).*");
     smatch match;
 
     // Extract the cursorID, the length and the depth.
@@ -76,28 +76,34 @@ bool tmTraceFile::parsePARSE(const string &thisLine) {
     // Did it all work?
     if (!matchOk) {
         stringstream s;
-        s << "parsePARSE(): Cannot match against PARSE at line: "
+        s << "parseCLOSE(): Cannot match against CLOSE at line: "
           <<  mLineNumber << "." << endl;
         cerr << s.str();
 
         if (mOptions->verbose()) {
             *mDbg << s.str()
-                  << "parsePARSE(): Exit." << endl;
+                  << "parseCLOSE(): Exit." << endl;
         }
 
         return false;
     }
 
     // We only care about user level SQL, so only depth 0.
+    // Well, that's the theory but we have bugs to deal with
+    // so we try to close anything we find, but don't barf if
+    // we don't find it.
+
+    /*
     if (depth) {
         // Ignore this one.
         if (mOptions->verbose()) {
-            *mDbg << "parsePARSE(): Ignoring PARSE with dep=" << depth << '.' << endl
-                  << "parsePARSE(): Exit." << endl;
+            *mDbg << "parseCLOSE(): Ignoring CLOSE with dep=" << depth << '.' << endl
+                  << "parseCLOSE(): Exit." << endl;
         }
 
         return true;
     }
+    */
 
 
     // Find the existing cursor.
@@ -105,33 +111,42 @@ bool tmTraceFile::parsePARSE(const string &thisLine) {
 
     // Found?
     if (i != mCursors.end()) {
-        // Yes. Thankfully! Update the PARSE line number and closed flag.
+        // Yes. Thankfully! Update the closed flag.
         // i is an iterator to a pair<string, tmCursor *>
         // So i->first is the string.
         // And i->second is the tmCursor pointer.
-        i->second->setSQLParseLine(mLineNumber);
-        i->second->setClosed(false);
+        i->second->setClosed(true);
     } else {
-        // Not found. Oh dear!
+        // Not found. Oh dear! Flag it up if depth was zero.
+        // Return true as if it worked to get
+        // around an Oracle bug that I think I just found.
+
         stringstream s;
-        s << "parsePARSE(): Found PARSE for cursor " << cursorID
-          << " but not found in existing cursor list." << endl;
-        cerr << s.str();
+        if (!depth) {
+            s << "parseCLOSE(): Found CLOSE for cursor " << cursorID
+              << " at line: " << mLineNumber
+              << ", but not found in existing cursor list." << endl;
+            cerr << s.str();
+        }
 
         if (mOptions->verbose()) {
             *mDbg << s.str()
-                  << "parsePARSE(): Exit." << endl;
+                  << "parseCLOSE(): Exit." << endl;
         }
 
-        return false;
+        // We should be returning false if we don't find the cursor
+        // but Oracle .... !
+        //return false;
+        return true;
     }
 
-    // Looks like a good parse.
+    // Looks like a good close.
     if (mOptions->verbose()) {
-        *mDbg << "parsePARSE(): Exit." << endl;
+        *mDbg << "parseCLOSE(): Exit." << endl;
     }
 
     return true;
 }
+
 
 

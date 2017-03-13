@@ -49,6 +49,7 @@
     mSQLParseLine = 0;
     mBindCount = 0;
     mCommandType = 0;
+    mClosed = false;
 
 }
 
@@ -97,7 +98,8 @@ ostream &operator<<(ostream &out, const tmCursor &cursor) {
         << "Bind Count: " << cursor.mBindCount << endl
         << "Final \"BINDS " << cursor.mCursorId << ":\" Line for this cursor: " << cursor.mBindsLine << endl
         << "Command Type: " << cursor.mCommandType << endl
-        << "SQL Text = [" << cursor.mSQLText << "]" << endl;
+        << "SQL Text = [" << cursor.mSQLText << "]" << endl
+        << "Closed? " << cursor.mClosed << endl;
 
     // If we have any binds, print them out.
     if (cursor.mBinds.size()) {

@@ -64,6 +64,7 @@ class tmCursor
         unsigned commandType() { return mCommandType; }         /**< Returns the command type for this statement. */
         unsigned bindsLine() { return mBindsLine; }             /**< Returns the last "BINDS #cursor" line number for this statement. */
         map<unsigned, tmBind *> *binds() { return &mBinds; }    /**< Returns a pointer to the binds for this statement. */
+        bool isClosed() { return mClosed; }                     /**< Returns whther or not the cursor is closed. */
 
         // Setters.
         void setSQLText(string val);                            /**< Changes the SQL statement for this cursor. */
@@ -73,6 +74,7 @@ class tmCursor
         void setBindCount(unsigned val) { mBindCount = val; }           /**< Changes the number of binds for the statement. */
         void setBindsLine(unsigned val) { mBindsLine = val; }           /**< Changes the "BINDS #cursor" line number for the statement. */
         void setCommandType(unsigned val) { mCommandType = val; }       /**< Changes the command type for the statement. */
+        void setClosed(bool val) { mClosed = val; }                     /**< Changes the closed state of the cursor. */
 
     protected:
 
@@ -86,6 +88,7 @@ class tmCursor
         unsigned mCommandType;              /**< What command is executing in this statement? */
         unsigned mBindsLine;                /**< The line where we found the most recent "BINDS #cursor" for this cursor */
         map<unsigned, tmBind *> mBinds;     /**< A std::map of all found binds for this statement. Indexed by bind position. */
+        bool mClosed;                       /**< Has this cursor been closed recently? */
 
         bool buildBindMap(const string &sql);
         void cleanUp();

@@ -246,7 +246,18 @@ bool tmTraceFile::parseTraceFile()
             // CLOSE #cursorID
             if (chunk == "CLOSE" ||
                 chunk == "CLOSE #") {
-                // At present, we no longer care about CLOSEing a cursor.
+                if (!parseCLOSE(traceLine)) {
+                    return false;
+                }
+                continue;
+            }
+
+            // STAT #cursorID
+            if (chunk == "STAT" ||
+                chunk.substr(0, 6) == "STAT #") {
+                if (!parseSTAT(traceLine)) {
+                    return false;
+                }
                 continue;
             }
 

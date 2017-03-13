@@ -101,11 +101,21 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
         return true;
     }
 
-    // We have a valid cursor.
+    // We have a valid cursor, but has it been closed?
+    // This catches reuse of cursors with fewer binds, and at depth > 0.
     tmCursor *thisCursor = i->second;
     if (mOptions->verbose()) {
         *mDbg << "parseBINDS(): Found cursor: " << i->first << '.' << endl;
     }
+
+    if (thisCursor->isClosed()) {
+        if (mOptions->verbose()) {
+            *mDbg << "parseBINDS(): Cursor is closed. Ignoring BINDS. " << endl;
+        }
+
+        return true;
+    }
+
 
     // Any binds?
     unsigned bindCount = thisCursor->bindCount();

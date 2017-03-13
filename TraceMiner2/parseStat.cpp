@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-/** @file parseParse.cpp
- * @brief Implementation file for the tmTraceFile.parsePARSE() function.
+/** @file parseStat.cpp
+ * @brief Implementation file for the tmTraceFile.parseSTAT() function.
  */
 
 #include "tmtracefile.h"
@@ -33,105 +33,82 @@
     #include "utilities.h"
 #endif
 
-/** @brief Parses a "PARSE" line.
+/** @brief Parses a "STAT" line.
  *
- * @param thisLine const string&. The line of text with "PARSE" in.
+ * @param thisLine const string&. The line of text with "STAT" in.
  * @return bool. Returns true if all ok. False otherwise.
  *
  * Parses a line from the trace file. The line is expected
- * to be the PARSE \#cursor line.
+ * to be the STAT \#cursor line.
  *
- * The tmCursor associated with this PARSE is found, and updated to the new
- * source file line number. Only the most recent PARSE is stored for each tmCursor.
+ * The tmCursor associated with this STAT is found, and the closed flag updated.
+ * This is done because some cursors don't have a CLOSE after the various STATs.
  */
-bool tmTraceFile::parsePARSE(const string &thisLine) {
+bool tmTraceFile::parseSTAT(const string &thisLine) {
 
     if (mOptions->verbose()) {
-        *mDbg << "parsePARSE(" << mLineNumber << "): Entry." << endl;
+        *mDbg << "parseSTAT(" << mLineNumber << "): Entry." << endl;
     }
 
-    // PARSE #5924310096:c=0,e=28,p=0,cr=0,cu=0,mis=0,r=0,dep=0,og=4,plh=1388734953,tim=526735705337
+    // STAT #3074753576 id=1 ...
     string cursorID = "";
-    unsigned depth = 0;
     bool matchOk = true;
 
 #ifdef USE_REGEX
-    regex reg("PARSE\\s(#\\d+).*?dep=(\\d+).*");
+    regex reg("STAT\\s(#\\d+).*");
     smatch match;
 
-    // Extract the cursorID, the length and the depth.
+    // Extract the cursorID.
     if (regex_match(thisLine, match, reg)) {
         cursorID = match[1];
-        depth = stoul(match[2], NULL, 10);
     } else {
         matchOk = false;
     }
 #else
     cursorID = getCursor(thisLine, &matchOk);
-    if (matchOk) {
-        depth = getDigits(thisLine, "dep=", &matchOk);
-    }
 #endif  // USE_REGEX
 
     // Did it all work?
     if (!matchOk) {
         stringstream s;
-        s << "parsePARSE(): Cannot match against PARSE at line: "
+        s << "parseSTAT(): Cannot match against STAT at line: "
           <<  mLineNumber << "." << endl;
         cerr << s.str();
 
         if (mOptions->verbose()) {
             *mDbg << s.str()
-                  << "parsePARSE(): Exit." << endl;
+                  << "parseSTAT(): Exit." << endl;
         }
 
         return false;
     }
 
-    // We only care about user level SQL, so only depth 0.
-    if (depth) {
-        // Ignore this one.
+    // Find the existing cursor.
+    map<string, tmCursor *>::iterator i = findCursor(cursorID);
+
+    // Not found? Don't care.
+    if (i == mCursors.end()) {
         if (mOptions->verbose()) {
-            *mDbg << "parsePARSE(): Ignoring PARSE with dep=" << depth << '.' << endl
-                  << "parsePARSE(): Exit." << endl;
+            *mDbg << "parseSTAT(): CursorID: " << cursorID << " - Not found. Exit." << endl;
         }
 
         return true;
     }
 
-
-    // Find the existing cursor.
-    map<string, tmCursor *>::iterator i = findCursor(cursorID);
-
-    // Found?
-    if (i != mCursors.end()) {
-        // Yes. Thankfully! Update the PARSE line number and closed flag.
-        // i is an iterator to a pair<string, tmCursor *>
-        // So i->first is the string.
-        // And i->second is the tmCursor pointer.
-        i->second->setSQLParseLine(mLineNumber);
-        i->second->setClosed(false);
-    } else {
-        // Not found. Oh dear!
-        stringstream s;
-        s << "parsePARSE(): Found PARSE for cursor " << cursorID
-          << " but not found in existing cursor list." << endl;
-        cerr << s.str();
-
-        if (mOptions->verbose()) {
-            *mDbg << s.str()
-                  << "parsePARSE(): Exit." << endl;
-        }
-
-        return false;
+    // Found. Close it.
+    if (!(i->second->isClosed())) {
+        i->second->setClosed(true);
     }
 
-    // Looks like a good parse.
+    // Looks like a good stat.
     if (mOptions->verbose()) {
-        *mDbg << "parsePARSE(): Exit." << endl;
+        *mDbg << "parseSTAT(): CursorID: " << cursorID << " - now/already closed." << endl
+              << "parseSTAT(): Exit." << endl;
     }
 
     return true;
 }
+
+
 
 
