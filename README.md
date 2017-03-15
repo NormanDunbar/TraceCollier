@@ -8,20 +8,36 @@ An improved version of TraceMiner. Written in C++ and quite honestly, a better p
 ## Improvements Over TraceMiner.
 It *may* not be faster, C++ never usually is, but it's a lot more thorough and safer too. It is less likely to bale out when it can't understand something in a trace file. Also:
 
-- You don't have to reconfigure anything and recompile if you have wider (ie, more digits) cursor IDs on your system.
+- You don't have to reconfigure anything and recompile if you have wider (ie, more digits) cursor IDs on your system. It appears that the cursor IDs, since Oracle 10g, are the address in memory of the cursor, as opposed to a simple incrementing integer. I may be wrong.
+
 - Likewise, there's no recompilation required if you have more than a certain number of bind variables in a statement.
+
 - There is no longer a limit on the length of a bind variable's name.
+
 - If the trace file has a line that is " value=  Bind#n" then it is correctly coped with as two lines: a NULL bind value for the current bind variable, and the start of the following bind variable's data. Previously, you had to edit this line in the raw trace file. Not good!
-- NULL values for bind variables are processed according to whether they are PL/SQL statement `OUT` variables - in which case the variable name is *not* substituted by NULL, or, SQL statement NULLs, in which case the bind variable name *is* replaced by `NULL` - which is the correct behaviour).
-- If a bind variable is used in multiple places in the same SQL statement: `update bedrock set fred = :flintstone, barney = :rubble, wilma = :flintstone, betty = :rubble where fred = :old_fred or wilma = :old_wilma`, for example, then it is correctly reported in *each* of those places. TraceMiner, of old, didn't know what to do when that happened!
+
+- NULL values for bind variables are processed according to whether they are PL/SQL statement `OUT` variables. For PL/SQL `OUT` variables the variable's name is used as it's value - so you know it's an `OUT` value. For SQL statements, the bind's value must be `NULL`.
+
+- If a bind variable is used in multiple places in the same SQL statement `update some_table    set ... created_by = :username, creation_date = :today, last_updated_by = :username, last_update_date = :today, ... ;`, for example, then it is correctly reported in *each* of those places. TraceMiner, of old, didn't know what to do when that happened!
+
 - If a bind is a ROWID type (oacdty=11 or 69) then the value line will have no quotes around the ROWID value. The output for the bind in the report will wrap the value in a `CHARTOROWID()` call - just to be explicit. If, however, the bind type is a simple `VARCHAR2`/`CHAR` there can be no wrapping, so there isn't!
+
+- If a PL/SQL statement returns a ref_cursor (data type = 102), it's not possible to get a name or value for that particular bind as it simply points at an address in memory. In this situation, TraceMiner2 will replace the bind 'value' with the text "REF_CURSOR" - just so you know what's what.
+
 - The log file and verbose output debugging file are created in the same directory as the trace file. No more messing about with redirection etc.
+
 - The default report format is HTML. Plain text output is always going to be messy, as it replicates the input SQL statements, line feeds and all, which can be very messy indeed according to the developer or code generator that created them.
+
 - The report file now reports the `EXEC`, `PARSE`, `BINDS` lines as well as the line in the trace file where the SQL was first located.
+
 - `COMMIT` and/or `ROLLBACK` statements indicate whether or not data was actually changed. If you see a "COMMIT (Read Only)" in the report, you may be committing unnecessarily as the entire transaction made no changes.
+
 - The report file repeats the headings every 25 EXECs by default. This makes the need to scrolling back and forth to find out what the numbers in the various columns actually refer to, a lot less necessary! This can be defined with a command line argument `--pagesize=nn` or `-p=nn`. No spaces are permitted around the '=' sign.
+
 - A `TraceMiner2.css` file and a `favicon.ico` file are created in the same location as the trace file too. The CSS can be edited quite easily to match your installation standards - if you have any - or just to make things the way you prefer them. For some reason, Internet Explorer 11 completely ignores the icon file.
+
 - If a css or icon file, as above, are detected in the trace file's folder, then they are not overwritten or changed in anyway. This way any changes you make are preserved.
+
 - If running in verbose mode (`--verbose` or `-v`), the debugging output is much more readable, and much more verbose! If TraceMiner2 fails to parse a trace file, try running in verbose mode and see what gets output to the debug file.
 
 ## Download the Source
@@ -230,12 +246,12 @@ Data Code | Data Type             |
 208 | UROWID |
 231 | TIMESTAMP WITH LOCAL TIME ZONE |
 
-However, various other sources on the internet seem to disagree with what the above table shows. In addition, I have at least one Oracle Trace where a ROWIND is type 11 and not type 69, also, I have VARRAY as type 123 and not as type 108. Consistency? Who mentioned consistency?
+However, various other sources on the internet seem to disagree with what the above table shows. In addition, I have at least one Oracle Trace where a ROWID is type 11 and not type 69, also, I have VARRAY as type 123 and not as type 108. Consistency? Who mentioned consistency?
 
 TraceMiner2 has a simple manner of extracting the bind variable value, as briefly explained below.
 
 ### VARCHAR2 and NVARCHAR2
-If the data type is 1, and the value is wrapped in double quotes then the data value is simply the string between the quotes. TraceMiner2 replaces the double quotes with a single quotes to match those that the original SQL statement probably used.
+If the data type is 1, and the value is wrapped in double quotes then the data value is simply the string between the quotes. TraceMiner2 replaces the double quotes with single quotes to match those that the original SQL statement probably used.
 
 If the first character of a type 1 data bind is *not* a double quote, then the remainder of the trace line holds hex pairs in the format `0 30 0 31 0 32 0 33` etc (for '0123' in this example) and the data type is `NVARCHAR2`.
 
@@ -280,8 +296,24 @@ At present, and because mainly I have no test data, these data types are not cat
 ### VARRAY
 At present, I've only seen these in the array buffer that receives the lines of text from `DBMS_OUTPUT.GET_LINES()` call. In this case, the value is missing, so we simply substitute the array name again. It's not perfect, but it's better than nothing (or `NULL`!)
 
+### REF_CURSOR
+If a bind variable has data type 102, then it's almost certainly a `PL/SQL OUT` parameter defining a `REF_CURSOR`. As it is not possible to extract a value - the trace file simply dumps out an address in memory for these types - TraceMiner2 will indicate the bind's usage by substituting the text "REF_CURSOR" into the statement.
+
+The following is a brief example of what I mean above, it shows a `PL/SQL OUT` bind for a `REF_CURSOR`:
+
+````
+ Bind#3
+  oacdty=102 mxl=04(04) mxlc=00 mal=00 scl=00 pre=00
+  oacflg=01 fl2=1000000 frm=00 csi=00 siz=0 off=176
+  kxsbbbfp=c2a91548  bln=04  avl=04  flg=01
+  value=Unhandled datatype (102) found in kxsbndinf
+Dump of memory from 0x00000000C2A91548 to 0x00000000C2A9154C
+0C2A91540                   00000000                   [....]    
+````
+
 ### Others.
-Any data type not mentioned above are simply considered to be whatever is on the remainder of the trace file line after the text `value=`.
+Any data type not mentioned above are simply considered to have the value of whatever is on the remainder of the trace file line after the text `value=`.
+
 
 ## Appendix D - Bind Variable Details
 
@@ -355,12 +387,25 @@ The PDF version of the `README.md` (markdown) file was created using `pandoc`, w
 The PDF was created thus:
 
 ````
-pandoc --from markdown --to latex --output README.pdf \
---toc --toc-depth=3 \
---variable linkcolor=Gray --variable urlcolor=Gray \
---variable toccolor=Gray --variable margin-left=3cm \
---variable margin-right=3cm --variable margin-top=3cm \
---variable margin-bottom=4cm README.md
+export PANDOC_PDF=README.pdf
+export PANDOC_COLOUR="Cool Grey"
+
+pandoc --from markdown \
+--to latex \
+--output "${PANDOC_PDF}" \
+--table-of-contents \
+--toc-depth=3 \
+--listings \
+--include-in-header listings_setup.tex \
+--variable fontfamily="utopia" \
+--variable toccolor="${PANDOC_COLOUR}" \
+--variable linkcolor="${PANDOC_COLOUR}" \
+--variable urlcolor="${PANDOC_COLOUR}" \
+--variable margin-top=3cm \
+--variable margin-left=3cm \
+--variable margin-right=3cm \
+--variable margin-bottom=4cm \
+README.md
 ````
 
 Other, useful, output formats are `epub`, Word `docx`, Libre Office `odt`, `ReStructuredText`, `HTML` etc etc etc.
