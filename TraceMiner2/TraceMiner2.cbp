@@ -11,7 +11,7 @@
 				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="bcc" />
-				<Option parameters='&quot;C:\Users\ndunbar\Downloads\Oracle-Azure stuff\TraceMinerTraces\jdepy1t_ora_48496808.trc&quot; --verbose --pagesize=50' />
+				<Option parameters='&quot;c:\test_trace.trc&quot; --verbose --pagesize=50' />
 				<Compiler>
 					<Add option="-O2" />
 				</Compiler>
@@ -31,11 +31,13 @@
 		<Unit filename="favicon.h" />
 		<Unit filename="gnu.h" />
 		<Unit filename="parseBinds.cpp" />
+		<Unit filename="parseClose.cpp" />
 		<Unit filename="parseError.cpp" />
 		<Unit filename="parseExec.cpp" />
 		<Unit filename="parseParse.cpp" />
 		<Unit filename="parseParseError.cpp" />
 		<Unit filename="parseParsing.cpp" />
+		<Unit filename="parseStat.cpp" />
 		<Unit filename="parseXctend.cpp" />
 		<Unit filename="tmbind.cpp" />
 		<Unit filename="tmbind.h" />
