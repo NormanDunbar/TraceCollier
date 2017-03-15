@@ -48,6 +48,7 @@
     mSQLText = "";
     mSQLParseLine = 0;
     mBindCount = 0;
+    mBindsLine = 0;
     mCommandType = 0;
     mClosed = false;
 

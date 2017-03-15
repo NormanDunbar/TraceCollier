@@ -200,7 +200,8 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
 
     // Verbose?
     if (mOptions->verbose()) {
-        *mDbg << endl << "parsePARSING(): Creating Cursor: "
+        *mDbg << endl << "parsePARSING(): "
+              << (exists.second ? "Creating" : "ReCreating") << " Cursor: "
               << exists.first->first << endl
               << *(exists.first->second)
               << "parsePARSING(): Exit." << endl;

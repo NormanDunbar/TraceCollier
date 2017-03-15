@@ -94,7 +94,8 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
     if (i == mCursors.end()) {
         // Ignore this one, depth != 0.
         if (mOptions->verbose()) {
-            *mDbg << "parseBINDS(): Ignoring BINDS with non-zero depth." << endl
+            *mDbg << "parseBINDS(): Ignoring BINDS for cursor " << cursorID
+                  << ", which has a non-zero depth." << endl
                   << "parseBINDS(): Exit." << endl;
         }
 
@@ -178,6 +179,7 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
         // recursive SQL statement.
         //
         // Update. This: WTF?
+        //
         // BINDS #140136345356328:
         //  Bind#0
         //   oacdty=01 mxl=32(18) mxlc=00 mal=00 scl=00 pre=00
@@ -185,11 +187,13 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
         //   kxsbbbfp=7f7409169fe0  bln=32  avl=18  flg=05
         //   value="AAAaPmAAGAAAW71AAV"
         // XCTEND rlbk=0, rd_only=1, tim=1313055015575161
-        // EXEC #140136345356328:c=0,e=941,p=0,cr=0,cu=0,mis=1,r=0,dep=0,og=1,plh=530833069,tim=1313055015575178
+        // EXEC #140136345356328:c=0,e=941,p=0,cr=0,cu=0,mis=1,r=0,...
         //
-        // I was thinking, anything can terminate the BINDS section if it has no leading space? But then testing
-        // proved me wrong. NVARCHAR2 and NCHAR can have value= continuation lines that begin with a digit. Sigh.
-        // However, that's relatively uncommon.... (Famous Last Words!)
+        // I was thinking, anything can terminate the BINDS section if it
+        // has no leading space? But then testing proved me wrong.
+        // NVARCHAR2 and NCHAR can have value= continuation lines that begin
+        // with a digit. Sigh. However, that's relatively uncommon.
+        // (Famous Last Words!)
 
         string prefix = bindLine.substr(0, 6);
         if (prefix == "EXEC #" ||
@@ -332,6 +336,7 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
  *         25 = Unhandled data type.
  *         29 = Unhandled data type.
  *         96 = NCHAR. Dumped as Hex digits.
+ *        102 = PL/SQL OUT REF_CURSOR.
  *        123 = A buffer. A VARRAY. Usually seen in DBMS_OUTPUT.GET_LINES(:LINES, :NUM_LINES). The :LINES bind will be type 123.
  * Avl = Average length. Sometimes means the number of characters in the ASCII representation of the bind's value. Zero indicates a NULL
  *       or a PL/SQL OUT parameter.
@@ -510,14 +515,29 @@ bool tmTraceFile::extractBindData(const vector<string>::iterator start, const ve
 
     }
 
+    // PL/SQL or not, a data type 102 is definitely a REF_CURSOR.
+    if (dataType == 102) {
+        thisBind->setBindValue("REF_CURSOR");
+        if (mOptions->verbose()) {
+            *mDbg << "extractBindData(): Bind variable: " << thisBind->bindId()
+                  << "('" << thisBind->bindName() << "') for cursor: "
+                  << thisCursor->cursorId() << ", has dataType 102. "
+                  << "Setting value to 'REF_CURSOR'." << endl
+                  << "extractBindData(): Exit." << endl;
+        }
+
+        // I am done here.
+        return true;
+    }
+
     // If averageLength is zero, or, we didn't find a "value="
     // then this is most likely an OUT parameter for PL/SQL,
-    // OR, a NULL value for a BIND.
+    // OR, a NULL value for a BIND in plain SQL.
     if (valuePos == string::npos ||
         averageLength == 0) {
             // Find our current cursor's Oracle Action Code.
             if (thisCursor->commandType() != COMMAND_PLSQL) {
-                // No value= means NULL value.
+                // In SQL, no 'value=' means a NULL value.
                 thisBind->setBindValue("NULL");
             } else {
                 // PL/SQL = buffer, OUT parameter etc.
@@ -539,13 +559,13 @@ bool tmTraceFile::extractBindData(const vector<string>::iterator start, const ve
     if (!extractBindValue(valueStartsHere, thisBind)) {
         // Damn!
         stringstream s;
-        s << "parseBindData(): Failed to extract bind value for 'Bind#"
+        s << "extractBindData(): Call to extractBindValue() Failed to extract bind value for 'Bind#"
           << thisBind->bindId() << '\'' << endl;
         cerr  << s.str();
 
         if (mOptions->verbose()) {
             *mDbg << s.str()
-                  << "parseBindData(): Exit." << endl;
+                  << "extractBindData(): Exit." << endl;
         }
 
         return false;

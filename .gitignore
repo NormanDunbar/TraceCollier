@@ -49,3 +49,6 @@ bin/*
 *.pdf
 *.css
 
+#Except the README.pdf
+!README.pdf
+

@@ -687,7 +687,8 @@ map<string, tmCursor *>::iterator tmTraceFile::findCursor(const string &cursorID
         if (i != mCursors.end()) {
             // Not found.
             *mDbg << "findCursor(): Cursor: " << cursorID
-                  << " found." << endl;
+                  << " found. (SQL on line: " << i->second->sqlLineNumber()
+                  << ')' << endl;
         } else {
             // Not found.
             *mDbg << "findCursor(): Cursor: " << cursorID
