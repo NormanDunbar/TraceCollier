@@ -24,6 +24,8 @@ SOURCES=TraceMiner2/TraceMiner2.cpp \
         TraceMiner2/parseParsing.cpp \
         TraceMiner2/parseParse.cpp \
         TraceMiner2/parseBinds.cpp \
+        TraceMiner2/parseClose.cpp \
+        TraceMiner2/parseStat.cpp \
         TraceMiner2/parseParseError.cpp \
         TraceMiner2/parseXctend.cpp \
         TraceMiner2/parseError.cpp
