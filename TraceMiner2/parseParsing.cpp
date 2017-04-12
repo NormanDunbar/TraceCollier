@@ -110,7 +110,7 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
     // We only care about user level SQL so depth 0 only gets saved away.
     // This does mean that SQL executed in a PL/SQL call is ignored though.
     // So far, that's what my customer(s) want. (Hello Rich.)
-    if (depth) {
+    if (depth > mOptions->depth()) {
         // Ignore this one.
         if (mOptions->verbose()) {
             *mDbg << "parsePARSING(): Ignoring PARSING IN CURSOR with dep=" << depth << '.' << endl

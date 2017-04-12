@@ -90,8 +90,8 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
         return false;
     }
 
-    // We only care about user level SQL, so only depth 0.
-    if (depth) {
+    // We only care about user level SQL, so only depth <= depth().
+    if (depth > mOptions->depth()) {
         // Ignore this one.
         if (mOptions->verbose()) {
             *mDbg << "parseEXEC(): Ignoring EXEC with dep=" << depth << '.' << endl
@@ -116,7 +116,7 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
         return false;
     }
 
-    // We have a depth 0 EXEC with a valid cursor, increment the EXEC counter.
+    // We have a depth <= depth() EXEC with a valid cursor, increment the EXEC counter.
     // And check if we need a fresh set of report headings?
     if ((mExecCount > mOptions->maxExecs())) {
         // Throw a new set of headings to make reading easier.
@@ -171,6 +171,7 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
               << setw(MAXLINENUMBER) << thisCursor->sqlParseLine() << ' '
               << setw(MAXLINENUMBER) << thisCursor->bindsLine() << ' '
               << setw(MAXLINENUMBER) << thisCursor->sqlLineNumber() << ' '
+              << setw(MAXLINENUMBER) << depth << ' '
               << sqlText << ' '
               << endl;
     } else {
@@ -178,6 +179,7 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
               << "<td class=\"number\">" << thisCursor->sqlParseLine() << "</td>"
               << "<td class=\"number\">" << thisCursor->bindsLine() << "</td>"
               << "<td class=\"number\">" << thisCursor->sqlLineNumber() << "</td>"
+              << "<td class=\"number\">" << depth << "</td>"
               << "<td class=\"text\">" << sqlText << "</td></tr>"
               << endl;
     }

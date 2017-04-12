@@ -89,13 +89,13 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
 
 
     // Find the cursor for this exec. If it's not there
-    // then it's not a depth=0 cursor.
+    // then it's not a traced cursor.
     map<string, tmCursor *>::iterator i = findCursor(cursorID);
     if (i == mCursors.end()) {
-        // Ignore this one, depth != 0.
+        // Ignore this one, depth != depth().
         if (mOptions->verbose()) {
             *mDbg << "parseBINDS(): Ignoring BINDS for cursor " << cursorID
-                  << ", which has a non-zero depth." << endl
+                  << ", which has an 'out of range' depth." << endl
                   << "parseBINDS(): Exit." << endl;
         }
 
@@ -103,7 +103,7 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
     }
 
     // We have a valid cursor, but has it been closed?
-    // This catches reuse of cursors with fewer binds, and at depth > 0.
+    // This catches reuse of cursors with fewer binds, and at depth > depth().
     tmCursor *thisCursor = i->second;
     if (mOptions->verbose()) {
         *mDbg << "parseBINDS(): Found cursor: " << i->first << '.' << endl;

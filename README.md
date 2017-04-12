@@ -40,6 +40,8 @@ It *may* not be faster, C++ never usually is, but it's a lot more thorough and s
 
 - If running in verbose mode (`--verbose` or `-v`), the debugging output is much more readable, and much more verbose! If TraceMiner2 fails to parse a trace file, try running in verbose mode and see what gets output to the debug file.
 
+- You can specify the maximum depth for cursors to be reported. The default is zero. (`--depth=n` or `-d=n`) Only cursors with a lower or equal depth will be reported. If you use `--depth=3` then only cursors with depth 0, 1 2 or 3 will be reported on.
+
 ## Download the Source
 
 Go to <https://github.com/NormanDunbar/TraceMiner2> and click the clone or download button. Choose the option to download a zip file.
@@ -99,11 +101,13 @@ Possible options are:
 
 - `--help` or `-h` or `-?` which provides brief help about the application and its options, then exits without doing anything.
 
-- `--pagesize=nn` or `-p=nn` which sets the report page size to `nn` EXEC statements with depth zero. This throws a couple of blank lines and repeats the headings in a text format report, or, starts a new table with appropriate headings in an HTML report. In either case, it makes reading easier. The default is 25 and this works well using Firefox on Windows 7, or Linux with a decent sized monitor. Even Internet Explorer copes!
+- `--pagesize=nn` or `-p=nn` which sets the report page size to `nn` EXEC statements. This throws a couple of blank lines and repeats the headings in a text format report, or, starts a new table with appropriate headings in an HTML report. In either case, it makes reading easier. The default is 25 and this works well using Firefox on Windows 7, or Linux with a decent sized monitor. Even Internet Explorer copes!
 
 - `--text` or `-t` which forces the report file to be created in plain text mode. The default is to create the report in HTML format.
 
 - `--verbose` or `-v` which creates a debugging file that will contain a huge amount of debugging information. If you have problems with TraceMiner2 then this file will help me debug things. It's best, really, that you don't run the application in this mode unless absolutely necessary! You have been warned. :-)
+
+- `--depth=n` or `-d=n` which determines which cursors will be examined and reported on. Any cursor with a `PARSE`, `EXEC` or `CLOSE`, with a `dep=` value less than or equal to the supplied `--depth=n` will be reported. Anything with a `dep=` value greater than the requested depth will be ignored.
 
 Traceminer2 will create:
 

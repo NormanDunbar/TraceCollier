@@ -50,7 +50,7 @@ bool tmTraceFile::parseCLOSE(const string &thisLine) {
         *mDbg << "parseCLOSE(" << mLineNumber << "): Entry." << endl;
     }
 
-    // CLOSE #4155332696:c=0,e=1,dep=1,type=3,tim=1039827725793
+    // CLOSE #4155332696:c=0,e=1,dep=0,type=3,tim=1039827725793
     string cursorID = "";
     unsigned depth = 0;
     bool matchOk = true;
@@ -94,7 +94,7 @@ bool tmTraceFile::parseCLOSE(const string &thisLine) {
     // we don't find it.
 
     /*
-    if (depth) {
+    if (depth > mOptions->depth()) {
         // Ignore this one.
         if (mOptions->verbose()) {
             *mDbg << "parseCLOSE(): Ignoring CLOSE with dep=" << depth << '.' << endl
@@ -122,7 +122,7 @@ bool tmTraceFile::parseCLOSE(const string &thisLine) {
         // around an Oracle bug that I think I just found.
 
         stringstream s;
-        if (!depth) {
+        if (depth > mOptions->depth()) {
             s << "parseCLOSE(): Found CLOSE for cursor " << cursorID
               << " at line: " << mLineNumber
               << ", but not found in existing cursor list." << endl;

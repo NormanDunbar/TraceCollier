@@ -42,6 +42,7 @@ tmOptions::tmOptions()
     mReportFile = "";
     mDebugFile = "";
     mCssFileName = "";
+    mDepth = 0;
 }
 
 /** @brief Destructor for a tmOptions object.
@@ -80,6 +81,8 @@ bool tmOptions::parseArgs(int argc, char *argv[]) {
             thisArg[c] = tolower(thisArg[c]);
         }
 
+        //cerr << "Argument '" << thisArg << "' - checking..." << endl;
+
         // Try verbose first ...
         if ((thisArg == "--verbose") ||
             (thisArg == "-v")) {
@@ -87,7 +90,7 @@ bool tmOptions::parseArgs(int argc, char *argv[]) {
             continue;
         }
 
-        // Try pagesize first ...
+        // Try pagesize ...
         if ((thisArg.substr(0, 10) == "--pagesize") ||
             (thisArg.substr(0, 2) == "-p")) {
             bool pageOk = true;
@@ -95,7 +98,6 @@ bool tmOptions::parseArgs(int argc, char *argv[]) {
             if (pageOk) {
                 mMaxExecs = --temp;
             } else {
-
                 // Try p instead ...
                 unsigned temp = getDigits(thisArg, "-p=", &pageOk);
                 if (pageOk) {
@@ -110,6 +112,25 @@ bool tmOptions::parseArgs(int argc, char *argv[]) {
         if ((thisArg == "--text") ||
             (thisArg == "-t")) {
             mHtml = false;
+            continue;
+        }
+
+        // Nope? Try DEPTH then ...
+        if ((thisArg.substr(0, 7) == "--depth") ||
+            (thisArg.substr(0,2) == "-d")) {
+
+            bool depthOk = true;
+            unsigned temp = getDigits(thisArg, "--depth=", &depthOk);
+            if (depthOk) {
+                mDepth = temp;
+            } else {
+                // Try d instead ...
+                unsigned temp = getDigits(thisArg, "-d=", &depthOk);
+                if (depthOk) {
+                    mDepth = temp;
+                }
+            }
+
             continue;
         }
 
@@ -191,6 +212,10 @@ void tmOptions::usage() {
     cerr << "'-p=nn' or '--pagesize=nn'. Define the page size for the report." << endl;
     cerr << "The headings for the report are thrown every 'nn' EXECs (dep=0) found." << endl;
     cerr << "The default is 25 which is a good size on Firefox on Windows 7!" << endl;
+    cerr << "There are no spaces permitted around the '=' sign." << endl << endl;
+
+    cerr << "'-d=nn' or '--depth=nn'. Define the maximum depth we are interested in." << endl;
+    cerr << "Any SQL statements executed at this depth, or 'lower' will be traced." << endl;
     cerr << "There are no spaces permitted around the '=' sign." << endl << endl;
 
     cerr << "'-v' or '--verbose' Turn on verbose mode." << endl;

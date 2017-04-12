@@ -92,7 +92,7 @@ bool tmTraceFile::parseERROR(const string &thisLine) {
     // a cursor for the cursorID which would indicate user level SQL.
     map<string, tmCursor *>::iterator i = findCursor(cursorID);
 
-    // If we found it, it must be depth=0.
+    // If we found it, it must be depth <= depth().
     // Otherwise, quietly ignore it, it's recursive.
     if (i != mCursors.end()) {
         if (mOptions->html()) {
@@ -100,9 +100,11 @@ bool tmTraceFile::parseERROR(const string &thisLine) {
                   << setw(MAXLINENUMBER) << ' ' << ' '
                   << setw(MAXLINENUMBER) << ' ' << ' '
                   << setw(MAXLINENUMBER) << ' ' << ' '
+                  << setw(MAXLINENUMBER) << ' ' << ' '
                   << " ERROR: ORA-" << errorCode << endl;
         } else {
             *mOfs << "<tr><td class=\"number\">" << mLineNumber << "</td>"
+                  << "<td>" << "&nbsp;" << "</td>"
                   << "<td>" << "&nbsp;" << "</td>"
                   << "<td>" << "&nbsp;" << "</td>"
                   << "<td>" << "&nbsp;" << "</td><td class=\"text\">"

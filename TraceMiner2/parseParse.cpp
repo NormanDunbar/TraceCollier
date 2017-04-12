@@ -88,8 +88,8 @@ bool tmTraceFile::parsePARSE(const string &thisLine) {
         return false;
     }
 
-    // We only care about user level SQL, so only depth 0.
-    if (depth) {
+    // We only care about user level SQL, so only depth <= depth().
+    if (depth > mOptions->depth()) {
         // Ignore this one.
         if (mOptions->verbose()) {
             *mDbg << "parsePARSE(): Ignoring PARSE with dep=" << depth << '.' << endl

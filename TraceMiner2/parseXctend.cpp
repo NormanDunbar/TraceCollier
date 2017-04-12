@@ -94,10 +94,12 @@ bool tmTraceFile::parseXCTEND(const string &thisLine) {
               << setw(MAXLINENUMBER) << ' ' << ' '
               << setw(MAXLINENUMBER) << ' ' << ' '
               << setw(MAXLINENUMBER) << ' ' << ' '
+              << setw(MAXLINENUMBER) << ' ' << ' '
               << (rollBack ? "ROLLBACK " : "COMMIT ")
               << (readOnly ? "(Read Only)" : "(Read Write)") << endl;
     } else {
         *mOfs << "<tr><td class=\"number\">" << mLineNumber << "</td>"
+              << "<td>" << "&nbsp;" << "</td>"
               << "<td>" << "&nbsp;" << "</td>"
               << "<td>" << "&nbsp;" << "</td>"
               << "<td>" << "&nbsp;" << "</td><td class=\"text\">"

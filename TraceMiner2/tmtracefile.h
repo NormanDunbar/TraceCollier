@@ -103,7 +103,7 @@ class tmTraceFile
     protected:
 
     private:
-        map<string, tmCursor *> mCursors;    /**< Std::map holding all depth=0 cursors for this trace file. */
+        map<string, tmCursor *> mCursors;    /**< Std::map holding all depth <= --depth cursors for this trace file. */
         unsigned mLineNumber;                /**< Current line number being parsed. */
         int mExecCount;                      /**< How many EXEC statements have we hit so far? */
         tmOptions *mOptions;                 /**< Pointer to (parsed) command line options. */
