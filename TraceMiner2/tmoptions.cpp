@@ -43,6 +43,7 @@ tmOptions::tmOptions()
     mDebugFile = "";
     mCssFileName = "";
     mDepth = 0;
+    mQuiet = false;
 }
 
 /** @brief Destructor for a tmOptions object.
@@ -131,6 +132,13 @@ bool tmOptions::parseArgs(int argc, char *argv[]) {
                 }
             }
 
+            continue;
+        }
+
+        // Might be QUIET, maybe?
+        if ((thisArg == "--quiet") ||
+            (thisArg == "-q")) {
+            mQuiet = true;
             continue;
         }
 
@@ -223,6 +231,8 @@ void tmOptions::usage() {
 
     cerr << "'-t' or '--text' Turn off HTML mode. The report file will be in TEXT format." << endl;
     cerr << "The default is for the report to be in HTML format." << endl << endl;
+
+    cerr << "'-q' or '--quiet' Turn off reporting of 'Cursor: #cccccccc created at line nnnn' messages." << endl << endl;
 
     cerr << "'-?'. '-h' or '--help' Displays this help, and exits." << endl << endl;
 

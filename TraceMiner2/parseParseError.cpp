@@ -56,6 +56,9 @@ bool tmTraceFile::parsePARSEERROR(const string &thisLine) {
               << "</td></tr>" << endl;
     }
 
+    // And on the command line.
+    cout << "PARSE ERROR detected at line: " << mLineNumber << endl;
+
 
     // Looks like a good parse.
     if (mOptions->verbose()) {

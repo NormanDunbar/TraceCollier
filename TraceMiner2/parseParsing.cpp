@@ -137,9 +137,11 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
     // Set the command type for later use.
     thisCursor->setCommandType(commandType);
 
-    // Tell the world.
-    cout << "Cursor: " << thisCursor->cursorId()
-         << " created at line: " << thisCursor->sqlLineNumber() << endl;
+    // Tell the world, unless we are running quetly.
+    if (!mOptions->quiet()) {
+        cout << "Cursor: " << thisCursor->cursorId()
+             << " created at line: " << thisCursor->sqlLineNumber() << endl;
+    }
 
     // Extract the SQL Text into a stream. This handles end of line for us.
     string aLine;

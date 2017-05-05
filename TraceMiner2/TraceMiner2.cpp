@@ -103,6 +103,8 @@
  * The optional parameters are as follows:
  *
  * @li --verbose or -v - indicates that you wish to generate lots of output for debugging purposes.
+ * @li --quiet or -q - indicates that you do not wish to see "Cursor: #cccc created at line: nnnn" messages.
+ * on the screen while parsing is taking place. Any ERRORs or PARSE ERRORS will still be displayed.
  * @li --help -h or -? - indicates that you want help. The program will exit after displaying the
  * usage details.
  * @li --text or -t - indicates that you wish to have the report formatted in plain text as opposed to
