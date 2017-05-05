@@ -11,7 +11,7 @@
 				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="bcc" />
-				<Option parameters='&quot;c:\test_trace.trc&quot; --verbose --pagesize=50' />
+				<Option parameters='&quot;c:\sourcecode\cfg_ora_4248.trc&quot; --verbose  --depth=1 --pagesize=20' />
 				<Compiler>
 					<Add option="-O2" />
 				</Compiler>

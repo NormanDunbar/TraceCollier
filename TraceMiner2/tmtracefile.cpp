@@ -264,6 +264,9 @@ bool tmTraceFile::parseTraceFile()
             // ERROR #cursorID
             if (chunk == "ERROR" ||
                 chunk == "ERROR #") {
+                if (!parseERROR(traceLine)) {
+                    return false;
+                }
                 continue;
             }
 

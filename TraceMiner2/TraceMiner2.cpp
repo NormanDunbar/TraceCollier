@@ -107,6 +107,10 @@
  * usage details.
  * @li --text or -t - indicates that you wish to have the report formatted in plain text as opposed to
  * HTML text. Good luck with that option! ;-)
+ * @li --depth=n or -d=n - indicates the maximum depth of recursive cursors that you wish to report on
+ * which is useful when a PL/SQL calls is at depth=0, you wouold be interested in depth=1, for example.
+ * @li --pagesize=nn or -p=nn - indicates how many EXEC statements you wish to display in each HTML table
+ * in the report. This meakes scrolling to the headings in long report files a lot easier!
  *
  * @section sec-mit-licence MIT Licence
  *
@@ -143,7 +147,7 @@
 #include "favicon.h"
 
 // Version number.
-const float version = 0.04;
+const float version = 0.05;
 
 // Various flags set according to the passed parameters.
 tmOptions options;

@@ -94,24 +94,32 @@ bool tmTraceFile::parseERROR(const string &thisLine) {
 
     // If we found it, it must be depth <= depth().
     // Otherwise, quietly ignore it, it's recursive.
+    string oraError = "ORA-" + std::to_string(errorCode);
+
     if (i != mCursors.end()) {
-        if (mOptions->html()) {
+        // Report the error in the report file.
+        if (!mOptions->html()) {
             *mOfs << setw(MAXLINENUMBER) << mLineNumber << ' '
                   << setw(MAXLINENUMBER) << ' ' << ' '
                   << setw(MAXLINENUMBER) << ' ' << ' '
                   << setw(MAXLINENUMBER) << ' ' << ' '
                   << setw(MAXLINENUMBER) << ' ' << ' '
-                  << " ERROR: ORA-" << errorCode << endl;
+                  << " ERROR: " << oraError << endl;
         } else {
             *mOfs << "<tr><td class=\"number\">" << mLineNumber << "</td>"
                   << "<td>" << "&nbsp;" << "</td>"
                   << "<td>" << "&nbsp;" << "</td>"
                   << "<td>" << "&nbsp;" << "</td>"
                   << "<td>" << "&nbsp;" << "</td><td class=\"text\">"
-                  << " ERROR: ORA-" << errorCode
+                  << " ERROR: " << oraError
                   << "</td></tr>" << endl;
 
         }
+
+        // And on the command line.
+        cout << "ERROR " << oraError << " in Cursor: " << i->second->cursorId()
+             << " detected at line: " << mLineNumber << endl;
+
     }
 
     // Looks like a good parse.
