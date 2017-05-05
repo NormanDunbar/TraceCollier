@@ -107,6 +107,8 @@ Possible options are:
 
 - `--verbose` or `-v` which creates a debugging file that will contain a huge amount of debugging information. If you have problems with TraceMiner2 then this file will help me debug things. It's best, really, that you don't run the application in this mode unless absolutely necessary! You have been warned. :-)
 
+- `--quiet` or `-q` will turn off all the `Cursor: #cccccc created at line nnnn` messages. Any `ERROR #ccccc` or `PARSE ERROR #cccccc` lines will still be reported though. You can't turn those off.
+
 - `--depth=n` or `-d=n` which determines which cursors will be examined and reported on. Any cursor with a `PARSE`, `EXEC` or `CLOSE`, with a `dep=` value less than or equal to the supplied `--depth=n` will be reported. Anything with a `dep=` value greater than the requested depth will be ignored.
 
 Traceminer2 will create:
