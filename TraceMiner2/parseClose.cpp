@@ -88,24 +88,6 @@ bool tmTraceFile::parseCLOSE(const string &thisLine) {
         return false;
     }
 
-    // We only care about user level SQL, so only depth 0.
-    // Well, that's the theory but we have bugs to deal with
-    // so we try to close anything we find, but don't barf if
-    // we don't find it.
-
-    /*
-    if (depth > mOptions->depth()) {
-        // Ignore this one.
-        if (mOptions->verbose()) {
-            *mDbg << "parseCLOSE(): Ignoring CLOSE with dep=" << depth << '.' << endl
-                  << "parseCLOSE(): Exit." << endl;
-        }
-
-        return true;
-    }
-    */
-
-
     // Find the existing cursor.
     map<string, tmCursor *>::iterator i = findCursor(cursorID);
 
@@ -122,7 +104,7 @@ bool tmTraceFile::parseCLOSE(const string &thisLine) {
         // around an Oracle bug that I think I just found.
 
         stringstream s;
-        if (depth > mOptions->depth()) {
+        if (depth <= mOptions->depth()) {
             s << "parseCLOSE(): Found CLOSE for cursor " << cursorID
               << " at line: " << mLineNumber
               << ", but not found in existing cursor list." << endl;
