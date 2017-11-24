@@ -39,7 +39,7 @@
 // Use macros to calculate a GNU compiler version to see if we can
 // use regex or not.
 #if defined (USE_REGEX)
-    #undefine USE_REGEX
+    #undef USE_REGEX
 #endif // defined
 
 #if defined (__GNUC__)

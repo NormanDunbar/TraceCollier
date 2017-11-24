@@ -202,6 +202,17 @@ bool tmCursor::buildBindMap(const string &sql) {
             continue;
         }
 
+        // Don't consider anything as a bind variable unless the
+        // colon is followed by a letter, digit or underscore.
+        if ((thisSQL.at(colonPos + 1) != '_') &&
+            (!isdigit(thisSQL.at(colonPos + 1))) &&
+            (!isalpha(thisSQL.at(colonPos + 1))))
+        {
+            colonPos += 2;
+            continue;
+        }
+
+
         // Ok, extract a bind variable name.
         if (!extractBindName(thisSQL, colonPos, bindName)) {
             cerr << "buildBindMap(): extractBindName() failed." << endl;
