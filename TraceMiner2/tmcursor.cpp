@@ -59,6 +59,7 @@
 tmCursor::~tmCursor() {
     // Anything to do to kill a tmCursor?
     // Of course there is, get shot of all the binds in the map.
+    //cerr << endl << "Deleting Cursor: " << mCursorId; // Debugging.
     cleanUp();
 }
 
@@ -72,11 +73,19 @@ tmCursor::~tmCursor() {
  */
 void tmCursor::cleanUp() {
 
-    for (map<unsigned, tmBind *>::iterator i = mBinds.begin(); i != mBinds.end(); ++i) {
-        // Dump the bind details for debugging.
-        //cerr << *(i->second);
-        mBinds.erase(i);
-        delete i->second;
+    //short bindCount = 0;
+    if (mBinds.size()) {
+        for (map<unsigned, tmBind *>::iterator i = mBinds.begin(); i != mBinds.end(); ++i) {
+            // Dump the bind details for debugging.
+            //cerr << "cleanUp(): Bind number: " << bindCount++ << endl;
+            //cerr << *(i->second);
+
+            // Destruct this particular tmBind.
+            delete i->second;
+        }
+
+        // Finally, clear the map.
+        mBinds.clear();
     }
 }
 
