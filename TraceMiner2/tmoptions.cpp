@@ -78,7 +78,7 @@ bool tmOptions::parseArgs(int argc, char *argv[]) {
         // Convert args to lower case and to strings.
         // Not really safe with Unicode though!
         string thisArg = string(argv[arg]);
-        for (int c = 0; c < thisArg.length(); c++) {
+        for (int c = 0; c < (int)thisArg.length(); c++) {
             thisArg[c] = tolower(thisArg[c]);
         }
 

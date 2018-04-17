@@ -743,9 +743,13 @@ void tmTraceFile::cleanUp() {
                 *mDbg << endl << "cleanUP(): Freeing cursor: " << i->second->cursorId() << endl;
                 *mDbg << *(i->second);
             }
-            mCursors.erase(i);
+
+            // Destruct the tmCursor.
             delete i->second;
         }
+
+        // Finally, clear the map.
+        mCursors.clear();
     }
 
     // we must do this last of all, or the above might blow up!
