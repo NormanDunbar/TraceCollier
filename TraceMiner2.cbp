@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="TraceMiner2" />
+		<Option pch_mode="2" />
+		<Option compiler="gnu_gcc_compiler3264bit_tdm-gcc-64" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/TraceMiner2" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gnu_gcc_compiler3264bit_tdm-gcc-64" />
+				<Option parameters='--pagesize=20  &quot;C:\Users\hisg494\Downloads\Trace Files\NORM.trc&quot; --depth=10 ' />
+				<Compiler>
+					<Add option="-std=c++14" />
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/TraceMiner2" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gnu_gcc_compiler3264bit_tdm-gcc-64" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-std=c++14" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<Unit filename="TraceMiner2/TraceMiner2.cpp" />
+		<Unit filename="TraceMiner2/TraceMiner2.css" />
+		<Unit filename="TraceMiner2/TraceMiner2.h" />
+		<Unit filename="TraceMiner2/css.h" />
+		<Unit filename="TraceMiner2/favicon.h" />
+		<Unit filename="TraceMiner2/gnu.h" />
+		<Unit filename="TraceMiner2/parseBinds.cpp" />
+		<Unit filename="TraceMiner2/parseClose.cpp" />
+		<Unit filename="TraceMiner2/parseError.cpp" />
+		<Unit filename="TraceMiner2/parseExec.cpp" />
+		<Unit filename="TraceMiner2/parseParse.cpp" />
+		<Unit filename="TraceMiner2/parseParseError.cpp" />
+		<Unit filename="TraceMiner2/parseParsing.cpp" />
+		<Unit filename="TraceMiner2/parseStat.cpp" />
+		<Unit filename="TraceMiner2/parseXctend.cpp" />
+		<Unit filename="TraceMiner2/tmbind.cpp" />
+		<Unit filename="TraceMiner2/tmbind.h" />
+		<Unit filename="TraceMiner2/tmcursor.cpp" />
+		<Unit filename="TraceMiner2/tmcursor.h" />
+		<Unit filename="TraceMiner2/tmoptions.cpp" />
+		<Unit filename="TraceMiner2/tmoptions.h" />
+		<Unit filename="TraceMiner2/tmtracefile.cpp" />
+		<Unit filename="TraceMiner2/tmtracefile.h" />
+		<Unit filename="TraceMiner2/utilities.cpp" />
+		<Unit filename="TraceMiner2/utilities.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
