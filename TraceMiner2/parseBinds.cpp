@@ -155,6 +155,29 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
         // Get next line.
         ok = readTraceLine(&bindLine);
 
+        // Oracle has been known to throw up a bind's value line where all of
+        // it is on the first line, but a second line contains the closing double quote. For example:
+        //
+        //  Bind#1
+        //  oacdty=01 mxl=128(89) mxlc=00 mal=00 scl=00 pre=00
+        //  oacflg=20 fl2=0000 frm=01 csi=46 siz=0 off=24
+        //  kxsbbbfp=121c43e50  bln=128  avl=89  flg=01
+        //  value="ORA-02291: integrity constraint (HEDW_EDW.CPE_PCL_ID_FK) violated - parent key not found
+        //"
+        // Bind#2
+        // ...
+        //
+        // So, we need to trap this and append it to the previous line we read.
+        if (bindLine == "\"") {
+                string temp = bindData.back();
+                cerr << "Got this: [" << temp << "]" << endl;
+                temp.push_back('"');
+                bindData.pop_back();
+                bindData.push_back(temp);
+                cerr << "Put this: [" << temp << "]" << endl;
+                continue;
+            }
+
         // Strip out those damned timestamp lines!
         if (bindLine.substr(0, 4) == "*** ")
         {
