@@ -113,6 +113,8 @@
  * which is useful when a PL/SQL calls is at depth=0, you wouold be interested in depth=1, for example.
  * @li --pagesize=nn or -p=nn - indicates how many EXEC statements you wish to display in each HTML table
  * in the report. This meakes scrolling to the headings in long report files a lot easier!
+ * @li --feedback=nn or -f=nn - indicates how often you want feedback on progress reading the trace file. Zero
+ * disables feedback. The default is every 100,000 lines read. Useful on larger trace files.
  *
  * @section sec-mit-licence MIT Licence
  *
@@ -149,7 +151,7 @@
 #include "favicon.h"
 
 // Version number.
-const float version = 0.05;
+const float version = 0.06;
 
 // Various flags set according to the passed parameters.
 tmOptions options;

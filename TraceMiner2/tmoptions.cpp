@@ -44,6 +44,7 @@ tmOptions::tmOptions()
     mCssFileName = "";
     mDepth = 0;
     mQuiet = false;
+    mFeedback = 1e5;
 }
 
 /** @brief Destructor for a tmOptions object.
@@ -135,6 +136,26 @@ bool tmOptions::parseArgs(int argc, char *argv[]) {
             continue;
         }
 
+        // Nope? Try FEEDBACK then ...
+        if ((thisArg.substr(0, 10) == "--feedback") ||
+            (thisArg.substr(0,2) == "-f")) {
+
+            bool feedbackOk = true;
+            unsigned temp = getDigits(thisArg, "--feedback=", &feedbackOk);
+            if (feedbackOk) {
+                mFeedback = temp;
+            } else {
+                // Try d instead ...
+                unsigned temp = getDigits(thisArg, "-d=", &feedbackOk);
+                if (feedbackOk) {
+                    mFeedback = temp;
+                }
+            }
+
+            continue;
+        }
+
+
         // Might be QUIET, maybe?
         if ((thisArg == "--quiet") ||
             (thisArg == "-q")) {
@@ -218,12 +239,17 @@ void tmOptions::usage() {
 
     cerr << "OPTIONS:" << endl << endl;
     cerr << "'-p=nn' or '--pagesize=nn'. Define the page size for the report." << endl;
-    cerr << "The headings for the report are thrown every 'nn' EXECs (dep=0) found." << endl;
+    cerr << "The headings for the report are thrown every 'nn' EXECs found." << endl;
     cerr << "The default is 25 which is a good size on Firefox on Windows 7!" << endl;
     cerr << "There are no spaces permitted around the '=' sign." << endl << endl;
 
     cerr << "'-d=nn' or '--depth=nn'. Define the maximum depth we are interested in." << endl;
-    cerr << "Any SQL statements executed at this depth, or 'lower' will be traced." << endl;
+    cerr << "Any SQL statements executed at depths between 0 and this depth will be traced." << endl;
+    cerr << "There are no spaces permitted around the '=' sign." << endl << endl;
+
+    cerr << "'-f=nn' or '--feedback=nn'. Define the feedback interval we are interested in." << endl;
+    cerr << "Every n lines, a message is output to stderr indicating the lines read." << endl;
+    cerr << "The deafult is every 100,00 lines. Use zero to disable feedback." << endl;
     cerr << "There are no spaces permitted around the '=' sign." << endl << endl;
 
     cerr << "'-v' or '--verbose' Turn on verbose mode." << endl;

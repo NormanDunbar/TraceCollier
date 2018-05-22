@@ -47,6 +47,7 @@ tmTraceFile::tmTraceFile(tmOptions *options)
     mSystemName = "";
     mNodeName = "";
     mLineNumber = 0;
+    mBatchCount = 0;
     mExecCount = -1;
     mUnprocessedLine.clear();
     mIfs = NULL;
@@ -652,6 +653,14 @@ bool tmTraceFile::readTraceLine(string *aLine) {
     while (true && mIfs->good()) {
         getline(*mIfs, *aLine);
         mLineNumber++;
+        mBatchCount++;
+
+        // Give some feedback on big trace files.
+        if (mBatchCount == mOptions->feedBack()) {
+            cerr << "readTraceLine(): " << mLineNumber << " lines read so far..."
+                 << endl;
+            mBatchCount = 0;
+        }
 
         // We ignore empty lines, EOF() etc.
         if (!aLine->empty()) {
