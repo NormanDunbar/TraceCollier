@@ -47,6 +47,7 @@ tmTraceFile::tmTraceFile(tmOptions *options)
     mSystemName = "";
     mNodeName = "";
     mLineNumber = 0;
+    mBatchCount = 0;
     mExecCount = -1;
     mUnprocessedLine.clear();
     mIfs = NULL;
@@ -166,6 +167,10 @@ bool tmTraceFile::parseTraceFile()
     string chunk;
     bool matchOk = true;
 
+    if (mOptions->verbose()) {
+        *mDbg << "parseTraceFile(): Entry." << endl;
+    }
+
 #ifdef USE_REGEX
     // Regex to extract the first command on the line.
     regex reg("(.*?)\\s#\\d+.*");
@@ -214,7 +219,7 @@ bool tmTraceFile::parseTraceFile()
             if (chunk == "PARSING IN CURSOR" ||
                 chunk == "PARSING") {
                 if (!parsePARSING(traceLine)) {
-                    return false;
+                    goto errorExit;;
                 }
                 continue;
             }
@@ -222,6 +227,9 @@ bool tmTraceFile::parseTraceFile()
             // PARSE ERROR
             if (chunk == "PARSE ERROR" ||
                 chunk == "PARSE E") {
+                if (!parsePARSEERROR(traceLine)) {
+                    goto errorExit;;
+                }
                 continue;
             }
 
@@ -229,7 +237,7 @@ bool tmTraceFile::parseTraceFile()
             if (chunk == "PARSE" ||
                 chunk == "PARSE #") {
                 if (!parsePARSE(traceLine)) {
-                    return false;
+                    goto errorExit;
                 }
                 continue;
             }
@@ -238,7 +246,7 @@ bool tmTraceFile::parseTraceFile()
             if (chunk == "BINDS" ||
                 chunk == "BINDS #") {
                 if (!parseBINDS(traceLine)) {
-                    return false;
+                    goto errorExit;
                 }
                 continue;
             }
@@ -247,7 +255,7 @@ bool tmTraceFile::parseTraceFile()
             if (chunk == "CLOSE" ||
                 chunk == "CLOSE #") {
                 if (!parseCLOSE(traceLine)) {
-                    return false;
+                    goto errorExit;
                 }
                 continue;
             }
@@ -256,7 +264,7 @@ bool tmTraceFile::parseTraceFile()
             if (chunk == "STAT" ||
                 chunk.substr(0, 6) == "STAT #") {
                 if (!parseSTAT(traceLine)) {
-                    return false;
+                    goto errorExit;
                 }
                 continue;
             }
@@ -265,7 +273,7 @@ bool tmTraceFile::parseTraceFile()
             if (chunk == "ERROR" ||
                 chunk == "ERROR #") {
                 if (!parseERROR(traceLine)) {
-                    return false;
+                    goto errorExit;
                 }
                 continue;
             }
@@ -273,7 +281,7 @@ bool tmTraceFile::parseTraceFile()
             if (chunk == "EXEC" ||
                 chunk.substr(0, 6) == "EXEC #") {
                 if (!parseEXEC(traceLine)) {
-                    return false;
+                    goto errorExit;
                 }
                 continue;
             }
@@ -289,7 +297,7 @@ bool tmTraceFile::parseTraceFile()
             // So no regex_match()!
             if (traceLine.substr(0, 6) == "XCTEND") {
                 if (!parseXCTEND(traceLine)) {
-                    return false;
+                    goto errorExit;
                 }
                 continue;
             }
@@ -297,7 +305,21 @@ bool tmTraceFile::parseTraceFile()
     }
 
     // We have a good parse.
+    if (mOptions->verbose()) {
+        *mDbg << "parseTraceFile(): Exit." << endl;
+    }
+
     return true;
+
+// Exit here on any errors.
+errorExit:
+
+    if (mOptions->verbose()) {
+        *mDbg << "parseTraceFile(): Error exit." << endl;
+    }
+
+    return false;
+
 }
 
 
@@ -652,6 +674,14 @@ bool tmTraceFile::readTraceLine(string *aLine) {
     while (true && mIfs->good()) {
         getline(*mIfs, *aLine);
         mLineNumber++;
+        mBatchCount++;
+
+        // Give some feedback on big trace files.
+        if (mBatchCount == mOptions->feedBack()) {
+            cerr << "readTraceLine(): " << mLineNumber << " lines read so far..."
+                 << endl;
+            mBatchCount = 0;
+        }
 
         // We ignore empty lines, EOF() etc.
         if (!aLine->empty()) {
@@ -661,8 +691,7 @@ bool tmTraceFile::readTraceLine(string *aLine) {
 
     // Verbose?
     if (mOptions->verbose()) {
-        *mDbg << "readTraceLine(" << mLineNumber << "): [" << *aLine << "]"
-              << " EOF = " << std::boolalpha << mIfs->eof() << endl;
+        *mDbg << "readTraceLine(" << mLineNumber << "): [" << *aLine << "]" << endl;
     }
 
     return mIfs->good();

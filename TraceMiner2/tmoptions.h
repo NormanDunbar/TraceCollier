@@ -51,6 +51,7 @@ class tmOptions
         int maxExecs() { return mMaxExecs; }            /**< Returns help mode flag. */
         unsigned depth() { return mDepth; }             /**< Returns max depth we care about. */
         bool quiet() { return mQuiet; }                 /**< Returns quiet mode flag. */
+        unsigned feedBack() { return mFeedback; }       /**< Returns feedback interval. */
 
         string traceFile() { return mTraceFile; }       /**< Returns trace file name. */
         string reportFile() { return mReportFile; }     /**< Returns report file name. */
@@ -75,6 +76,7 @@ class tmOptions
         bool mHelp;                         /**< Did the user request help? */
         unsigned mMaxExecs;                 /**< Report file page size. */
         unsigned mDepth;                    /**< Maximum depth which we care about */
+        unsigned mFeedback;                 /**< Report to cerr every n lines read. */
         bool mQuiet;                        /**< Are we running in quiet mode? */
         string mTraceFile;                  /**< Name of the trace file being parsed. */
         string mReportFile;                 /**< Name of the report file. */

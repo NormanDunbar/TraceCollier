@@ -11,7 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gnu_gcc_compiler3264bit_tdm-gcc-64" />
-				<Option parameters='--pagesize=20  &quot;C:\Users\hisg494\Downloads\Trace Files\NORM.trc&quot; --depth=10 ' />
+				<Option parameters='-p=30 -d=10 -v &quot;C:\Users\hisg494\Downloads\Trace Files\UKMISDEV1_ora_ 28573912_NORMAN.trc&quot;' />
 				<Compiler>
 					<Add option="-std=c++14" />
 					<Add option="-g" />

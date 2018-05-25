@@ -105,6 +105,7 @@ class tmTraceFile
     private:
         map<string, tmCursor *> mCursors;    /**< Std::map holding all depth <= --depth cursors for this trace file. */
         unsigned mLineNumber;                /**< Current line number being parsed. */
+        unsigned mBatchCount;                /**< Current line in this batch. See --feedback parameter. */
         int mExecCount;                      /**< How many EXEC statements have we hit so far? */
         tmOptions *mOptions;                 /**< Pointer to (parsed) command line options. */
 
