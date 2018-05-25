@@ -39,19 +39,25 @@
  */
 bool tmTraceFile::parsePARSEERROR(const string &thisLine) {
 
+    if (mOptions->verbose()) {
+        *mDbg << "parsePARSEERROR(" << mLineNumber << "): Entry." << endl;
+    }
+
     // Write the broken line to the report file.
-    if (mOptions->html()) {
+    if (!mOptions->html()) {
         *mOfs << setw(MAXLINENUMBER) << mLineNumber << ' '
+              << setw(MAXLINENUMBER) << mLineNumber << ' '
               << setw(MAXLINENUMBER) << ' ' << ' '
-              << setw(MAXLINENUMBER) << ' ' << ' '
+              << setw(MAXLINENUMBER) << mLineNumber << ' '
               << setw(MAXLINENUMBER) << ' ' << ' '
               << thisLine << ' '
               << endl;
     } else {
         *mOfs << "<tr><td class=\"number\">" << mLineNumber << "</td>"
+              << "<td class=\"number\">" << "&nbsp;" << mLineNumber << "</td>"
               << "<td>" << "&nbsp;" << "</td>"
-              << "<td>" << "&nbsp;" << "</td>"
-              << "<td>" << "&nbsp;" << "</td><td class=\"text\">"
+              << "<td class=\"number\">" << "&nbsp;" << mLineNumber << "</td>"
+              << "<td>" << "&nbsp;" << "</td><td class=\"error_text\">"
               << thisLine
               << "</td></tr>" << endl;
     }

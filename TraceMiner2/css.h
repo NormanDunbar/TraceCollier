@@ -73,6 +73,14 @@ string cssText =
     + "    text-align: left;" + eol
     + "    padding-left: 3px;" + eol
     + "    vertical-align: top;" + eol
+    + "}" + eol
+    + eol
+    + ".text {" + eol
+    + "    text-align: left;" + eol
+    + "    padding-left: 3px;" + eol
+    + "    vertical-align: top;" + eol
+    + "    font-weight: bold;" + eol
+    + "    color: red" + eol
     + "}" + eol;
 
 #endif // CSS_H

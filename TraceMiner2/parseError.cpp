@@ -110,7 +110,7 @@ bool tmTraceFile::parseERROR(const string &thisLine) {
                   << "<td>" << "&nbsp;" << "</td>"
                   << "<td>" << "&nbsp;" << "</td>"
                   << "<td>" << "&nbsp;" << "</td>"
-                  << "<td>" << "&nbsp;" << "</td><td class=\"text\">"
+                  << "<td>" << "&nbsp;" << "</td><td class=\"error_text\">"
                   << " ERROR: " << oraError
                   << "</td></tr>" << endl;
 

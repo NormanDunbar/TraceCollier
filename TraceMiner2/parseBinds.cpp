@@ -170,11 +170,9 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
         // So, we need to trap this and append it to the previous line we read.
         if (bindLine == "\"") {
                 string temp = bindData.back();
-                cerr << "Got this: [" << temp << "]" << endl;
                 temp.push_back('"');
                 bindData.pop_back();
                 bindData.push_back(temp);
-                cerr << "Put this: [" << temp << "]" << endl;
                 continue;
             }
 
