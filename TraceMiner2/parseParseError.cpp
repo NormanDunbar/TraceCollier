@@ -27,6 +27,7 @@
  */
 
 #include "tmtracefile.h"
+#include "utilities.h"
 
 
 /** @brief Parses a "PARSE ERROR" line.
@@ -39,27 +40,50 @@
  */
 bool tmTraceFile::parsePARSEERROR(const string &thisLine) {
 
+    // PARSE ERROR #4573797608:len=21 dep=0 uid=368 oct=3 lid=368 tim=39554896622951 err=923
+
     if (mOptions->verbose()) {
         *mDbg << "parsePARSEERROR(" << mLineNumber << "): Entry." << endl;
     }
 
+    // Grab the first line of the failed SQL.
+    // This will update mLineNumber.
+    string nextLine;
+    readTraceLine(&nextLine);
+
+    // Trim off the unwanted stuff from the error line.
+    string errorStuff = thisLine;
+    string::size_type colonPos = 0;
+
+    colonPos = errorStuff.find(":");
+    if (colonPos != string::npos) {
+        errorStuff = errorStuff.substr(0, colonPos-1);
+    }
+
+    // Extract the depth.
+    bool ok = false;
+    unsigned depth = getDigits(thisLine, "dep=", &ok);
+    if (!ok) {
+        depth = -1;
+    }
+
     // Write the broken line to the report file.
     if (!mOptions->html()) {
-        *mOfs << setw(MAXLINENUMBER) << mLineNumber << ' '
-              << setw(MAXLINENUMBER) << mLineNumber << ' '
+        *mOfs << setw(MAXLINENUMBER) << ' ' << ' '
+              << setw(MAXLINENUMBER) << mLineNumber-1 << ' '
               << setw(MAXLINENUMBER) << ' ' << ' '
               << setw(MAXLINENUMBER) << mLineNumber << ' '
-              << setw(MAXLINENUMBER) << ' ' << ' '
+              << setw(MAXLINENUMBER) << depth << ' '
               << thisLine << ' '
               << endl;
     } else {
-        *mOfs << "<tr><td class=\"number\">" << mLineNumber << "</td>"
-              << "<td class=\"number\">" << "&nbsp;" << mLineNumber << "</td>"
+        *mOfs << "<tr><td class=\"number\">" << "&nbsp;" << "</td>"
+              << "<td class=\"number\">" << "&nbsp;" << mLineNumber-1 << "</td>"
               << "<td>" << "&nbsp;" << "</td>"
               << "<td class=\"number\">" << "&nbsp;" << mLineNumber << "</td>"
-              << "<td>" << "&nbsp;" << "</td><td class=\"error_text\">"
-              << thisLine
-              << "</td></tr>" << endl;
+              << "<td class=\"number\">" << depth << "</td>"
+              << "<td class=\"error_text\">" << errorStuff << "<br>"
+              << nextLine << "</td></tr>" << endl;
     }
 
     // And on the command line.
