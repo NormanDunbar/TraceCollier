@@ -107,9 +107,7 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
         return false;
     }
 
-    // We only care about user level SQL so depth 0 only gets saved away.
-    // This does mean that SQL executed in a PL/SQL call is ignored though.
-    // So far, that's what my customer(s) want. (Hello Rich.)
+    // We only care about SQL at the defined depth, default = 0.
     if (depth > mOptions->depth()) {
         // Ignore this one.
         if (mOptions->verbose()) {
@@ -137,7 +135,7 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
     // Set the command type for later use.
     thisCursor->setCommandType(commandType);
 
-    // Tell the world, unless we are running quetly.
+    // Tell the world, unless we are running quietly.
     if (!mOptions->quiet()) {
         cout << "Cursor: " << thisCursor->cursorId()
              << " created at line: " << thisCursor->sqlLineNumber() << endl;
