@@ -173,7 +173,12 @@ bool tmCursor::buildBindMap(const string &sql) {
     // Binds are a ":" followed by one or more underscores,
     // letters and/or digits. Double quotes optional.
     // This regex finds valid binds.
-    regex reg("(:\"?\\w+\"?)");
+    // regex reg("(:\"?\\w+\"?)");
+
+    // ISSUE #9. The above regex finds incorrect binds if there is not a space,
+    // tab or newline etc prior to the colon. Eg. TO_DATE('dd:mm:yy'...) has
+    // two binds :mm and :yy when it doesn't have any!
+    regex reg("[:space: (=,+-/*](:\"?\\w+\"?)");
     smatch match;
 #else
     string::size_type colonPos = 0;
@@ -192,6 +197,7 @@ bool tmCursor::buildBindMap(const string &sql) {
     }
         // extract the bind name, including the colon.
         bindName = match[1];
+        cerr << "Found bind '" << bindName << "'" << endl;
 #else
         // All of this code *should* have been in the extractNextBind function,
         // but for some unknown, and undeterminable reason, looking for a colon
@@ -219,6 +225,22 @@ bool tmCursor::buildBindMap(const string &sql) {
         {
             colonPos += 2;
             continue;
+        }
+
+        // ISSUE #9.
+        // Don't consider this to be a bind variable if it is not
+        // preceded by a space, or tab or newline etc. You cannot have a
+        // bind immediately followed by another "SELECT :a:b ..." for eg.
+        if (colonPos > 0) {
+            if ((thisSQL.at(colonPos - 1) != ',') &&
+               (thisSQL.at(colonPos - 1) != ' ') &&
+               (thisSQL.at(colonPos - 1) != '\t') )
+            {
+                cerr << "Bind at position " << colonPos << " is not a bind." << endl;
+                cerr << "It  is preceeded by a '" << thisSQL.at(colonPos - 1) << "'" << endl;
+                colonPos++;
+                continue;
+            }
         }
 
 
