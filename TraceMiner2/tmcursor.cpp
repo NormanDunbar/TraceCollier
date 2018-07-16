@@ -234,8 +234,15 @@ bool tmCursor::buildBindMap(const string &sql) {
         if (colonPos > 0) {
             if ((thisSQL.at(colonPos - 1) != ',') &&
                (thisSQL.at(colonPos - 1) != ' ') &&
-               (thisSQL.at(colonPos - 1) != '\t') )
-            {
+               (thisSQL.at(colonPos - 1) != '\t') &&
+               (thisSQL.at(colonPos - 1) != '\n') &&
+               (thisSQL.at(colonPos - 1) != '(') &&
+               (thisSQL.at(colonPos - 1) != '=') &&
+               (thisSQL.at(colonPos - 1) != '+') &&
+               (thisSQL.at(colonPos - 1) != '-') &&
+               (thisSQL.at(colonPos - 1) != '/') &&
+               (thisSQL.at(colonPos - 1) != '*') )
+        {
                 cerr << "Bind at position " << colonPos << " is not a bind." << endl;
                 cerr << "It  is preceeded by a '" << thisSQL.at(colonPos - 1) << "'" << endl;
                 colonPos++;
