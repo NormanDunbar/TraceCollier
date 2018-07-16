@@ -52,7 +52,7 @@ bool tmTraceFile::parsePARSE(const string &thisLine) {
 
     // PARSE #5924310096:c=0,e=28,p=0,cr=0,cu=0,mis=0,r=0,dep=0,og=4,plh=1388734953,tim=526735705337
     string cursorID = "";
-    unsigned depth = 0;
+    // unsigned depth = 0;      // Removed for Issue #10. See below.
     bool matchOk = true;
 
 #ifdef USE_REGEX
@@ -62,7 +62,7 @@ bool tmTraceFile::parsePARSE(const string &thisLine) {
     // Extract the cursorID, the length and the depth.
     if (regex_match(thisLine, match, reg)) {
         cursorID = match[1];
-        depth = stoul(match[2], NULL, 10);
+        //depth = stoul(match[2], NULL, 10);    // Removed for Issue 10.
     } else {
         matchOk = false;
     }
@@ -89,6 +89,9 @@ bool tmTraceFile::parsePARSE(const string &thisLine) {
     }
 
     // We only care about user level SQL, so only depth <= depth().
+    // # Issue #10 - we need ALL parsed cursors as they can be cached on
+    // close and then exec'd again at a higher depth. Sigh.
+    /*
     if (depth > mOptions->depth()) {
         // Ignore this one.
         if (mOptions->verbose()) {
@@ -98,6 +101,7 @@ bool tmTraceFile::parsePARSE(const string &thisLine) {
 
         return true;
     }
+    */
 
 
     // Find the existing cursor.
@@ -114,13 +118,13 @@ bool tmTraceFile::parsePARSE(const string &thisLine) {
     } else {
         // Not found. Oh dear!
         stringstream s;
-        s << "parsePARSE(): Found PARSE for cursor " << cursorID
+        s << "parsePARSE(" << mLineNumber << "): Found PARSE for cursor " << cursorID
           << " but not found in existing cursor list." << endl;
         cerr << s.str();
 
         if (mOptions->verbose()) {
             *mDbg << s.str()
-                  << "parsePARSE(): Exit." << endl;
+                  << "parsePARSE(" << mLineNumber << "): Exit." << endl;
         }
 
         return false;

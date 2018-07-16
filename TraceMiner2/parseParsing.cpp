@@ -60,7 +60,7 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
     bool matchOk = true;
     string cursorID = "";
     unsigned sqlLength = 0;
-    unsigned depth = 0;
+    //unsigned depth = 0;       // Removed for Issue 10.
     unsigned commandType = 0;
 
     // The SQL starts on the following line, not this one!
@@ -74,7 +74,7 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
     if (regex_match(thisLine, match, reg)) {
         cursorID = match[1];
         sqlLength = stoul(match[2], NULL, 10);
-        depth = stoul(match[3], NULL, 10);
+        //depth = stoul(match[3], NULL, 10);        // Removed for Issue 10.
         commandType = stoul(match[4], NULL, 10);
     } else {
         matchOk = false;
@@ -84,8 +84,8 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
     if (matchOk) {
         sqlLength = getDigits(thisLine, "len=", &matchOk);
         if (matchOk) {
-            depth = getDigits(thisLine, "dep=", &matchOk);
-            if (matchOk) {
+            //depth = getDigits(thisLine, "dep=", &matchOk);  // Removed - Issue 10
+            //if (matchOk) {
                 commandType = getDigits(thisLine, "oct=", &matchOk);
             }
         }
@@ -108,6 +108,8 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
     }
 
     // We only care about SQL at the defined depth, default = 0.
+    // Removed for Issue #10, we need to keep all cursors.
+    /*
     if (depth > mOptions->depth()) {
         // Ignore this one.
         if (mOptions->verbose()) {
@@ -117,6 +119,7 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
 
         return true;
     }
+    */
 
     tmCursor *thisCursor = new tmCursor(cursorID, sqlLength, sqlLine);
     if (!thisCursor) {
