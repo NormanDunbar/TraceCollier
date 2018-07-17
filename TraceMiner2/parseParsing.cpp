@@ -195,6 +195,8 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
         exists.first->second->setSQLLineNumber(sqlLine);
         exists.first->second->setSQLLength(sqlLength);
         exists.first->second->setSQLParseLine(0);
+        // Issue #5 solution, perhaps?
+        exists.first->second->setCommandType(commandType);
         delete thisCursor;
     }
 

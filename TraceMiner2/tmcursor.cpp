@@ -197,7 +197,6 @@ bool tmCursor::buildBindMap(const string &sql) {
     }
         // extract the bind name, including the colon.
         bindName = match[1];
-        cerr << "Found bind '" << bindName << "'" << endl;
 #else
         // All of this code *should* have been in the extractNextBind function,
         // but for some unknown, and undeterminable reason, looking for a colon
