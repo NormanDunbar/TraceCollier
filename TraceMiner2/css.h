@@ -75,7 +75,7 @@ string cssText =
     + "    vertical-align: top;" + eol
     + "}" + eol
     + eol
-    + ".text {" + eol
+    + ".error_text {" + eol
     + "    text-align: left;" + eol
     + "    padding-left: 3px;" + eol
     + "    vertical-align: top;" + eol
