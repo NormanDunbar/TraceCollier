@@ -267,6 +267,25 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
         vector<string>::iterator start_i = find(bindData.begin(), bindData.end(), currentBind.str());
 
         if (start_i == bindData.end()) {
+            // We didn't find the data for this bind variable. We know the bind
+            // is part of the SQL text, but there's no actual bind data in the
+            // trace file, so it's a duplicate bind of one already there.
+            // Attempt to extract the name, and use that as the value.
+            // Issue #5 on GitHub.
+            thisBind->setBindValue(thisBind->bindName());
+
+            if (mOptions->verbose()) {
+                *mDbg << "parseBINDS(): Cursor: " << thisCursor->cursorId() << ": "
+                      << "Bind #" << thisBind->bindId() << ": BindName: ["
+                      << thisBind->bindName() << "] has value ["
+                      << thisBind->bindValue() << ']' << endl;
+            }
+
+            return true;
+
+
+
+            // Ok, I give up, I cannot continue here.
             stringstream s;
 
             s << "parseBINDS(): Cannot locate bind data for" << currentBind.str() << endl;
