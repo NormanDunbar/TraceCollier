@@ -98,6 +98,8 @@ bool tmTraceFile::parseCLOSE(const string &thisLine) {
         // So i->first is the string.
         // And i->second is the tmCursor pointer.
         i->second->setClosed(true);
+        // Issue #11: Binds line not cleared on close.
+        i->second->setBindsLine(0);
     } else {
         // Not found. Oh dear! Flag it up if depth was zero.
         // Return true as if it worked to get
