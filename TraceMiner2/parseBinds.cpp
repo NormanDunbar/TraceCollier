@@ -121,6 +121,11 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
     // Any binds?
     unsigned bindCount = thisCursor->bindCount();
     if (!bindCount) {
+        // Issue #5: RETURNING clause binds are ignored.
+        if (thisCursor->isReturning()) {
+            // Bale out quietly!
+            return true;
+        }
         // Weird. No binds required, but we have binds anyway.
         // Barf!
         stringstream s;

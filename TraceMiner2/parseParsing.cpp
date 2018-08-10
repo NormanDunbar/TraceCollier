@@ -195,13 +195,16 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
         exists.first->second->setSQLLineNumber(sqlLine);
         exists.first->second->setSQLLength(sqlLength);
         exists.first->second->setSQLParseLine(0);
-        // Issue #5 solution, perhaps?
         exists.first->second->setCommandType(commandType);
+        // Issue #5 solution, perhaps?
+        exists.first->second->setReturning(false);
         // Don't need this one any more then.
         delete thisCursor;
     }
 
     // Then set the SQL Text, regardless.
+    // ISSUE 5: This will now only scan for binds up to any
+    // RETURNING clause.
     exists.first->second->setSQLText(ss.str());
 
     // Verbose?

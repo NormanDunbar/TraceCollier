@@ -51,6 +51,8 @@
     mBindsLine = 0;
     mCommandType = 0;
     mClosed = false;
+    mReturning = false;
+    mStopScanningHere = 0;
 
 }
 
@@ -109,7 +111,9 @@ ostream &operator<<(ostream &out, const tmCursor &cursor) {
         << "Final \"BINDS " << cursor.mCursorId << ":\" Line for this cursor: " << cursor.mBindsLine << endl
         << "Command Type: " << cursor.mCommandType << endl
         << "SQL Text = [" << cursor.mSQLText << "]" << endl
+        << "Returning? " << cursor.mReturning << endl
         << "Closed? " << cursor.mClosed << endl;
+
 
     // If we have any binds, print them out.
     if (cursor.mBinds.size()) {
@@ -139,6 +143,7 @@ void tmCursor::setSQLText(string val) {
 
     // Assign the (new) SQL statement.
     mSQLText = val;
+    mStopScanningHere = mSQLText.length();
 
     // Build the binds list.
     buildBindMap(val);
@@ -180,13 +185,75 @@ bool tmCursor::buildBindMap(const string &sql) {
     // two binds :mm and :yy when it doesn't have any!
     regex reg("[:space: (=,+-/*](:\"?\\w+\"?)");
     smatch match;
+
+    // Issue #5, RETURNING binds get NULL as their name.
+    regex regReturning("\\Wreturning\\W", regex::icase);
+
 #else
     string::size_type colonPos = 0;
+    // Issue #5, RETURNING binds get NULL as their name.
+    string::size_type returningPos = 0;
 #endif // USE_REGEX
 
     // Oracle numbers binds from 0, in the order that
     // they appear in the SQL.
     unsigned bindID = 0;
+
+
+#ifdef USE_REGEX
+    // Issue #5, RETURNING binds get NULL as their name.
+    // Scan the SQL looking for a RETURNING clause.
+    if (regex_search(thisSQL, match, regReturning)) {
+        // We have a RETURNING clause.
+        mReturning = true;
+        mStopScanningHere = match.prefix().length() +1;
+    }
+#else
+    // Can't use a regex, do it the hard way then! We also have to keep
+    // scanning - there might be variables or columns named returningxxx or
+    // xxxreturning etc.
+    string::size_t howBig = 0;
+    while (true) {
+        // Pseudo case insensitive search. All upper or all lower only!
+        string::size_type returningPos = thisSQL.find("RETURNING", howBig);
+        if (returningPos == string::npos) {
+            returningPos = thisSQL.find("returning", howBig);
+        }
+
+        // Found anything?
+        if (returningPos == string::npos) {
+            return;
+        }
+
+        // Found something. Is it a complete word? If so, the character before
+        // must be space, tab, newline, the character after likewise.
+        char returningBefore = thisSQL[returningPos -1];
+        char returningAfter = thisSQL[returningPos +9];
+
+        if (((returningBefore == ' ' ) ||
+             (returningBefore == '\t' ) ||
+             (returningBefore == '\n' ) ||
+             (returningBefore == '\r' )) &&
+            ((returningAfter == ' ' ) ||
+             (returningAfter == '\t' ) ||
+             (returningAfter == '\n' ) ||
+             (returningAfter == '\r' )))
+        {
+            // We have a RETURNING sql statement.
+            mReturning = true;
+            mStopScanningHere = returningPos;
+        }
+
+        // Keep searching..
+        howBig = returningPos +1;
+    }
+#endif // USE_REGEX
+
+    // Issue #5. If we have a RETURNING clause, stop scanning the SQL at that position.
+    if (mReturning) {
+        thisSQL = thisSQL.substr(0, mStopScanningHere);
+        //cerr << "buildBindMap(): Found RETURNING clause. Trimming SQL to: [" << thisSQL << ']' << endl;
+    }
 
     // Scan the SQL looking for binds.
     while (true) {
