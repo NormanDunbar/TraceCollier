@@ -229,7 +229,8 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
             prefix == "STAT #" ||
             prefix == "CLOSE " ||
             prefix == "PARSIN" ||
-            prefix == "PARSE ")
+            prefix == "PARSE " ||
+            prefix == "DEADLO")
         {
             break;
         }

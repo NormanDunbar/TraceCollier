@@ -143,7 +143,8 @@ class tmTraceFile
         bool parseBINDS(const string &thisLine);    /**< Parses a BINDS line. */
         bool parseBindData(tmBind *thisBind, vector<string>::iterator i);       /**< Parses a bind's data lines. */
         bool parseCLOSE(const string &thisLine);    /**< Parses a CLOSE line. */
-        bool parseSTAT(const string &thisLine);    /**< Parses a STAT line. */
+        bool parseSTAT(const string &thisLine);     /**< Parses a STAT line. */
+        void parseDEADLOCK();                       /**< Parses a deadlock graph */
 
         // Data extraction from a vector of bind lines.
         bool extractBindData(const vector<string>::iterator start, const vector<string>::iterator stop, tmCursor *thisCursor, tmBind *thisBind);    /**< Extracts the bind data from a vector. */

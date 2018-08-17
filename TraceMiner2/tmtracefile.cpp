@@ -200,6 +200,15 @@ bool tmTraceFile::parseTraceFile()
             continue;
         }
 
+        // DEADLOCK DETECTED lines don't have a cursor. Need to
+        // process them here.
+        if (traceLine == "DEADLOCK DETECTED ( ORA-00060 )") {
+            // Dump the deadlock graph stuff
+            // Then keep reading.
+            parseDEADLOCK();
+            continue;
+        }
+
 #ifdef USE_REGEX
         matchOk = regex_match(traceLine, match, reg);
         if (matchOk) {
@@ -683,10 +692,19 @@ bool tmTraceFile::readTraceLine(string *aLine) {
             mBatchCount = 0;
         }
 
+        // Update for DEADLOCK handling.
+        if (*aLine == " ") {
+            if (!mOptions->quiet()) {
+                cerr << "ONE SPACE at line: " << mLineNumber << endl;
+            }
+            continue;
+        }
+
         // We ignore empty lines, EOF() etc.
         if (!aLine->empty()) {
             break;
         }
+
     }
 
     // Verbose?
