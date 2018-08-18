@@ -28,6 +28,7 @@ SOURCES=TraceMiner2/TraceMiner2.cpp \
         TraceMiner2/parseStat.cpp \
         TraceMiner2/parseParseError.cpp \
         TraceMiner2/parseXctend.cpp \
+        TraceMiner2/parseDeadlock.cpp \
         TraceMiner2/parseError.cpp
 
 OBJECTS=$(SOURCES:.cpp=.o)
