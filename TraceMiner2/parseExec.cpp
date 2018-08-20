@@ -180,7 +180,7 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
               << "<td class=\"number\">" << thisCursor->bindsLine() << "</td>"
               << "<td class=\"number\">" << thisCursor->sqlLineNumber() << "</td>"
               << "<td class=\"number\">" << depth << "</td>"
-              << "<td class=\"text\">" << sqlText << "</td></tr>"
+              << "<td class=\"text\"><pre>" << sqlText << "</pre></td></tr>"
               << endl;
     }
 

@@ -58,6 +58,12 @@ string cssText =
     + "    margin-left: 2.5%;" + eol
     + "}" + eol
     + eol
+    + "pre {" + eol
+    + "    white-space: pre-wrap;" + eol
+    + "    word-break: keep-all;" + eol
+    + "    font-size: larger;" + eol
+    + "}" + eol
+    + eol
     + "th {" + eol
     + "    background: burlywood;" + eol
     + "    color: maroon;" + eol
