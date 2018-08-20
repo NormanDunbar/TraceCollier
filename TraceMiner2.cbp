@@ -43,6 +43,7 @@
 		<Unit filename="TraceMiner2/gnu.h" />
 		<Unit filename="TraceMiner2/parseBinds.cpp" />
 		<Unit filename="TraceMiner2/parseClose.cpp" />
+		<Unit filename="TraceMiner2/parseDeadlock.cpp" />
 		<Unit filename="TraceMiner2/parseError.cpp" />
 		<Unit filename="TraceMiner2/parseExec.cpp" />
 		<Unit filename="TraceMiner2/parseParse.cpp" />
