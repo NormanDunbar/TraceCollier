@@ -165,19 +165,33 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
         }
     }
 
-    // And write the replaced SQL to the report file.
+    // And write the replaced SQL to the report file. If there are EXECs
+    // with no PARSE then they have been EXECuted from session cached cursors.
+    // The previous CLOSE for the cursor will be a TYP=1, 2 or 3. Only TYP=0
+    // get a PARSE line.
+    // Likewise, if there is a BINDS line of zero, it has no binds.
+    string parseLineText = std::to_string(thisCursor->sqlParseLine());
+    parseLineText = (parseLineText == "0") ? "From cache" : parseLineText;
+
+    string parseClass = (parseLineText == "From cache") ? "text" : "number" ;
+
+    string bindsLineText = std::to_string(thisCursor->bindsLine());
+    bindsLineText = (bindsLineText == "0") ?  "No binds" : bindsLineText;
+
+    string bindsClass = (bindsLineText == "No binds") ? "text" : "number" ;
+
     if (!mOptions->html()) {
         *mOfs << setw(MAXLINENUMBER) << mLineNumber << ' '
-              << setw(MAXLINENUMBER) << thisCursor->sqlParseLine() << ' '
-              << setw(MAXLINENUMBER) << thisCursor->bindsLine() << ' '
+              << setw(MAXLINENUMBER) << parseLineText << ' '
+              << setw(MAXLINENUMBER) << bindsLineText << ' '
               << setw(MAXLINENUMBER) << thisCursor->sqlLineNumber() << ' '
               << setw(MAXLINENUMBER) << depth << ' '
               << sqlText << ' '
               << endl;
     } else {
         *mOfs << "<tr><td class=\"number\">" << mLineNumber << "</td>"
-              << "<td class=\"number\">" << thisCursor->sqlParseLine() << "</td>"
-              << "<td class=\"number\">" << thisCursor->bindsLine() << "</td>"
+              << "<td class=\"" << parseClass << "\">" << parseLineText << "</td>"
+              << "<td class=\"" << bindsClass << "\">" << bindsLineText << "</td>"
               << "<td class=\"number\">" << thisCursor->sqlLineNumber() << "</td>"
               << "<td class=\"number\">" << depth << "</td>"
               << "<td class=\"text\"><pre>" << sqlText << "</pre></td></tr>"
