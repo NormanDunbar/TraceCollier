@@ -183,7 +183,7 @@ bool tmCursor::buildBindMap(const string &sql) {
     // ISSUE #9. The above regex finds incorrect binds if there is not a space,
     // tab or newline etc prior to the colon. Eg. TO_DATE('dd:mm:yy'...) has
     // two binds :mm and :yy when it doesn't have any!
-    regex reg("[:space: (=,+-/*](:\"?\\w+\"?)");
+    regex reg("[:space: (=,+-/*>](:\"?\\w+\"?)");
     smatch match;
 
     // Issue #5, RETURNING binds get NULL as their name.
@@ -307,6 +307,8 @@ bool tmCursor::buildBindMap(const string &sql) {
                (thisSQL.at(colonPos - 1) != '+') &&
                (thisSQL.at(colonPos - 1) != '-') &&
                (thisSQL.at(colonPos - 1) != '/') &&
+               (thisSQL.at(colonPos - 1) != '>') && // Greater than or PL/SQL =>
+               (thisSQL.at(colonPos - 1) != '<') && // Less than
                (thisSQL.at(colonPos - 1) != '*') )
         {
                 cerr << "Bind at position " << colonPos << " is not a bind." << endl;
