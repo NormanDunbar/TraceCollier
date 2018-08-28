@@ -154,13 +154,16 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
     // after the first non-bind related line. (EXEC usually!)
 
     vector<string>bindData;
+    vector<unsigned> bindLineNumbers;
 
     string bindLine;
+    unsigned bindLineNumber;
     bool ok = true;
 
     while (ok) {
         // Get next line.
         ok = readTraceLine(&bindLine);
+        bindLineNumber = mLineNumber;
 
         // Oracle has been known to throw up a bind's value line where all of
         // it is on the first line, but a second line contains the closing double quote. For example:
@@ -187,7 +190,7 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
         if (bindLine.substr(0, 4) == "*** ")
         {
             if (mOptions->verbose()) {
-                *mDbg << "parseBINDS(" << mLineNumber << "): Ignoring timestamp/empty line ["
+                *mDbg << "parseBINDS(" << bindLineNumber << "): Ignoring timestamp/empty line ["
                       << bindLine << ']' << endl;
             }
 
@@ -239,6 +242,7 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
 
         // Save the normal lines.
         bindData.push_back(bindLine);
+        bindLineNumbers.push_back(bindLineNumber);
     }
 
     // We have read one line too far. Save it for later processing.
@@ -267,12 +271,10 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
             *mDbg << "parseBINDS(): Processing: [" << currentBind.str() << ']' << endl;
         }
 
-        // Save the "Bind last seen at" Line number.
-        //thisBind->setBindLineNumber(mLineNumber);
-
         // Find the first line of this bind's data and the first of the next bind's data.
         // The latter may not exist of course, if this is the final bind. The former must!
         vector<string>::iterator start_i = find(bindData.begin(), bindData.end(), currentBind.str());
+        unsigned startLineNumber = std::distance(bindData.begin(), start_i);
 
         if (start_i == bindData.end()) {
             // We didn't find the data for this bind variable. We know the bind
@@ -283,7 +285,7 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
             thisBind->setBindValue(thisBind->bindName());
 
             if (mOptions->verbose()) {
-                *mDbg << "parseBINDS(): Cursor: " << thisCursor->cursorId() << ": "
+                *mDbg << "parseBINDS(" << mLineNumber << "): Cursor: " << thisCursor->cursorId() << ": "
                       << "Bind #" << thisBind->bindId() << ": BindName: ["
                       << thisBind->bindName() << "] has value ["
                       << thisBind->bindValue() << ']' << endl;
@@ -296,12 +298,12 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
             // Ok, I give up, I cannot continue here.
             stringstream s;
 
-            s << "parseBINDS(): Cannot locate bind data for" << currentBind.str() << endl;
+            s << "parseBINDS(" << mLineNumber << "): Cannot locate bind data for" << currentBind.str() << endl;
             cerr << s.str();
 
             if (mOptions->verbose()) {
                 *mDbg << s.str()
-                      << "parseBINDS(): Exit." << endl;
+                      << "parseBINDS(" << mLineNumber << "): Exit." << endl;
             }
 
             return false;
@@ -323,7 +325,7 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
 
         // Now we have a start and stop iterator into the bind data
         // for this particular bind. Extract the information we want.
-        if (!extractBindData(start_i, stop_i, thisCursor, thisBind)) {
+        if (!extractBindData(start_i, stop_i, thisCursor, thisBind, bindLineNumbers[startLineNumber])) {
             stringstream s;
             s << "parseBINDS(): Failed to extract bind data for" << currentBind.str() << '.' << endl;
             cerr << s.str();
@@ -360,6 +362,7 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
  * @param stop const vector<string>::iterator. Just after the last line to scan.
  * @param thisCursor tmCursor*. The tmCursor object who's data we are extracting.
  * @param thisBind tmBind*. The tmBind object who's data we are extracting.
+ * @param unsigned firstLineNumber. The first line number of the bind data for the cursor.
  * @return bool. Returns true for success, false otherwise.
  *
  * Parses a vector of lines, read in from the trace file,  which relate to a single
@@ -392,11 +395,11 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
  * Mxl = Maximum length, but is not reliable. It's the internal format's maximum length.
  *
  */
-bool tmTraceFile::extractBindData(const vector<string>::iterator start, const vector<string>::iterator stop, tmCursor *thisCursor, tmBind *thisBind) {
+bool tmTraceFile::extractBindData(const vector<string>::iterator start, const vector<string>::iterator stop, tmCursor *thisCursor, tmBind *thisBind, unsigned firstLineNumber) {
 
     if (mOptions->verbose()) {
-        *mDbg << "extractBindData(): Entry." << endl
-              << "extractBindData(): Extracting data for Bind #"
+        *mDbg << "extractBindData(" << firstLineNumber << "): Entry." << endl
+              << "extractBindData(" << firstLineNumber << "): Extracting data for Bind #"
               << thisBind->bindId() << '.' << endl;
     }
 
@@ -404,6 +407,7 @@ bool tmTraceFile::extractBindData(const vector<string>::iterator start, const ve
     unsigned dataType = 0;
     unsigned averageLength = 0;
     string value = "";
+    unsigned valueLine = 0;
     vector<string>::const_iterator valueStartsHere = stop;
 
     // Flags.
@@ -414,12 +418,14 @@ bool tmTraceFile::extractBindData(const vector<string>::iterator start, const ve
 
 
     // Parse the bindData vector for the data we want.
-    for (vector<string>::const_iterator i=start;
+    unsigned currentLine = firstLineNumber;
+    for (vector<string>::const_iterator i = start;
         i != stop;
-        i++)
+        i++,
+        currentLine++)
     {
         if (mOptions->verbose()) {
-           *mDbg << "extractBindData(): Scanning line: [" << *i << ']' << endl;
+           *mDbg << "extractBindData(" << currentLine << "): Scanning line: [" << *i << ']' << endl;
         }
 
         // Set the flags.
@@ -457,7 +463,7 @@ bool tmTraceFile::extractBindData(const vector<string>::iterator start, const ve
                             *mDbg << "extractBindData(): Bind#" << thisBind->bindId()
                                   << " has same data as Bind#" << bi->second->bindId()
                                   << " Bind name [" << bi->second->bindName() << "]." << endl
-                                  << "extractBindData(): Exit." << endl;
+                                  << "extractBindData(" << currentLine << "): Exit." << endl;
                         }
 
                         // We have the bind's value, we are done here.
@@ -471,7 +477,7 @@ bool tmTraceFile::extractBindData(const vector<string>::iterator start, const ve
 
             stringstream s;
 
-            s << "extractBindData(): Bind#" << thisBind->bindId()
+            s << "extractBindData(" << currentLine << "): Bind#" << thisBind->bindId()
               << " is a copy of another bind variable. However"
               << " extractBindData() was unable to find it." << endl;
 
@@ -479,7 +485,7 @@ bool tmTraceFile::extractBindData(const vector<string>::iterator start, const ve
 
             if (mOptions->verbose()) {
                 *mDbg << s.str()
-                      << "extractBindData(): Exit." << endl;
+                      << "extractBindData(" << currentLine << "): Exit." << endl;
             }
 
             return false;
@@ -494,8 +500,11 @@ bool tmTraceFile::extractBindData(const vector<string>::iterator start, const ve
            valueStartsHere = i;
 
            if (mOptions->verbose()) {
-              *mDbg << "extractBindData(): 'Value=' found." << endl;
+              *mDbg << "extractBindData(" << currentLine << "): 'Value=' found." << endl;
            }
+
+           // Save the line that the value is on.
+           valueLine = currentLine;
 
            continue;
         }
@@ -506,24 +515,24 @@ bool tmTraceFile::extractBindData(const vector<string>::iterator start, const ve
         if (oacdtyPos != string::npos) {
 
            if (mOptions->verbose()) {
-              *mDbg << "extractBindData(): 'Oacdty=' found." << endl;
+              *mDbg << "extractBindData(" << currentLine << "): 'Oacdty=' found." << endl;
            }
 
-           if (!extractNumber(i, oacdtyPos + 6, dataType)) {
+           if (!extractNumber(i, oacdtyPos + 6, dataType, currentLine)) {
                 stringstream s;
                 s << "extractBindData(): Failed to extract Data Type (OACDTY) for bind." << endl;
                 cerr << s.str();
 
                 if (mOptions->verbose()) {
                     *mDbg << s.str()
-                          << "extractBindData(): Exit.";
+                          << "extractBindData(" << currentLine << "): Exit.";
                 }
 
                 return false;
            }
 
            if (mOptions->verbose()) {
-              *mDbg << "extractBindData(): 'Data Type is " << dataType << '.' << endl;
+              *mDbg << "extractBindData(" << currentLine << "): 'Data Type is " << dataType << '.' << endl;
            }
 
            continue;
@@ -535,24 +544,24 @@ bool tmTraceFile::extractBindData(const vector<string>::iterator start, const ve
         if (avlPos != string::npos) {
 
            if (mOptions->verbose()) {
-              *mDbg << "extractBindData(): 'Avl=' found." << endl;
+              *mDbg << "extractBindData(" << currentLine << "): 'Avl=' found." << endl;
            }
 
-           if (!extractNumber(i, avlPos + 3, averageLength)) {
+           if (!extractNumber(i, avlPos + 3, averageLength, currentLine)) {
                 stringstream s;
                 s << "extractBindData(): Failed to extract Average Length (AVL) for bind." << endl;
                 cerr << s.str();
 
                 if (mOptions->verbose()) {
                     *mDbg << s.str()
-                          << "extractBindData(): Exit.";
+                          << "extractBindData(" << currentLine << "): Exit.";
                 }
 
                 return false;
            }
 
            if (mOptions->verbose()) {
-              *mDbg << "extractBindData(): 'Average Length is " << averageLength << '.' << endl;
+              *mDbg << "extractBindData(" << currentLine << "): 'Average Length is " << averageLength << '.' << endl;
            }
 
            continue;
@@ -604,7 +613,7 @@ bool tmTraceFile::extractBindData(const vector<string>::iterator start, const ve
         }
 
     // We have a good bind, with a value present, extract it.
-    if (!extractBindValue(valueStartsHere, thisBind)) {
+    if (!extractBindValue(valueStartsHere, thisBind, valueLine)) {
         // Damn!
         stringstream s;
         s << "extractBindData(): Call to extractBindValue() Failed to extract bind value for 'Bind#"
@@ -621,7 +630,7 @@ bool tmTraceFile::extractBindData(const vector<string>::iterator start, const ve
 
     // Looks like a good parse.
     if (mOptions->verbose()) {
-        *mDbg << "extractBindData(): Exit." << endl;
+        *mDbg << "extractBindData(" << currentLine << "): Exit." << endl;
     }
 
     return true;
@@ -635,10 +644,10 @@ bool tmTraceFile::extractBindData(const vector<string>::iterator start, const ve
  * @param result unsigned&. Variable to receive the result.
  * @return bool. True is success. False is otherwise.
  */
-bool tmTraceFile::extractNumber(vector<string>::const_iterator i, const unsigned equalPos, unsigned &result) {
+bool tmTraceFile::extractNumber(vector<string>::const_iterator i, const unsigned equalPos, unsigned &result, unsigned currentLine) {
 
    if (mOptions->verbose()) {
-      *mDbg << "extractNumber(): Entry." << endl;
+      *mDbg << "extractNumber(" << currentLine << "): Entry." << endl;
    }
 
    try {
@@ -647,22 +656,22 @@ bool tmTraceFile::extractNumber(vector<string>::const_iterator i, const unsigned
        result = stoul(i->substr(equalPos + 1), NULL, 10);
    } catch (exception &e) {
        stringstream s;
-       s << "extractNumber(): Exception: " << e.what() << endl
-         << "extractNumber(): Failed to extract numeric data for bind." << endl;
+       s << "extractNumber(" << currentLine << "): Exception: " << e.what() << endl
+         << "extractNumber(" << currentLine << "): Failed to extract numeric data for bind." << endl;
        cerr << s.str();
 
        if (mOptions->verbose()) {
            *mDbg << s.str()
-                 << "extractNumber(): Exit.";
+                 << "extractNumber(" << currentLine << "): Exit.";
        }
 
        return false;
    }
 
    if (mOptions->verbose()) {
-      *mDbg << "extractNumber(): 'Result is "
+      *mDbg << "extractNumber(" << currentLine << "): 'Result is "
             << result << '.' << endl
-            << "extractNumber(): Exit." << endl;
+            << "extractNumber(" << currentLine << "): Exit." << endl;
    }
 
    return true;
@@ -677,11 +686,11 @@ bool tmTraceFile::extractNumber(vector<string>::const_iterator i, const unsigned
  * @param result string&. Variable to receive the result.
  * @return bool. True is success. False is otherwise.
  */
-bool tmTraceFile::extractHex(vector<string>::const_iterator i, const unsigned equalPos, string &result) {
+bool tmTraceFile::extractHex(vector<string>::const_iterator i, const unsigned equalPos, string &result, unsigned currentLine) {
 
 
     if (mOptions->verbose()) {
-       *mDbg << "extractHex(): Entry." << endl;
+       *mDbg << "extractHex(" << currentLine << "): Entry." << endl;
     }
 
     // Initialise result string.
@@ -714,13 +723,13 @@ bool tmTraceFile::extractHex(vector<string>::const_iterator i, const unsigned eq
         } catch (exception &e) {
 
             stringstream s;
-            s << "extractHex(): Exception: " << e.what() << endl
-              << "extractHex(): Failed to extract hex data from '" << temp << '\'' << endl;
+            s << "extractHex(" << currentLine << "): Exception: " << e.what() << endl
+              << "extractHex(" << currentLine << "): Failed to extract hex data from '" << temp << '\'' << endl;
             cerr << s.str();
 
             if (mOptions->verbose()) {
                 *mDbg << s.str()
-                      << "extractHex(): Exit.";
+                      << "extractHex(" << currentLine << "): Exit.";
             }
 
             return false;
@@ -740,9 +749,9 @@ bool tmTraceFile::extractHex(vector<string>::const_iterator i, const unsigned eq
     result.push_back('\'');
 
     if (mOptions->verbose()) {
-       *mDbg << "extractHex(): Result is "
+       *mDbg << "extractHex(" << currentLine << "): Result is "
              << result << '.' << endl
-             << "extractHex(): Exit." << endl;
+             << "extractHex(" << currentLine << "): Exit." << endl;
     }
 
     return true;
@@ -784,12 +793,12 @@ bool tmTraceFile::extractHex(vector<string>::const_iterator i, const unsigned eq
  * 208 = UROWID.
  * 231 = TIMESTAMP WITH LOCAL TIME ZONE.
  */
-bool tmTraceFile::extractBindValue(vector<string>::const_iterator i, tmBind *thisBind) {
+bool tmTraceFile::extractBindValue(vector<string>::const_iterator i, tmBind *thisBind, unsigned currentLine) {
 
    if (mOptions->verbose()) {
-      *mDbg << "extractBindValue(): Entry." << endl
-            << "extractBindValue(): Processing Bind#" << thisBind->bindId() << '.' << endl
-            << "extractBindValue(): Extracting Hex from [" << *i << ']' << endl;
+      *mDbg << "extractBindValue(" << currentLine << "): Entry." << endl
+            << "extractBindValue(" << currentLine << "): Processing Bind#" << thisBind->bindId() << '.' << endl
+            << "extractBindValue(" << currentLine << "): Extracting value from [" << *i << ']' << endl;
    }
 
    unsigned equalPos = i->find("=");
@@ -821,16 +830,16 @@ bool tmTraceFile::extractBindValue(vector<string>::const_iterator i, tmBind *thi
             } else {
                // This is an NCHAR or NVARCHAR2, extract the hex data.
                string thisValue;
-               if (extractHex(i, equalPos, thisValue)) {
+               if (extractHex(i, equalPos, thisValue, currentLine)) {
                    thisBind->setBindValue(thisValue);
                } else {
                    stringstream s;
-                   s << "extractBindValue(): Failed to extract Hex." << endl;
+                   s << "extractBindValue(" << currentLine << "): Failed to extract Hex." << endl;
                    cerr << s.str();
 
                    if (mOptions->verbose()) {
                        *mDbg << s.str()
-                             << "extractBindValue(): Exit." << endl;
+                             << "extractBindValue(" << currentLine << "): Exit." << endl;
                    }
 
                    return false;
@@ -893,8 +902,8 @@ bool tmTraceFile::extractBindValue(vector<string>::const_iterator i, tmBind *thi
 
    // Looks like a good parse.
    if (mOptions->verbose()) {
-      *mDbg << "extractBindValue(): Result = " << thisBind->bindValue() << endl
-            << "extractBindValue(): Exit." << endl;
+      *mDbg << "extractBindValue(" << currentLine << "): Result = " << thisBind->bindValue() << endl
+            << "extractBindValue(" << currentLine << "): Exit." << endl;
    }
 
     return true;
