@@ -78,13 +78,13 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
     // Did it all work?
     if (!matchOk) {
         stringstream s;
-        s << "parseEXEC(): Cannot match against EXEC at line: "
+        s << "parseEXEC(" << mLineNumber << "): Cannot match against EXEC at line: "
           <<  mLineNumber << "." << endl;
         cerr << s.str();
 
         if (mOptions->verbose()) {
             *mDbg << s.str() << endl
-                  << "parseEXEC(): Exit." << endl;
+                  << "parseEXEC(" << mLineNumber << "): Exit." << endl;
         }
 
         return false;
@@ -94,8 +94,8 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
     if (depth > mOptions->depth()) {
         // Ignore this one.
         if (mOptions->verbose()) {
-            *mDbg << "parseEXEC(): Ignoring EXEC with dep=" << depth << '.' << endl
-                  << "parseEXEC(): Exit." << endl;
+            *mDbg << "parseEXEC(" << mLineNumber << "): Ignoring EXEC with dep=" << depth << '.' << endl
+                  << "parseEXEC(" << mLineNumber << "): Exit." << endl;
         }
 
         return true;
@@ -105,12 +105,12 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
     map<string, tmCursor *>::iterator i = findCursor(cursorID);
     if (i == mCursors.end()) {
         stringstream s;
-        s << "parseEXEC(): Cursor " << cursorID << " not found." << endl;
+        s << "parseEXEC(" << mLineNumber << "): Cursor " << cursorID << " not found." << endl;
         cerr << s.str();
 
         if (mOptions->verbose()) {
             *mDbg << s.str() << endl
-                  << "parseEXEC(): Exit." << endl;
+                  << "parseEXEC(" << mLineNumber << "): Exit." << endl;
         }
 
         return false;
@@ -144,7 +144,7 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
         if (bindPos != string::npos) {
             sqlText.replace(bindPos, i->second->bindName().length(), i->second->bindValue());
             if (mOptions->verbose()) {
-                *mDbg << "parseEXEC(): Cursor: " << cursorID << ": Bind #"
+                *mDbg << "parseEXEC(" << mLineNumber << "): Cursor: " << cursorID << ": Bind #"
                       << i->second->bindId() << ": Replacing: ["
                       << i->second->bindName() << "] with ["
                       << i->second->bindValue() << ']' << endl;
@@ -152,13 +152,13 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
         } else {
             // Hmm. This should never happen!
             stringstream s;
-            s << "parseEXEC(): Cannot find '" << i->second->bindName() << " in ["
+            s << "parseEXEC(" << mLineNumber << "): Cannot find '" << i->second->bindName() << " in ["
               << sqlText << "]." << endl;
             cerr << s.str();
 
             if (mOptions->verbose()) {
                 *mDbg << s.str()
-                      << "parseEXEC(): Exit." << endl;
+                      << "parseEXEC(" << mLineNumber << "): Exit." << endl;
             }
 
             return false;
@@ -200,7 +200,7 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
 
     // Looks like a good parse.
     if (mOptions->verbose()) {
-        *mDbg << "parseEXEC(): Exit." << endl;
+        *mDbg << "parseEXEC(" << mLineNumber << "): Exit." << endl;
     }
 
     mExecCount++;

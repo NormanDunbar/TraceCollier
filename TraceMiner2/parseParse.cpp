@@ -82,7 +82,7 @@ bool tmTraceFile::parsePARSE(const string &thisLine) {
 
         if (mOptions->verbose()) {
             *mDbg << s.str()
-                  << "parsePARSE(): Exit." << endl;
+                  << "parsePARSE(" << mLineNumber << "): Exit." << endl;
         }
 
         return false;
@@ -132,7 +132,7 @@ bool tmTraceFile::parsePARSE(const string &thisLine) {
 
     // Looks like a good parse.
     if (mOptions->verbose()) {
-        *mDbg << "parsePARSE(): Exit." << endl;
+        *mDbg << "parsePARSE(" << mLineNumber << "): Exit." << endl;
     }
 
     return true;

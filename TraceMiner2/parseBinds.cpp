@@ -75,13 +75,13 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
 
     if (!matchOK) {
         stringstream s;
-        s << "parseBINDS(): Cannot match against BINDS # at line: "
+        s << "parseBINDS(" << mLineNumber << "): Cannot match against BINDS # at line: "
           <<  mLineNumber << "." << endl;
         cerr << s.str();
 
         if (mOptions->verbose()) {
             *mDbg << s.str()
-                  << "parseBINDS(): Exit." << endl;
+                  << "parseBINDS(" << mLineNumber << "): Exit." << endl;
         }
 
         return false;
@@ -94,9 +94,9 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
     if (i == mCursors.end()) {
         // Ignore this one, depth != depth().
         if (mOptions->verbose()) {
-            *mDbg << "parseBINDS(): Ignoring BINDS for cursor " << cursorID
+            *mDbg << "parseBINDS(" << mLineNumber << "): Ignoring BINDS for cursor " << cursorID
                   << ", which has an 'out of range' depth." << endl
-                  << "parseBINDS(): Exit." << endl;
+                  << "parseBINDS(" << mLineNumber << "): Exit." << endl;
         }
 
         return true;
@@ -106,12 +106,12 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
     // This catches reuse of cursors with fewer binds, and at depth > depth().
     tmCursor *thisCursor = i->second;
     if (mOptions->verbose()) {
-        *mDbg << "parseBINDS(): Found cursor: " << i->first << '.' << endl;
+        *mDbg << "parseBINDS(" << mLineNumber << "): Found cursor: " << i->first << '.' << endl;
     }
 
     if (thisCursor->isClosed()) {
         if (mOptions->verbose()) {
-            *mDbg << "parseBINDS(): Cursor is closed. Ignoring BINDS. " << endl;
+            *mDbg << "parseBINDS(" << mLineNumber << "): Cursor is closed. Ignoring BINDS. " << endl;
         }
 
         return true;
@@ -129,7 +129,7 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
         // Weird. No binds required, but we have binds anyway.
         // Barf!
         stringstream s;
-        s << "parseBINDS(): Cursor " << cursorID
+        s << "parseBINDS(" << mLineNumber << "): Cursor " << cursorID
           << " should have no binds, "
           << "but the trace file says otherwise at line: "
           << mLineNumber << endl;
@@ -137,7 +137,7 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
 
         if (mOptions->verbose()) {
             *mDbg << s.str() << endl
-                  << "parseBINDS(): Exit." << endl;
+                  << "parseBINDS(" << mLineNumber << "): Exit." << endl;
         }
 
         return false;
@@ -152,7 +152,9 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
     // into memory for later processing.
     // We start reading from the line " Bind#0" and stop
     // after the first non-bind related line. (EXEC usually!)
+
     vector<string>bindData;
+
     string bindLine;
     bool ok = true;
 
@@ -185,7 +187,7 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
         if (bindLine.substr(0, 4) == "*** ")
         {
             if (mOptions->verbose()) {
-                *mDbg << "parseBINDS(): Ignoring timestamp/empty line ["
+                *mDbg << "parseBINDS(" << mLineNumber << "): Ignoring timestamp/empty line ["
                       << bindLine << ']' << endl;
             }
 
@@ -247,7 +249,7 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
     // rogue bears no resemblance to either the desired line, or the
     // one prior. This solution appears to work!
     if (mOptions->verbose()) {
-        *mDbg << "parseBINDS(): Pushing back this line: [" << bindLine << ']' << endl;
+        *mDbg << "parseBINDS(" << mLineNumber << "): Pushing back this line: [" << bindLine << ']' << endl;
     }
     mUnprocessedLine = bindLine;
 
@@ -345,7 +347,7 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
 
     // Looks like a good parse.
     if (mOptions->verbose()) {
-        *mDbg << "parseBINDS(): Exit." << endl;
+        *mDbg << "parseBINDS(" << mLineNumber << "): Exit." << endl;
     }
 
     return true;

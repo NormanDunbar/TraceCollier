@@ -93,7 +93,7 @@ bool tmTraceFile::parse()
     }
 
     if (mOptions->verbose()) {
-        *mDbg << "parse(): Entry." << endl;
+        *mDbg << "parse(" << mLineNumber << "): Entry." << endl;
     }
 
     // We need the report file here.
@@ -109,7 +109,7 @@ bool tmTraceFile::parse()
     // Ready to go, lets parse a trace file.
     if (!openTraceFile()) {
         if (mOptions->verbose()) {
-            *mDbg << "parse(): Cannot open trace file. Exit." << endl;
+            *mDbg << "parse(" << mLineNumber << "): Cannot open trace file. Exit." << endl;
         }
 
         return false;
@@ -121,7 +121,7 @@ bool tmTraceFile::parse()
         cleanUp();
 
         if (mOptions->verbose()) {
-            *mDbg << "parse(): parseHeader() failed. Error exit." << endl;
+            *mDbg << "parse(" << mLineNumber << "): parseHeader() failed. Error exit." << endl;
         }
 
         return false;
@@ -130,7 +130,7 @@ bool tmTraceFile::parse()
     // File is open, header is parsed.
     if (!parseTraceFile()) {
         if (mOptions->verbose()) {
-            *mDbg << "parse(): Cannot parse trace file. Exit." << endl;
+            *mDbg << "parse(" << mLineNumber << "): Cannot parse trace file. Exit." << endl;
         }
 
         return false;
@@ -138,7 +138,7 @@ bool tmTraceFile::parse()
 
     // It was a good parse.
     if (mOptions->verbose()) {
-        *mDbg << "parse(): Exit." << endl;
+        *mDbg << "parse(" << mLineNumber << "): Exit." << endl;
     }
 
     // Close the table if HTML requested.
@@ -168,7 +168,7 @@ bool tmTraceFile::parseTraceFile()
     bool matchOk = true;
 
     if (mOptions->verbose()) {
-        *mDbg << "parseTraceFile(): Entry." << endl;
+        *mDbg << "parseTraceFile(" << mLineNumber << "): Entry." << endl;
     }
 
 #ifdef USE_REGEX
@@ -193,7 +193,7 @@ bool tmTraceFile::parseTraceFile()
         if (traceLine.substr(0, 4) == "*** ")
         {
             if (mOptions->verbose()) {
-                *mDbg << "parseTraceFile(): Ignoring timestamp line ["
+                *mDbg << "parseTraceFile(" << mLineNumber << "): Ignoring timestamp line ["
                       << traceLine << ']' << endl;
             }
 
@@ -315,7 +315,7 @@ bool tmTraceFile::parseTraceFile()
 
     // We have a good parse.
     if (mOptions->verbose()) {
-        *mDbg << "parseTraceFile(): Exit." << endl;
+        *mDbg << "parseTraceFile(" << mLineNumber << "): Exit." << endl;
     }
 
     return true;
@@ -324,7 +324,7 @@ bool tmTraceFile::parseTraceFile()
 errorExit:
 
     if (mOptions->verbose()) {
-        *mDbg << "parseTraceFile(): Error exit." << endl;
+        *mDbg << "parseTraceFile(" << mLineNumber << "): Error exit." << endl;
     }
 
     return false;
@@ -342,7 +342,7 @@ errorExit:
 bool tmTraceFile::parseHeader() {
 
     if (mOptions->verbose()) {
-        *mDbg << "parseHeader(): Entry." << endl;
+        *mDbg << "parseHeader(" << mLineNumber << "): Entry." << endl;
     }
 
     string traceLine;
@@ -350,13 +350,13 @@ bool tmTraceFile::parseHeader() {
 
     if (!ok) {
         stringstream s;
-        s << "parseHeader(): Cannot read first line from "
+        s << "parseHeader(" << mLineNumber << "): Cannot read first line from "
           << mOptions->traceFile() << endl;
         cerr << s.str();
 
         if (mOptions->verbose()) {
             *mDbg << s.str()
-                  << "parseHeader(): Error exit." << endl;
+                  << "parseHeader(" << mLineNumber << "): Error exit." << endl;
         }
 
         return false;
@@ -373,7 +373,7 @@ bool tmTraceFile::parseHeader() {
 
             if (mOptions->verbose()) {
                 *mDbg << s.str()
-                      << "parseHeader(): Error exit." << endl;
+                      << "parseHeader(" << mLineNumber << "): Error exit." << endl;
             }
 
             return false;
@@ -386,7 +386,7 @@ bool tmTraceFile::parseHeader() {
 
             if (mOptions->verbose()) {
                 *mDbg << s.str()
-                      << "parseHeader(): Error exit." << endl;
+                      << "parseHeader(" << mLineNumber << "): Error exit." << endl;
             }
 
         return false;
@@ -399,13 +399,13 @@ bool tmTraceFile::parseHeader() {
         ok = readTraceLine(&traceLine);
         if (!ok) {
             stringstream s;
-            s << "parseHeader(): Cannot read header line(s) from "
+            s << "parseHeader(" << mLineNumber << "): Cannot read header line(s) from "
               << mOptions->traceFile() << endl;
             cerr << s.str();
 
             if (mOptions->verbose()) {
                 *mDbg << s.str()
-                      << "parseHeader(): Error exit." << endl;
+                      << "parseHeader(" << mLineNumber << "): Error exit." << endl;
             }
 
             break;
@@ -444,7 +444,7 @@ bool tmTraceFile::parseHeader() {
     }
 
     if (mOptions->verbose()) {
-        *mDbg << "parseHeader(): Exit." << endl;
+        *mDbg << "parseHeader(" << mLineNumber << "): Exit." << endl;
     }
 
     return ok;
@@ -464,22 +464,22 @@ bool tmTraceFile::openTraceFile()
     string traceFileName = mOptions->traceFile();
 
     if (mOptions->verbose()) {
-        *mDbg << "openTraceFile(): Entry." << endl
-              << "openTraceFile(): Trace File: [" << traceFileName << ']' << endl;
+        *mDbg << "openTraceFile(" << mLineNumber << "): Entry." << endl
+              << "openTraceFile(" << mLineNumber << "): Trace File: [" << traceFileName << ']' << endl;
     }
 
     mIfs = new ifstream(traceFileName);
 
     if (!mIfs->good()) {
         stringstream s;
-        s << "openTraceFile(): Cannot open trace file "
+        s << "openTraceFile(" << mLineNumber << "): Cannot open trace file "
           << traceFileName << endl;
         cerr << s.str();
         cleanUp();
 
         if (mOptions->verbose()) {
             *mDbg << s.str()
-                  << "openTraceFile(): Error exit." << endl;
+                  << "openTraceFile(" << mLineNumber << "): Error exit." << endl;
         }
 
         return false;
@@ -487,7 +487,7 @@ bool tmTraceFile::openTraceFile()
 
     // Looks like a valid trace file.
     if (mOptions->verbose()) {
-        *mDbg << "openTraceFile(): Exit." << endl;
+        *mDbg << "openTraceFile(" << mLineNumber << "): Exit." << endl;
     }
 
     return true;
@@ -594,7 +594,7 @@ bool tmTraceFile::openReportFile()
 void tmTraceFile::reportHeadings() {
 
     if (mOptions->verbose()) {
-        *mDbg << "reportHeadings(): EXEC count: " << mExecCount << " Entry." << endl;
+        *mDbg << "reportHeadings(" << mLineNumber << "): EXEC count: " << mExecCount << " Entry." << endl;
     }
 
     if (!mOptions->html()) {
@@ -663,7 +663,7 @@ void tmTraceFile::reportHeadings() {
     }
 
     if (mOptions->verbose()) {
-        *mDbg << "reportHeadings(): EXEC count: " << mExecCount << " Exit." << endl;
+        *mDbg << "reportHeadings(" << mLineNumber << "): EXEC count: " << mExecCount << " Exit." << endl;
     }
 
 }
@@ -695,7 +695,7 @@ bool tmTraceFile::readTraceLine(string *aLine) {
         // Update for DEADLOCK handling.
         if (*aLine == " ") {
             if (!mOptions->quiet()) {
-                cerr << "ONE SPACE at line: " << mLineNumber << endl;
+                cerr << "readTraceLine(): ONE SPACE at line: " << mLineNumber << endl;
             }
             continue;
         }
@@ -729,8 +729,8 @@ map<string, tmCursor *>::iterator tmTraceFile::findCursor(const string &cursorID
     // Find an existing cursor in the map.
 
     if (mOptions->verbose()) {
-        *mDbg << "findCursor(): Entry." << endl
-              << "findCursor(): Looking for cursor: " << cursorID << endl;
+        *mDbg << "findCursor(" << mLineNumber << "): Entry." << endl
+              << "findCursor(" << mLineNumber << "): Looking for cursor: " << cursorID << endl;
     }
 
     map<string, tmCursor *>::iterator i = mCursors.find(cursorID);
@@ -738,18 +738,18 @@ map<string, tmCursor *>::iterator tmTraceFile::findCursor(const string &cursorID
     if (mOptions->verbose()) {
         if (i != mCursors.end()) {
             // Not found.
-            *mDbg << "findCursor(): Cursor: " << cursorID
+            *mDbg << "findCursor(" << mLineNumber << "): Cursor: " << cursorID
                   << " found. (SQL on line: " << i->second->sqlLineNumber()
                   << ')' << endl;
         } else {
             // Not found.
-            *mDbg << "findCursor(): Cursor: " << cursorID
+            *mDbg << "findCursor(" << mLineNumber << "): Cursor: " << cursorID
                   << " not found." << endl;
         }
     }
 
     if (mOptions->verbose()) {
-        *mDbg << "findCursor(): Exit." << endl;
+        *mDbg << "findCursor(" << mLineNumber << "): Exit." << endl;
     }
 
     return i;

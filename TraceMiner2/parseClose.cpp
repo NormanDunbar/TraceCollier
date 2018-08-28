@@ -76,13 +76,13 @@ bool tmTraceFile::parseCLOSE(const string &thisLine) {
     // Did it all work?
     if (!matchOk) {
         stringstream s;
-        s << "parseCLOSE(): Cannot match against CLOSE at line: "
+        s << "parseCLOSE(" << mLineNumber << "): Cannot match against CLOSE at line: "
           <<  mLineNumber << "." << endl;
         cerr << s.str();
 
         if (mOptions->verbose()) {
             *mDbg << s.str()
-                  << "parseCLOSE(): Exit." << endl;
+                  << "parseCLOSE(" << mLineNumber << "): Exit." << endl;
         }
 
         return false;
@@ -107,7 +107,7 @@ bool tmTraceFile::parseCLOSE(const string &thisLine) {
 
         stringstream s;
         if (depth <= mOptions->depth()) {
-            s << "parseCLOSE(): Found CLOSE for cursor " << cursorID
+            s << "parseCLOSE(" << mLineNumber << "): Found CLOSE for cursor " << cursorID
               << " at line: " << mLineNumber
               << ", but not found in existing cursor list." << endl;
             cerr << s.str();
@@ -115,7 +115,7 @@ bool tmTraceFile::parseCLOSE(const string &thisLine) {
 
         if (mOptions->verbose()) {
             *mDbg << s.str()
-                  << "parseCLOSE(): Exit." << endl;
+                  << "parseCLOSE(" << mLineNumber << "): Exit." << endl;
         }
 
         // We should be returning false if we don't find the cursor
@@ -126,7 +126,7 @@ bool tmTraceFile::parseCLOSE(const string &thisLine) {
 
     // Looks like a good close.
     if (mOptions->verbose()) {
-        *mDbg << "parseCLOSE(): Exit." << endl;
+        *mDbg << "parseCLOSE(" << mLineNumber << "): Exit." << endl;
     }
 
     return true;

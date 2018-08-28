@@ -75,13 +75,13 @@ bool tmTraceFile::parseERROR(const string &thisLine) {
     // Did it all work?
     if (!matchOk) {
         stringstream s;
-        s << "parseERROR(): Cannot match against ERROR at line: "
+        s << "parseERROR(" << mLineNumber << "): Cannot match against ERROR at line: "
           <<  mLineNumber << "." << endl;
         cerr << s.str();
 
         if (mOptions->verbose()) {
             *mDbg << s.str()
-                  << "parseERROR(): Exit." << endl;
+                  << "parseERROR(" << mLineNumber << "): Exit." << endl;
         }
 
         return false;
@@ -124,7 +124,7 @@ bool tmTraceFile::parseERROR(const string &thisLine) {
 
     // Looks like a good parse.
     if (mOptions->verbose()) {
-        *mDbg << "parseERROR(): Exit." << endl;
+        *mDbg << "parseERROR(" << mLineNumber << "): Exit." << endl;
     }
 
     return true;

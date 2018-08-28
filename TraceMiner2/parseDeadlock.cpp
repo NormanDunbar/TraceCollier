@@ -114,7 +114,7 @@ void tmTraceFile::parseDEADLOCK() {
 
     // Looks like a good parse.
     if (mOptions->verbose()) {
-        *mDbg << "parseDEADLOCK(): Exit." << endl;
+        *mDbg << "parseDEADLOCK(" << mLineNumber << "): Exit." << endl;
     }
 }
 

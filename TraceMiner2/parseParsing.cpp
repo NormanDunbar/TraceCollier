@@ -101,7 +101,7 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
 
         if (mOptions->verbose()) {
             *mDbg << s.str() << endl
-                  << "parsePARSING(): Exit." << endl;
+                  << "parsePARSING(" << mLineNumber << "): Exit." << endl;
         }
 
         return false;
@@ -129,7 +129,7 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
 
         if (mOptions->verbose()) {
             *mDbg << s.str()
-                  << "parsePARSING(): Exit." << endl;
+                  << "parsePARSING(" << mLineNumber << "): Exit." << endl;
         }
 
         return false;
@@ -203,11 +203,11 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
 
     // Verbose?
     if (mOptions->verbose()) {
-        *mDbg << endl << "parsePARSING(): "
+        *mDbg << endl << "parsePARSING(" << mLineNumber << "): "
               << (exists.second ? "Creating" : "ReCreating") << " Cursor: "
               << exists.first->first << endl
               << *(exists.first->second)
-              << "parsePARSING(): Exit." << endl;
+              << "parsePARSING(" << mLineNumber << "): Exit." << endl;
     }
 
     return true;

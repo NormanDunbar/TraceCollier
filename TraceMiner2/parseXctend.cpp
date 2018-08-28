@@ -83,7 +83,7 @@ bool tmTraceFile::parseXCTEND(const string &thisLine) {
 
         if (mOptions->verbose()) {
             *mDbg << s.str()
-                  << "parseXCTEND(): Exit." << endl;
+                  << "parseXCTEND(" << mLineNumber << "): Exit." << endl;
         }
 
         return false;
@@ -110,7 +110,7 @@ bool tmTraceFile::parseXCTEND(const string &thisLine) {
 
     // Looks like a good parse.
     if (mOptions->verbose()) {
-        *mDbg << "parseXCTEND(): Exit." << endl;
+        *mDbg << "parseXCTEND(" << mLineNumber << "): Exit." << endl;
     }
 
     // Increment  the EXEC count for a COMMIT or ROLLBACK.

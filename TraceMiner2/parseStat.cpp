@@ -77,7 +77,7 @@ bool tmTraceFile::parseSTAT(const string &thisLine) {
 
         if (mOptions->verbose()) {
             *mDbg << s.str()
-                  << "parseSTAT(): Exit." << endl;
+                  << "parseSTAT(" << mLineNumber << "): Exit." << endl;
         }
 
         return false;
@@ -89,7 +89,7 @@ bool tmTraceFile::parseSTAT(const string &thisLine) {
     // Not found? Don't care.
     if (i == mCursors.end()) {
         if (mOptions->verbose()) {
-            *mDbg << "parseSTAT(): CursorID: " << cursorID << " - Not found. Exit." << endl;
+            *mDbg << "parseSTAT(" << mLineNumber << "): CursorID: " << cursorID << " - Not found. Exit." << endl;
         }
 
         return true;
@@ -102,8 +102,9 @@ bool tmTraceFile::parseSTAT(const string &thisLine) {
 
     // Looks like a good stat.
     if (mOptions->verbose()) {
-        *mDbg << "parseSTAT(): CursorID: " << cursorID << " - now/already closed." << endl
-              << "parseSTAT(): Exit." << endl;
+        *mDbg << "parseSTAT(" << mLineNumber << "): CursorID: "
+              << cursorID << " - now/already closed." << endl
+              << "parseSTAT(" << mLineNumber << "): Exit." << endl;
     }
 
     return true;
