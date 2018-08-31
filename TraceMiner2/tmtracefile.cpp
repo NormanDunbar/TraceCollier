@@ -707,6 +707,12 @@ bool tmTraceFile::readTraceLine(string *aLine) {
 
     }
 
+    // Windows trace? Lose the "^M" aka '\r' aka character(13).
+    string::size_type pos = aLine->find('\r');
+    if (pos != string::npos) {
+        aLine->erase(pos);
+    }
+
     // Verbose?
     if (mOptions->verbose()) {
         *mDbg << "readTraceLine(" << mLineNumber << "): [" << *aLine << "]" << endl;

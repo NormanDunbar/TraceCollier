@@ -316,20 +316,31 @@ bool extractBindName(const string &thisSQL, const string::size_type &colonPos, s
 
     // No shortcut, do it the hard way.
     // Stash the colon first.
-    unsigned pos = colonPos;
+    string::size_type pos = colonPos;
+    string::size_type endPos = thisSQL.length() - 1;
     bindName.push_back(thisSQL.at(pos++));
     char cc = thisSQL.at(pos);
 
-    // Lop around, until we find something  that's not allowed in a bind name.
+    // Loop around, until we find something  that's not allowed in a bind name.
+    // Or, the end of the text.
     while (cc != ' ' &&
            cc != ':' &&
            cc != ',' &&
            cc != ')' &&
+           cc != '\n' &&
+           cc != '\r' &&
            cc != ';')
     {
         bindName.push_back(cc);
+
+        if (pos == endPos) {
+            break;
+        }
+
         cc = thisSQL.at(++pos);
     }
-
+cerr << "SQL = [" << thisSQL << ']'
+     << endl 
+     << "bindName = '" << bindName << "'" << endl;
     return true;
 }

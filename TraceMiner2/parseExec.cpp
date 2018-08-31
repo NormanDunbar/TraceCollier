@@ -128,7 +128,8 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
     tmCursor *thisCursor = i->second;
     string sqlText = thisCursor->sqlText();
 
-    // Find the binds map for this cursor.
+    // Find the binds map for this cursor if there are any binds.
+    if (thisCursor->bindsLine()) {
     map<unsigned, tmBind *> *binds = thisCursor->binds();
 
     // Replace all the bind names we find, with the bind value.
@@ -163,6 +164,7 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
 
             return false;
         }
+    }
     }
 
     // And write the replaced SQL to the report file. If there are EXECs

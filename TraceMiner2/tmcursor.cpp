@@ -212,7 +212,7 @@ bool tmCursor::buildBindMap(const string &sql) {
     // Can't use a regex, do it the hard way then! We also have to keep
     // scanning - there might be variables or columns named returningxxx or
     // xxxreturning etc.
-    string::size_t howBig = 0;
+    string::size_type howBig = 0;
     while (true) {
         // Pseudo case insensitive search. All upper or all lower only!
         string::size_type returningPos = thisSQL.find("RETURNING", howBig);
@@ -222,7 +222,7 @@ bool tmCursor::buildBindMap(const string &sql) {
 
         // Found anything?
         if (returningPos == string::npos) {
-            return;
+            break;
         }
 
         // Found something. Is it a complete word? If so, the character before
@@ -317,7 +317,6 @@ bool tmCursor::buildBindMap(const string &sql) {
                 continue;
             }
         }
-
 
         // Ok, extract a bind variable name.
         if (!extractBindName(thisSQL, colonPos, bindName)) {

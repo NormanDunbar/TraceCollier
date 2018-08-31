@@ -68,9 +68,10 @@ bool tmTraceFile::parsePARSE(const string &thisLine) {
     }
 #else
     cursorID = getCursor(thisLine, &matchOk);
-    if (matchOk) {
-        depth = getDigits(thisLine, "dep=", &matchOk);
-    }
+    // Removed for Issue 10.
+    //if (matchOk) {
+        //depth = getDigits(thisLine, "dep=", &matchOk);
+    //}
 #endif  // USE_REGEX
 
     // Did it all work?

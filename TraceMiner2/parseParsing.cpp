@@ -87,7 +87,7 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
             //depth = getDigits(thisLine, "dep=", &matchOk);  // Removed - Issue 10
             //if (matchOk) {
                 commandType = getDigits(thisLine, "oct=", &matchOk);
-            }
+            //}
         }
     }
 #endif // USE_REGEX
@@ -180,7 +180,6 @@ bool tmTraceFile::parsePARSING(const string &thisLine) {
     // Exists.first->second is the tmCursor pointer.
     //
     // Phew!
-
     // So, after all that, did we insert or find our cursor?
     if (!exists.second) {
         // Update existing cursor details. Only the
