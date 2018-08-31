@@ -339,8 +339,5 @@ bool extractBindName(const string &thisSQL, const string::size_type &colonPos, s
 
         cc = thisSQL.at(++pos);
     }
-cerr << "SQL = [" << thisSQL << ']'
-     << endl 
-     << "bindName = '" << bindName << "'" << endl;
     return true;
 }
