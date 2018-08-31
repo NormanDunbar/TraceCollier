@@ -97,20 +97,27 @@ bool tmTraceFile::parseERROR(const string &thisLine) {
     string oraError = "ORA-" + std::to_string(errorCode);
 
     if (i != mCursors.end()) {
+        unsigned temp = i->second->bindsLine();
+        string bindsLine = std::to_string(temp);
+        if (temp == 0) {
+            bindsLine = "No binds";
+        }
+
         // Report the error in the report file.
         if (!mOptions->html()) {
             *mOfs << setw(MAXLINENUMBER) << mLineNumber << ' '
-                  << setw(MAXLINENUMBER) << ' ' << ' '
-                  << setw(MAXLINENUMBER) << ' ' << ' '
-                  << setw(MAXLINENUMBER) << ' ' << ' '
+                  << setw(MAXLINENUMBER) << i->second->sqlParseLine() << ' '
+                  << setw(MAXLINENUMBER) << bindsLine << ' '
+                  << setw(MAXLINENUMBER) << i->second->sqlLineNumber() << ' '
                   << setw(MAXLINENUMBER) << ' ' << ' '
                   << " ERROR: " << oraError << endl;
         } else {
             *mOfs << "<tr><td class=\"number\">" << mLineNumber << "</td>"
+                  << "<td>" << i->second->sqlParseLine() << "</td>"
+                  << "<td>" << bindsLine << "</td>"
+                  << "<td>" << i->second->sqlLineNumber() << "</td>"
                   << "<td>" << "&nbsp;" << "</td>"
-                  << "<td>" << "&nbsp;" << "</td>"
-                  << "<td>" << "&nbsp;" << "</td>"
-                  << "<td>" << "&nbsp;" << "</td><td class=\"error_text\">"
+                  << "<td class=\"error_text\">"
                   << " ERROR: " << oraError
                   << "</td></tr>" << endl;
 
