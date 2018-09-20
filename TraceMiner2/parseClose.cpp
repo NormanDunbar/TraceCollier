@@ -53,16 +53,18 @@ bool tmTraceFile::parseCLOSE(const string &thisLine) {
     // CLOSE #4155332696:c=0,e=1,dep=0,type=3,tim=1039827725793
     string cursorID = "";
     unsigned depth = 0;
+    unsigned closeType = 0;
     bool matchOk = true;
 
 #ifdef USE_REGEX
-    regex reg("CLOSE\\s(#\\d+).*?dep=(\\d+).*");
+    regex reg("CLOSE\\s(#\\d+).*?dep=(\\d+).*?type=(\\d+).*");
     smatch match;
 
     // Extract the cursorID, the length and the depth.
     if (regex_match(thisLine, match, reg)) {
         cursorID = match[1];
         depth = stoul(match[2], NULL, 10);
+        closeType = stoul(match[3], NULL, 10);
     } else {
         matchOk = false;
     }
@@ -70,6 +72,10 @@ bool tmTraceFile::parseCLOSE(const string &thisLine) {
     cursorID = getCursor(thisLine, &matchOk);
     if (matchOk) {
         depth = getDigits(thisLine, "dep=", &matchOk);
+
+        if (matchOk) {
+            closeType = getDigits(thisLine, "type=", &matchOk);
+        }
     }
 #endif  // USE_REGEX
 
@@ -126,7 +132,17 @@ bool tmTraceFile::parseCLOSE(const string &thisLine) {
 
     // Looks like a good close.
     if (mOptions->verbose()) {
-        *mDbg << "parseCLOSE(" << mLineNumber << "): Exit." << endl;
+        *mDbg << "parseCLOSE(" << mLineNumber << "): Cursor " << i->first
+              << " has been " << (closeType == 0 ? " hard closed." : " closed and cached.")
+              << endl
+            << "parseCLOSE(" << mLineNumber << "): Exit." << endl;
+    }
+
+    // One for the viewer.
+    if (!mOptions->quiet()) {
+        cout << "Cursor: " << i->first
+             << (closeType == 0 ? " hard closed" : " closed and cached")
+             << " at line: " << mLineNumber << endl;
     }
 
     return true;

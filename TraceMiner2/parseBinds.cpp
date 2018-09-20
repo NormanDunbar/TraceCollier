@@ -109,12 +109,15 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
         *mDbg << "parseBINDS(" << mLineNumber << "): Found cursor: " << i->first << '.' << endl;
     }
 
+    // Issue #15 Don't ignore binds for cached closed cursors.
+    // Change debugging message.
     if (thisCursor->isClosed()) {
         if (mOptions->verbose()) {
-            *mDbg << "parseBINDS(" << mLineNumber << "): Cursor is closed. Ignoring BINDS. " << endl;
+            *mDbg << "parseBINDS(" << mLineNumber << "): Cursor " << i->first
+                  << " executing from cache, apparently." << endl;
         }
 
-        return true;
+        //return true;
     }
 
 
