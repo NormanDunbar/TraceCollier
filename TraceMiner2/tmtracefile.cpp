@@ -527,6 +527,16 @@ bool tmTraceFile::openDebugFile()
     // Yup, the comma is not required now. Should be locale dependent.
     mDbg->imbue(locale(mDbg->getloc(), new ThousandsSeparator<char>(',')));
 
+    // For my own benefit, note whether or not we are using REGEXes
+    // It helps when testing, to know what's what.
+    *mDbg << "TraceMiner2 - ";
+    #ifdef USE_REGEX
+       *mDbg << " with REGEX support.";
+    #else
+       *mDbg << " with no REGEX support.";
+    #endif // USE_REGEX
+    *mDbg << endl << endl;
+
     // Looks like a valid debug file.
     return true;
 }
