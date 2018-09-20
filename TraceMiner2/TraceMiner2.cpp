@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
     #ifdef USE_REGEX
         cout << " : with REGEX support.";
     #else
-        cout << " : with no REGEX support."
+        cout << " : with no REGEX support.";
     #endif // USE_REGEX
     cout << endl << endl;
 
