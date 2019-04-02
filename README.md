@@ -5,6 +5,8 @@
 # TraceMiner2
 An improved version of TraceMiner. Written in C++ and quite honestly, a better product altogether! Requires an Oracle 10g or upwards trace file, but can *probably* be changed to cope with 9i, at the very minimum, if necessary. Maybe. It depends.
 
+From version 1.06 onwards, TraceMiner2 has the ability to report the data and time that each execution took place. It does this only if you pass it the name of a trace file which was pre-processed by another of my useful utilities, *TraceAdjust*, available from  <https://github.com/NormanDunbar/TraceAdjust>.
+
 ## Improvements Over TraceMiner.
 It *may* not be faster, C++ never usually is, but it's a lot more thorough and safer too. It is less likely to bale out when it can't understand something in a trace file. Also:
 

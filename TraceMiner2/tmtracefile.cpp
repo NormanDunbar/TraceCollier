@@ -49,6 +49,7 @@ tmTraceFile::tmTraceFile(tmOptions *options)
     mLineNumber = 0;
     mBatchCount = 0;
     mExecCount = -1;
+    mIsTraceAdjusted = false;
     mUnprocessedLine.clear();
     mIfs = NULL;
     mOfs = NULL;
@@ -96,16 +97,6 @@ bool tmTraceFile::parse()
         *mDbg << "parse(" << mLineNumber << "): Entry." << endl;
     }
 
-    // We need the report file here.
-    if (!openReportFile()) {
-        return false;
-    }
-
-    // Report file is open.
-    // Reset the EXEC counter.
-    mExecCount = 0;
-
-
     // Ready to go, lets parse a trace file.
     if (!openTraceFile()) {
         if (mOptions->verbose()) {
@@ -128,6 +119,16 @@ bool tmTraceFile::parse()
     }
 
     // File is open, header is parsed.
+    // We need the report file here.
+    if (!openReportFile()) {
+        return false;
+    }
+
+    // Report file is open.
+    // Reset the EXEC counter.
+    mExecCount = 0;
+
+    // Parse the trace, finally!
     if (!parseTraceFile()) {
         if (mOptions->verbose()) {
             *mDbg << "parse(" << mLineNumber << "): Cannot parse trace file. Exit." << endl;
@@ -438,6 +439,12 @@ bool tmTraceFile::parseHeader() {
             continue;
         }
 
+        // Has file been trace adjusted?
+        if (chunk == "*** TraceA") {
+            mIsTraceAdjusted = true;
+            continue;
+        }
+
         if (chunk == "==========") {
             break;
         }
@@ -615,7 +622,12 @@ void tmTraceFile::reportHeadings() {
             *mOfs << "TraceMiner2" << endl
                   << "-----------" << endl << endl;
 
-            *mOfs << "Processing Trace file: " << mOptions->traceFile() << endl << endl;
+            *mOfs << "Processing Trace file: " << mOptions->traceFile();
+            if (mIsTraceAdjusted) {
+                *mOfs << " (Preprocessed by 'TraceAdjust') ";
+            }
+
+            *mOfs << endl << endl;
         }
 
         // Break up the report every MAXEXECS EXEC statements.
@@ -627,8 +639,13 @@ void tmTraceFile::reportHeadings() {
               << setw(MAXLINENUMBER) << "PARSE Line" << ' '
               << setw(MAXLINENUMBER) << "BINDS Line" << ' '
               << setw(MAXLINENUMBER) << "SQL Line" << ' '
-              << setw(MAXLINENUMBER) << "DEP" << ' '
-              << "SQL Text"
+              << setw(MAXLINENUMBER) << "DEP" << ' ';
+
+        if (mIsTraceAdjusted) {
+            *mOfs << setw(28) << left << "EXEC Date/Time";
+        }
+
+        *mOfs << "SQL Text"
               << endl
               << setw(200) << setfill('-') << '-'
               << setfill(' ') << endl;
@@ -648,7 +665,13 @@ void tmTraceFile::reportHeadings() {
                   << "<body>" << endl
                   << "<H1>TraceMiner2</H1>" << endl
                   << "<p><strong>Processing Trace File:</strong> "
-                  << mOptions->traceFile() << "</p>" << endl;
+                  << mOptions->traceFile();
+
+                  if (mIsTraceAdjusted) {
+                      *mOfs << " (Preprocessed by '<strong>TraceAdjust</strong>') ";
+                  }
+
+                  *mOfs << "</p>" << endl;
         }
 
         // Are we in the middle of a trace? Start a new table if necessary.
@@ -667,8 +690,13 @@ void tmTraceFile::reportHeadings() {
               << "<th style=\"width:6%\";>PARSE Line</th>"
               << "<th style=\"width:6%\";>BINDS# Line</th>"
               << "<th style=\"width:6%\";>SQL Line</th>"
-              << "<th style=\"width:3%\";>DEP</th>"
-              << "<th>SQL Text</th></tr>"
+              << "<th style=\"width:3%\";>DEP</th>";
+
+        if (mIsTraceAdjusted) {
+            *mOfs << "<th style=\"width:10%\";>EXEC Date/Time</th>";
+        }
+
+        *mOfs << "<th>SQL Text</th></tr>"
               << endl;
     }
 

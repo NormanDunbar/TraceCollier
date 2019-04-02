@@ -53,7 +53,7 @@
     mClosed = false;
     mReturning = false;
     mStopScanningHere = 0;
-
+    mLocal = "";
 }
 
 /** @brief Destructor for tmCursor object.

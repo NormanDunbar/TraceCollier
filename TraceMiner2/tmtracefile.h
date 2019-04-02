@@ -64,6 +64,7 @@ using std::stoul;
 using std::numpunct;
 using std::locale;
 using std::setw;
+using std::left;
 using std::setfill;
 
 #include "tmcursor.h"
@@ -119,6 +120,7 @@ class tmTraceFile
         ifstream *mIfs;                     /**< Std::ifstream used to read the trace file. */
         ofstream *mOfs;                     /**< Std::ofstream used to write the report file. */
         ofstream *mDbg;                     /**< Std::ofstream used to write the debug file. */
+        bool mIsTraceAdjusted;              /**< True if the trace file has been TraceAdjusted. */
 
         // Internal stuff.
         void cleanUp();                     /**< Cleans up on destruction etc. */

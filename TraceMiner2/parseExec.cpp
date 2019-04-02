@@ -51,26 +51,38 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
         *mDbg << "parseEXEC(" << mLineNumber << "): Entry. EXEC Count so far: " << mExecCount << endl;
     }
 
-    // EXEC #5924310096:c=0,e=31,p=0,cr=0,cu=0,mis=0,r=0,dep=0,og=4,plh=1388734953,tim=526735705392
+    // EXEC #5924310096:c=0,e=31,p=0,cr=0,cu=0,mis=0,r=0,dep=0,og=4,plh=1388734953,tim=526735705392 [ ...,local='yyyy Mon etc ']
     string cursorID = "";
     unsigned depth = 0;
     bool matchOk = true;
+    string local = "";
 
 #ifdef USE_REGEX
     regex reg("EXEC\\s(#\\d+).*?dep=(\\d+).*");
+    regex regAdjusted("EXEC\\s(#\\d+).*?dep=(\\d+).*?local='(.*?)'.*");
     smatch match;
 
     // Extract the cursorID, the length and the depth.
-    if (regex_match(thisLine, match, reg)) {
+    if (regex_match(thisLine, match, regAdjusted)) {
+        // Extract local date/time.
+        local = match[3];
+    } else {
+        if (!regex_match(thisLine, match, reg)) {
+            matchOk = false;
+        }
+    }
+
+    // Get the common stuff.
+    if (matchOk) {
         cursorID = match[1];
         depth = stoul(match[2], NULL, 10);
-    } else {
-        matchOk = false;
     }
+
 #else
     cursorID = getCursor(thisLine, &matchOk);
     if (matchOk) {
         depth = getDigits(thisLine, "dep=", &matchOk);
+        local = getLocal(thisLine);
     }
 #endif  // USE_REGEX
 
@@ -86,6 +98,8 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
             *mDbg << s.str() << endl
                   << "parseEXEC(" << mLineNumber << "): Exit." << endl;
         }
+
+        cerr << "EXEC: Local = [" << local << "]" << endl;
 
         return false;
     }
@@ -116,6 +130,7 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
         return false;
     }
 
+
     // We have a depth <= depth() EXEC with a valid cursor, increment the EXEC counter.
     // And check if we need a fresh set of report headings?
     if ((mExecCount > mOptions->maxExecs())) {
@@ -127,6 +142,9 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
     // Get the SQL Statement & binds.
     tmCursor *thisCursor = i->second;
     string sqlText = thisCursor->sqlText();
+
+    // Might as well save the local date/time.
+    thisCursor->setLocal(local);
 
     // Find the binds map for this cursor if there are any binds.
     if (thisCursor->bindsLine()) {
@@ -187,16 +205,27 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
               << setw(MAXLINENUMBER) << parseLineText << ' '
               << setw(MAXLINENUMBER) << bindsLineText << ' '
               << setw(MAXLINENUMBER) << thisCursor->sqlLineNumber() << ' '
-              << setw(MAXLINENUMBER) << depth << ' '
-              << sqlText << ' '
+              << setw(MAXLINENUMBER) << depth << ' ';
+
+        if (mIsTraceAdjusted) {
+            *mOfs << setw(27) << local << ' ';
+        }
+
+        *mOfs << sqlText << ' '
               << endl;
     } else {
         *mOfs << "<tr><td class=\"number\">" << mLineNumber << "</td>"
               << "<td class=\"" << parseClass << "\">" << parseLineText << "</td>"
               << "<td class=\"" << bindsClass << "\">" << bindsLineText << "</td>"
               << "<td class=\"number\">" << thisCursor->sqlLineNumber() << "</td>"
-              << "<td class=\"number\">" << depth << "</td>"
-              << "<td class=\"text\"><pre>" << sqlText << "</pre></td></tr>"
+              << "<td class=\"number\">" << depth << "</td>";
+
+        if (mIsTraceAdjusted) {
+            // Force a break between date and time.
+            *mOfs << "<td class=\"text\">" << local.substr(0, 10) << "<br>" << local.substr(12) << "</td>";
+        }
+
+        *mOfs << "<td class=\"text\"><pre>" << sqlText << "</pre></td></tr>"
               << endl;
     }
 
