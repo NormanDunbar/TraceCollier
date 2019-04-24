@@ -145,8 +145,8 @@ bool tmOptions::parseArgs(int argc, char *argv[]) {
             if (feedbackOk) {
                 mFeedback = temp;
             } else {
-                // Try d instead ...
-                unsigned temp = getDigits(thisArg, "-d=", &feedbackOk);
+                // Try f instead ...
+                unsigned temp = getDigits(thisArg, "-f=", &feedbackOk);
                 if (feedbackOk) {
                     mFeedback = temp;
                 }
