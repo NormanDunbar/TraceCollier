@@ -681,19 +681,15 @@ void tmTraceFile::reportHeadings() {
                   << "<p>&nbsp;</p>" << endl << endl;
         }
 
-        // I'm a little p1553d off at the WWW for HTML5's inability
-        // to use CSS to specify a table or cell width in the CSS
-        // file. This is a bad thing as I have to recompile if I need
-        // to change the column widths.
-        *mOfs << "<table style=\"width:95%\";>" << endl
-              << "<tr><th style=\"width:6%\";>EXEC Line</th>"
-              << "<th style=\"width:6%\";>PARSE Line</th>"
-              << "<th style=\"width:6%\";>BINDS# Line</th>"
-              << "<th style=\"width:6%\";>SQL Line</th>"
-              << "<th style=\"width:3%\";>DEP</th>";
+        *mOfs << "<table class=\"tm2table\">" << endl
+              << "<tr><th class=\"execline\";>EXEC Line</th>"
+              << "<th class=\"parseline\";>PARSE Line</th>"
+              << "<th class=\"bindsline\";>BINDS# Line</th>"
+              << "<th class=\"sqlline\";>SQL Line</th>"
+              << "<th class=\"depline\";>DEP</th>";
 
         if (mIsTraceAdjusted) {
-            *mOfs << "<th style=\"width:10%\";>EXEC Date/Time</th>";
+            *mOfs << "<th class=\"exectime\";>EXEC Date/Time</th>";
         }
 
         *mOfs << "<th>SQL Text</th></tr>"

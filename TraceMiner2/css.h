@@ -40,33 +40,32 @@ string cssText =
     + "    color: maroon;" + eol
     + "}" + eol
     + eol
-    + "table, th, td {" + eol
-    + "    border: 1px solid bisque;" + eol
-    + "}" + eol
-    + eol
-    + "table {" + eol
-    + "    border-collapse: collapse;" + eol
-    + "    background: beige;" + eol
-    + "    font-family: \"courier new\",\"lucida console\",mono;" + eol
-    + "    font-size: smaller;" + eol
-    + eol
-    + "    /* If \"fixed\" is not used, the widths are ignored. Sigh */" + eol
-    + "    /* So the <table> is hard coded as <table style=\"width:95%\"> which I don't like. */" + eol
-    + "    table-layout: fixed;" + eol
-    + eol
-    + "    /* Margin is half of 100-95% to accommodate a 95% wide table. */" + eol
-    + "    margin-left: 2.5%;" + eol
-    + "}" + eol
-    + eol
     + "pre {" + eol
     + "    white-space: pre-wrap;" + eol
     + "    word-break: keep-all;" + eol
     + "    font-size: larger;" + eol
     + "}" + eol
     + eol
-    + "th {" + eol
+    + ".tm2table {" + eol
+    + "    border-collapse: collapse;" + eol
+    + "    background: beige;" + eol
+    + "    font-family: \"courier new\",\"lucida console\",mono;" + eol
+    + "    font-size: smaller;" + eol
+    + "    table-layout: fixed;" + eol
+    + eol
+    + "    /* Margin-left is (100 - width%)/2 equally space the table in the width. */" + eol
+    + "    margin-left: 2.5%;" + eol
+    + "    width: 95%;" + eol
+    + "}" + eol
+    + eol
+    + ".tm2table th {" + eol
     + "    background: burlywood;" + eol
     + "    color: maroon;" + eol
+    + "    border: 1px solid bisque;" + eol
+    + "}" + eol
+    + eol
+    + ".tm2table td {" + eol
+    + "    border: 1px solid bisque;" + eol
     + "}" + eol
     + eol
     + ".number {" + eol
@@ -87,6 +86,30 @@ string cssText =
     + "    vertical-align: top;" + eol
     + "    font-weight: bold;" + eol
     + "    color: red" + eol
-    + "}" + eol;
+    + "}" + eol
+    + ".execline {" + eol
+    + "    width: 5%;" + eol
+    + "}" + eol
+    + eol
+    + ".parseline {" + eol
+    + "    width: 5%;" + eol
+    + "}" + eol
+    + eol
+    + ".bindsline {" + eol
+    + "    width: 5%;" + eol
+    + "}" + eol
+    + eol
+    + ".sqlline {" + eol
+    + "    width: 5%;" + eol
+    + "}" + eol
+    + eol
+    + ".depline {" + eol
+    + "    width: 3%;" + eol
+    + "}" + eol
+    + eol
+    + ".exectime {" + eol
+    + "    width: 14%;" + eol
+    + "}" + eol
+    + eol;
 
 #endif // CSS_H
