@@ -9,10 +9,11 @@
 #
 
 CPP=g++
-CPPFLAGS=-std=c++11
+CPPFLAGS=-std=c++11 
 TARGET=$(BIN)/TraceMiner2
 RM=rm
 BIN=./bin
+STRIP=strip
 
 SOURCES=TraceMiner2/TraceMiner2.cpp \
         TraceMiner2/tmoptions.cpp \
@@ -37,6 +38,7 @@ all:	traceminer2 $(BIN)
 
 traceminer2:	$(OBJECTS) $(BIN)
 	$(CPP) -o $(TARGET) $(OBJECTS)
+	$(STRIP) $(TARGET)
 
 
 $(BIN):
