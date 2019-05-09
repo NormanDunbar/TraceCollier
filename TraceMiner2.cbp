@@ -39,11 +39,7 @@
 		</Build>
 		<Compiler>
 			<Add option="-std=c++14" />
-			<Add option="-m32" />
 		</Compiler>
-		<Linker>
-			<Add option="-m32" />
-		</Linker>
 		<Unit filename="TraceMiner2/TraceMiner2.cpp" />
 		<Unit filename="TraceMiner2/TraceMiner2.css" />
 		<Unit filename="TraceMiner2/TraceMiner2.h" />
