@@ -635,7 +635,7 @@ void tmTraceFile::reportHeadings() {
             *mOfs << endl << endl;
         }
 
-        *mOfs << setw(MAXLINENUMBER) << "EXEC Line" << ' '
+        *mOfs << setw(MAXLINENUMBER) << "EXEC/ERROR Line" << ' '
               << setw(MAXLINENUMBER) << "PARSE Line" << ' '
               << setw(MAXLINENUMBER) << "BINDS Line" << ' '
               << setw(MAXLINENUMBER) << "SQL Line" << ' '
@@ -682,7 +682,7 @@ void tmTraceFile::reportHeadings() {
         }
 
         *mOfs << "<table class=\"tm2table\">" << endl
-              << "<tr><th class=\"execline\";>EXEC Line</th>"
+              << "<tr><th class=\"execline\";>EXEC/ERROR Line</th>"
               << "<th class=\"parseline\";>PARSE Line</th>"
               << "<th class=\"bindsline\";>BINDS# Line</th>"
               << "<th class=\"sqlline\";>SQL Line</th>"

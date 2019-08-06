@@ -147,11 +147,13 @@ Trace Miner 2 has been tested on the following:
 
 # Documentation
 
-**In development, `doxygen` version 1.8.13 was used. Versions previous to this *may* cause problems. Time and testing will tell.**
+**In development, `doxygen` version 1.8.15 was used. Versions previous to this *may* cause problems. Time and testing will tell.**
 
 ![The Trace Miner!](Docs/miner-clipart-miner.png)
 
-The source code is documented with specially formatted comments which are collected by *Doxygen* <http://www.stack.nl/~dimitri/doxygen/>, and output as HTML files documenting all the source and header files, classes, variables, functions etc in the source code. Other output formats are available, but HTML is the default.
+The source code is documented with specially formatted comments which are collected by *Doxygen* <http://www.doxygen.nl/index.html>, and output as HTML files documenting all the source and header files, classes, variables, functions etc in the source code. Other output formats are available, but HTML is the default.
+
+**This is not User documentation, but Developer documentation.**
 
 There is a Doxygen configuration file included in the source code. It can be found in the folder `SourceCode\TraceMiner2-master\Docs` and is named `TraceMiner2.doxyfile`. 
 
@@ -159,13 +161,13 @@ Sadly this file doesn't appear to enable relative paths to be used when extracti
 
 Option            | Current Value                                                |
 ----------------- | ------------------------------------------------------------ |
-PROJECT\_LOGO      | C:/SourceCode/TraceMiner2/Docs/tm2\_logo\_25pct.png            |
-OUTPUT\_DIRECTORY  | C:/SourceCode/TraceMiner2/TraceMiner2/doxygen                |
-WARN\_LOGFILE      | C:/SourceCode/TraceMiner2/TraceMiner2/doxygen/doxygen.log    |
-INPUT             | C:/SourceCode/TraceMiner2/TraceMiner2/                       |
+PROJECT\_LOGO      | E:/SourceCode/TraceMiner2/Docs/tm2\_logo\_25pct.png            |
+OUTPUT\_DIRECTORY  | E:/SourceCode/TraceMiner2/Docs                |
+WARN\_LOGFILE      | E:/SourceCode/TraceMiner2/TraceMiner2/Docs/doxygen.log    |
+INPUT             | E:/SourceCode/TraceMiner2/TraceMiner2/                       |
 HAVE\_DOT          | YES                                                          |
 
-Replace `C:/SourceCode/TraceMiner2` with your appropriate top level directory.
+Replace `E:/SourceCode/TraceMiner2` with your appropriate top level directory.
 
 The configuration file for Doxygen assumes the presence of the `dot` (aka `Graphviz` <http://www.graphviz.org/>) utility to draw the class, call and caller diagrams. If you don't have dot, or do not wish to generate these diagrams, then set `HAVE_DOT` to `NO`.
 

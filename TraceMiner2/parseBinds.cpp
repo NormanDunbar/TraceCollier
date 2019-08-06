@@ -365,7 +365,7 @@ bool tmTraceFile::parseBINDS(const string &thisLine) {
  * @param stop const vector<string>::iterator. Just after the last line to scan.
  * @param thisCursor tmCursor*. The tmCursor object who's data we are extracting.
  * @param thisBind tmBind*. The tmBind object who's data we are extracting.
- * @param unsigned firstLineNumber. The first line number of the bind data for the cursor.
+ * @param firstLineNumber unsigned. The first line number of the bind data for the cursor.
  * @return bool. Returns true for success, false otherwise.
  *
  * Parses a vector of lines, read in from the trace file,  which relate to a single
@@ -645,6 +645,7 @@ bool tmTraceFile::extractBindData(const vector<string>::iterator start, const ve
  * @param i vector<string>::const_iterator. Iterator pointing at the string.
  * @param equalPos const unsigned. Where the '=' is found in the string.
  * @param result unsigned&. Variable to receive the result.
+ * @param currentLine unsigned. The current line number of the bind data for the cursor.
  * @return bool. True is success. False is otherwise.
  */
 bool tmTraceFile::extractNumber(vector<string>::const_iterator i, const unsigned equalPos, unsigned &result, unsigned currentLine) {
@@ -687,6 +688,7 @@ bool tmTraceFile::extractNumber(vector<string>::const_iterator i, const unsigned
  * @param i vector<string>::const_iterator. Iterator pointing at the string.
  * @param equalPos const unsigned. Where the '=' is found in the string.
  * @param result string&. Variable to receive the result.
+ * @param currentLine unsigned. The current line number of the bind data for the cursor.
  * @return bool. True is success. False is otherwise.
  */
 bool tmTraceFile::extractHex(vector<string>::const_iterator i, const unsigned equalPos, string &result, unsigned currentLine) {
@@ -766,6 +768,7 @@ bool tmTraceFile::extractHex(vector<string>::const_iterator i, const unsigned eq
  *
  * @param i vector<string>::const_iterator. The line we are extracting a value from.
  * @param thisBind tmBind*. The tmBind object who's value we are extracting.
+ * @param currentLine unsigned. The current line number of the bind data for the cursor.
  * @return bool. True means all ok. False means problems.
  *
  * The bind data types are:

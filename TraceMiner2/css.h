@@ -44,6 +44,9 @@ string cssText =
     + "    white-space: pre-wrap;" + eol
     + "    word-break: keep-all;" + eol
     + "    font-size: larger;" + eol
+    + eol
+    + "    /* Fix for Firefox which adds a bottom-margin to 'pre' tags */" + eol
+    + "    margin-bottom: 0;" + eol
     + "}" + eol
     + eol
     + ".tm2table {" + eol
@@ -87,6 +90,7 @@ string cssText =
     + "    font-weight: bold;" + eol
     + "    color: red" + eol
     + "}" + eol
+    + eol
     + ".execline {" + eol
     + "    width: 5%;" + eol
     + "}" + eol

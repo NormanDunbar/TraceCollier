@@ -151,8 +151,8 @@ class tmTraceFile
         // Data extraction from a vector of bind lines.
         bool extractBindData(const vector<string>::iterator start, const vector<string>::iterator stop, tmCursor *thisCursor, tmBind *thisBind, unsigned firstLineNumber);    /**< Extracts the bind data from a vector. */
         bool extractNumber(vector<string>::const_iterator i, const unsigned equalPos, unsigned &result, unsigned currentLine);  /**< Extracts a numeric value. */
-        bool extractHex(vector<string>::const_iterator i, const unsigned equalPos, string &result, unsigned firstLineNumber);  /**< Extracts a hex value. */
-        bool extractBindValue(vector<string>::const_iterator i, tmBind *thisBind, unsigned firstLineNumber);  /**< Extracts a string representing a bind's actual value. */
+        bool extractHex(vector<string>::const_iterator i, const unsigned equalPos, string &result, unsigned currentLine);  /**< Extracts a hex value. */
+        bool extractBindValue(vector<string>::const_iterator i, tmBind *thisBind, unsigned currentLine);  /**< Extracts a string representing a bind's actual value. */
 };
 
 // Stolen from http://stackoverflow.com/questions/4728155/how-do-you-set-the-cout-locale-to-insert-commas-as-thousands-separators

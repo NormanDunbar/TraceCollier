@@ -146,6 +146,9 @@ bool tmTraceFile::parseEXEC(const string &thisLine) {
     // Might as well save the local date/time.
     thisCursor->setLocal(local);
 
+    // Save the EXEC line too, for parseERROR().
+    thisCursor->setExec(mLineNumber);
+
     // Find the binds map for this cursor if there are any binds.
     if (thisCursor->bindsLine()) {
     map<unsigned, tmBind *> *binds = thisCursor->binds();
