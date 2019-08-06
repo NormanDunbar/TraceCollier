@@ -67,6 +67,7 @@ class tmCursor
         bool isClosed() { return mClosed; }                     /**< Returns whether or not the cursor is closed. */
         bool isReturning() { return mReturning; }               /**< Returns whether or not the cursor has a RETURNING clause. */
         string getLocal() { return mLocal; }                    /**< Returns the local date/time of the cursor */
+        unsigned execLine() { return mExecLine; }                    /**< Returns the last EXEC line for the cursor. */
 
         // Setters.
         void setSQLText(string val);                            /**< Changes the SQL statement for this cursor. */
@@ -78,7 +79,8 @@ class tmCursor
         void setCommandType(unsigned val) { mCommandType = val; }       /**< Changes the command type for the statement. */
         void setClosed(bool val) { mClosed = val; }                     /**< Changes the closed state of the cursor. */
         void setReturning(bool val) { mReturning = val; }               /**< Changes the RETURNING state of the cursor. */
-        void setLocal(string val) { mLocal = val; }                     /**< Changes the local date.time of the cursor */
+        void setLocal(string val) { mLocal = val; }                     /**< Changes the local date.time of the cursor. */
+        void setExec(unsigned val) { mExecLine = val; }                /**< Changes the EXEC line of the cursor. */
 
     protected:
 
@@ -96,6 +98,7 @@ class tmCursor
         bool mReturning;                    /**< Does this cursor have a RETURNING clause? */
         unsigned mStopScanningHere;         /**< Where to stop looking for bind variables in the string. */
         string mLocal;                       /**< Local date/time for this exec */
+        unsigned mExecLine;                 /**< Line number of previous EXEC - for parseERROR() */
 
         bool buildBindMap(const string &sql);
         void cleanUp();

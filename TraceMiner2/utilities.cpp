@@ -344,8 +344,8 @@ bool extractBindName(const string &thisSQL, const string::size_type &colonPos, s
 
 /** @brief Extracts a local date/time from a trace adjusted trace file line.
  *
- * @param thisSQL const string&. The text of the SQL Statement.
- * @return string. The locazl date.time, if found, "" otherwise.
+ * @param thisLine const string&. The text of the SQL Statement.
+ * @return string. The local date.time, if found, "" otherwise.
  *
  */
 string getLocal(const string &thisLine) {

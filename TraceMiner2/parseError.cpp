@@ -104,18 +104,19 @@ bool tmTraceFile::parseERROR(const string &thisLine) {
         }
 
         // Report the error in the report file.
+        // EXEC(ERROR) line numbers.
         if (!mOptions->html()) {
-            *mOfs << setw(MAXLINENUMBER) << mLineNumber << ' '
+            *mOfs << setw(MAXLINENUMBER) << i->second->execLine() << '/' << mLineNumber << ' '
                   << setw(MAXLINENUMBER) << i->second->sqlParseLine() << ' '
                   << setw(MAXLINENUMBER) << bindsLine << ' '
                   << setw(MAXLINENUMBER) << i->second->sqlLineNumber() << ' '
                   << setw(MAXLINENUMBER) << ' ' << ' '
                   << " ERROR: " << oraError << endl;
         } else {
-            *mOfs << "<tr><td class=\"number\">" << mLineNumber << "</td>"
-                  << "<td>" << i->second->sqlParseLine() << "</td>"
-                  << "<td>" << bindsLine << "</td>"
-                  << "<td>" << i->second->sqlLineNumber() << "</td>"
+            *mOfs << "<tr><td class=\"number\">" << i->second->execLine() << '/' << mLineNumber << "</td>"
+                  << "<td class=\"number\">" << i->second->sqlParseLine() << "</td>"
+                  << "<td class=\"number\">" << bindsLine << "</td>"
+                  << "<td class=\"number\">" << i->second->sqlLineNumber() << "</td>"
                   << "<td>" << "&nbsp;" << "</td>"
                   << "<td class=\"error_text\">"
                   << " ERROR: " << oraError

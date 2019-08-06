@@ -52,3 +52,4 @@ bin/*
 #Except the README.pdf
 !README.pdf
 
+doxygen.log
