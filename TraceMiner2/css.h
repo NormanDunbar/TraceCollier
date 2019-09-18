@@ -114,6 +114,11 @@ string cssText =
     + ".exectime {" + eol
     + "    width: 14%;" + eol
     + "}" + eol
+    + eol
+    + ".footer {" + eol
+    + "    text-align: center;" + eol
+    + "    font-size: x-small;" + eol
+    + "}" + eol
     + eol;
 
 #endif // CSS_H

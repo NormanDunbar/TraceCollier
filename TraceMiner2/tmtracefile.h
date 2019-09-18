@@ -99,7 +99,7 @@ class tmTraceFile
         void setOptions(tmOptions *opt) { mOptions = opt; }   /**< Sets the options pointer. */
 
         // Other useful stuff.
-        bool parse();               /**< Parses the trace file. */
+        bool parse(const float varsion);               /**< Parses the trace file. */
 
     protected:
 

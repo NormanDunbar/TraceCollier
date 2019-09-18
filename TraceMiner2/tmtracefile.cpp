@@ -72,6 +72,7 @@ tmTraceFile::~tmTraceFile()
 
 /** @brief Parses a complete trace file.
  *
+ * @param const float version. Version number of TraceMiner2. Used in report footer.
  * @return bool.
  *
  * This function will parse an Oracle trace file and report on the SQL and
@@ -83,7 +84,7 @@ tmTraceFile::~tmTraceFile()
  *
  * Returns true to indicate success or false for a failure of some kind.
  */
-bool tmTraceFile::parse()
+bool tmTraceFile::parse(const float version)
 {
     // We might need the debug file, but if we fail to open it, just carry on.
     if (mOptions->verbose()) {
@@ -144,8 +145,20 @@ bool tmTraceFile::parse()
 
     // Close the table if HTML requested.
     if (mOptions->html()) {
-        *mOfs << endl
-              << "</table></body></html>" << endl;
+
+        *mOfs << "</table>"
+              << "<p></p>\n<hr>\n"
+              << "<p class=\"footer\">\n\t"
+              << "Created with <strong>TraceMiner2</strong> version <strong>" << version
+              << "</strong><br>Copyright &copy; Norman Dunbar 2016-2019<br>\n\t"
+              << "Released under the <a href=\"https://opensource.org/licenses/MIT\"><span class=\"url\">MIT Licence</span></a><br><br>\n\t"
+              << "Binary releases available from: "
+              << "<a href=\"https://github.com/NormanDunbar/TraceMiner2/releases\">"
+              << "<span class=\"url\">https://github.com/NormanDunbar/TraceMiner2/releases</span></a><br>\n\t"
+              << "Source code available from: "
+              << "<a href=\"https://github.com/NormanDunbar/TraceMiner2\">"
+              << "<span class=\"url\">https://github.com/NormanDunbar/TraceMiner2</span></a>\n</p>\n\n"
+              << "\n</body></html>" << endl;
     }
 
     return true;
@@ -364,9 +377,10 @@ bool tmTraceFile::parseHeader() {
     }
 
     // Have we got a trace file? The first line starts "Trace file ..."
+    // UNLESS it's the output from 'trcsess' in which case it starts "*** ".
     if (traceLine.length() > 10) {
         string chunk = traceLine.substr(0, 10);
-        if (!(chunk == "Trace file")) {
+        if ((chunk != "Trace file") && (traceLine.substr(0,4) != "*** ")) {
             stringstream s;
             s << mOptions->traceFile() << " is not an Oracle trace file." << endl
               << "Missing 'Trace file' in header." << endl;
