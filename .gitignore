@@ -55,3 +55,4 @@ bin/*
 doxygen.log
 TraceMiner2.debug.log
 TraceMiner2.release.log
+obj/*
