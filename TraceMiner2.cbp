@@ -59,9 +59,6 @@
 				</Linker>
 			</Target>
 		</Build>
-		<Compiler>
-			<Add option="-std=c++14" />
-		</Compiler>
 		<Unit filename="TraceMiner2/TraceMiner2.cpp" />
 		<Unit filename="TraceMiner2/TraceMiner2.css" />
 		<Unit filename="TraceMiner2/TraceMiner2.h" />
