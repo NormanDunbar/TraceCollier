@@ -44,6 +44,15 @@ It *may* not be faster, C++ never usually is, but it's a lot more thorough and s
 
 - You can specify the maximum depth for cursors to be reported. The default is zero. (`--depth=n` or `-d=n`) Only cursors with a lower or equal depth will be reported. If you use `--depth=3` then only cursors with depth 0, 1 2 or 3 will be reported on.
 
+## Free eBook - Oracle Trace File Explained
+
+You can always download the latest, free, copy of my eBook on Oracle Trace files at <https://github.com/NormanDunbar/OracleTraceFilesExplained/releases>.
+
+## Get the Latest Binary
+
+Go to <https://github.com/NormanDunbar/TraceMiner2/releases>, chose the latest release, and then choose your desired version. Files here will be for Windows or Linux in 32 and 64 bit versions. The source code used to build these versions is also available to download from the release that you are looking at - should you require it.
+
+
 ## Download the Source
 
 Go to <https://github.com/NormanDunbar/TraceMiner2> and click the clone or download button. Choose the option to download a zip file.
@@ -54,10 +63,22 @@ Save it somewhere safe, I use my `SourceCode` folder, and extract it. This will 
 
 ### On Linux
 
+#### Use the Makefile
+
+This option is known to work on GNU/Linux and also, surprisingly, on AIX too. At least one of my "customers" is using TraceMiner2 on AIX.
+
+
 ````
 cd TraceMiner2-master
 make -f makefile.gnu
 ````
+#### CodeBlocks IDE
+
+There is a project file in the `SourceCode/TraceMiner2-master/` folder, named `TraceMinder2.Linux.cbp`. Open that and select `Build->Build` or press CTRL-F9 to do the same. The executable will be found in `SourceCode/TraceMiner2-master/bin/ReleaseXX` when it has completed. ('XX' is 32 or 64, depending on which build you chose.)
+
+The build options in the project file allow you to compile Debug and/or Release versions for 32 and/or 64 bit Linux using the g++ compiler.
+
+Also on Linux, there are a number of small shell scripts named `compile*.sh` and `rebuild*.sh` which can be used to build various targets from the command line, using  the CodeBlocks project file as a "make" file. Most useful indeed.
 
 ### On Windows
 
@@ -78,11 +99,15 @@ bcc32c -o bin\TraceMiner2.exe TraceMiner2\*.cpp
 
 #### CodeBlocks IDE
 
-There is a project file in the `SourceCode\TraceMiner2-master\TraceMiner2` sub-folder, named `TraceMinder2.cbp`. Open that and select `Build->Build` or press CTRL-F9 to do the same. The executable will be found in `SourceCode\TraceMiner2-master\TraceMiner2\bin\Release` when it has completed.
+There is a project file in the `SourceCode\TraceMiner2-master` folder, named `TraceMinder2.cbp`. Open that and select `Build->Build` or press CTRL-F9 to do the same. The executable will be found in `SourceCode\TraceMiner2-master\bin\ReleaseXX` when it has completed. (XX is 32  or 64 depending on your chosen build target.)
+
+The build options in the project file allow you to compile Debug and/or Release versions for 32 and/or 64 bit Linux using the TDM 64/32 bit version of the g++ compiler for Windows.
+
+Also on Windows, there are a number of batch files named `compile*.cmd` and `rebuild*.cmd` which can be used to build various targets from the command line, using  the CodeBlocks project file as a "make" file.
 
 ## Need a Free C++ Compiler?
 
-<https://www.embarcadero.com/free-tools> is the place to look for one. It's 32 bit and modern. It runs perfectly well on 64 bit Windows too.
+<https://www.embarcadero.com/free-tools> is the place to look for one. It's only available in the 32 bit version, but it is modern and runs perfectly well on 64 bit Windows too.
 
 You will need to sign up, but other than a few special offers, and a couple of training course advisory emails, you won't get too much hassle. And it's worth it for one of the finest Windows C/C++ compilers for free.
 
@@ -117,7 +142,7 @@ Possible options are:
 
 Traceminer2 will create:
 
-- A report file, the default is in HTML format, which is the same name as the trace file, but with the extension changed from `.trc` to `.html`. 
+- A report file, the default is in HTML format, which is the same name as the trace file, but with the extension changed from `.trc` to `.html`.
 
 - If the report is in HTML format, then `favicon.ico` will be created, *if one doesn't already exist* in the folder the trace file is found in.
 
@@ -189,7 +214,7 @@ If you have installed Doxygen, then there is a Wizard that you can run to load t
 
 # Appendices
 
-The following appendices contain potentially useful information about the lines of the trace file that are parsed.
+The following appendices contain potentially useful information about the lines of the trace file that are parsed. Some/much of what you read belwo is an extract from my free eBook on Oracle Trace Files which you can download from <https://github.com/NormanDunbar/OracleTraceFilesExplained/releases>.
 
 ## Appendix A - Trace File changes known to prevent 9i being used.
 
