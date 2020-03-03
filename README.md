@@ -1,13 +1,20 @@
-% TraceMiner2 Overview
+% Trace Collier Overview
 % Norman Dunbar
 % 9th February 2017
 
-# TraceMiner2
-An improved version of TraceMiner. Written in C++ and quite honestly, a better product altogether! Requires an Oracle 10g or upwards trace file, but can *probably* be changed to cope with 9i, at the very minimum, if necessary. Maybe. It depends.
+# Trace Collier
 
-From version 1.06 onwards, TraceMiner2 has the ability to report the data and time that each execution took place. It does this only if you pass it the name of a trace file which was pre-processed by another of my useful utilities, *TraceAdjust*, available from  <https://github.com/NormanDunbar/TraceAdjust>.
+**As of 3rd March, after a Cease and Desist letter from a German lawyer, https://www.wuesthoff.de, acting on behalf of their client, Synaxus, this utility has a new name, Trace Collier.**
 
-## Improvements Over TraceMiner.
+**It appears that Synaxus has an unrelated software product with a very similar name to my old name, and have registered it as a trade mark.**
+
+**Their product can be found at https://www.synaxus.de/index.php/en/traceminer/tm-40 why not take a look?**
+
+An improved version of ~TraceMiner~. Written in C++ and quite honestly, a better product altogether! Requires an Oracle 10g or upwards trace file, but can *probably* be changed to cope with 9i, at the very minimum, if necessary. Maybe. It depends.
+
+From version 1.06 onwards, Trace Collier has the ability to report the date and time that each execution took place. It does this only if you pass it the name of a trace file which was pre-processed by another of my useful utilities, *TraceAdjust*, available from  <https://github.com/NormanDunbar/TraceAdjust>.
+
+## Improvements Over ~TraceMiner~.
 It *may* not be faster, C++ never usually is, but it's a lot more thorough and safer too. It is less likely to bale out when it can't understand something in a trace file. Also:
 
 - You don't have to reconfigure anything and recompile if you have wider (ie, more digits) cursor IDs on your system. It appears that the cursor IDs, since Oracle 10g, are the address in memory of the cursor, as opposed to a simple incrementing integer. I may be wrong.
@@ -20,11 +27,11 @@ It *may* not be faster, C++ never usually is, but it's a lot more thorough and s
 
 - NULL values for bind variables are processed according to whether they are PL/SQL statement `OUT` variables. For PL/SQL `OUT` variables the variable's name is used as it's value - so you know it's an `OUT` value. For SQL statements, the bind's value must be `NULL`.
 
-- If a bind variable is used in multiple places in the same SQL statement `update some_table    set ... created_by = :username, creation_date = :today, last_updated_by = :username, last_update_date = :today, ... ;`, for example, then it is correctly reported in *each* of those places. TraceMiner, of old, didn't know what to do when that happened!
+- If a bind variable is used in multiple places in the same SQL statement `update some_table    set ... created_by = :username, creation_date = :today, last_updated_by = :username, last_update_date = :today, ... ;`, for example, then it is correctly reported in *each* of those places. ~TraceMiner~, of old, didn't know what to do when that happened!
 
 - If a bind is a ROWID type (oacdty=11 or 69) then the value line will have no quotes around the ROWID value. The output for the bind in the report will wrap the value in a `CHARTOROWID()` call - just to be explicit. If, however, the bind type is a simple `VARCHAR2`/`CHAR` there can be no wrapping, so there isn't!
 
-- If a PL/SQL statement returns a ref_cursor (data type = 102), it's not possible to get a name or value for that particular bind as it simply points at an address in memory. In this situation, TraceMiner2 will replace the bind 'value' with the text "REF_CURSOR" - just so you know what's what.
+- If a PL/SQL statement returns a ref_cursor (data type = 102), it's not possible to get a name or value for that particular bind as it simply points at an address in memory. In this situation, Trace Collier will replace the bind 'value' with the text "REF_CURSOR" - just so you know what's what.
 
 - The log file and verbose output debugging file are created in the same directory as the trace file. No more messing about with redirection etc.
 
@@ -36,11 +43,11 @@ It *may* not be faster, C++ never usually is, but it's a lot more thorough and s
 
 - The report file repeats the headings every 25 EXECs by default. This makes the need to scrolling back and forth to find out what the numbers in the various columns actually refer to, a lot less necessary! This can be defined with a command line argument `--pagesize=nn` or `-p=nn`. No spaces are permitted around the '=' sign.
 
-- A `TraceMiner2.css` file and a `favicon.ico` file are created in the same location as the trace file too. The CSS can be edited quite easily to match your installation standards - if you have any - or just to make things the way you prefer them. For some reason, Internet Explorer 11 completely ignores the icon file.
+- A `TraceCollier.css` file and a `favicon.ico` file are created in the same location as the trace file too. The CSS can be edited quite easily to match your installation standards - if you have any - or just to make things the way you prefer them. For some reason, Internet Explorer 11 completely ignores the icon file.
 
 - If a css or icon file, as above, are detected in the trace file's folder, then they are not overwritten or changed in anyway. This way any changes you make are preserved.
 
-- If running in verbose mode (`--verbose` or `-v`), the debugging output is much more readable, and much more verbose! If TraceMiner2 fails to parse a trace file, try running in verbose mode and see what gets output to the debug file.
+- If running in verbose mode (`--verbose` or `-v`), the debugging output is much more readable, and much more verbose! If Trace Collier fails to parse a trace file, try running in verbose mode and see what gets output to the debug file.
 
 - You can specify the maximum depth for cursors to be reported. The default is zero. (`--depth=n` or `-d=n`) Only cursors with a lower or equal depth will be reported. If you use `--depth=3` then only cursors with depth 0, 1 2 or 3 will be reported on.
 
@@ -50,14 +57,14 @@ You can always download the latest, free, copy of my eBook on Oracle Trace files
 
 ## Get the Latest Binary
 
-Go to <https://github.com/NormanDunbar/TraceMiner2/releases>, chose the latest release, and then choose your desired version. Files here will be for Windows or Linux in 32 and 64 bit versions. The source code used to build these versions is also available to download from the release that you are looking at - should you require it.
+Go to <https://github.com/NormanDunbar/TraceCollier/releases>, choose the latest release, and then choose your desired version. Files here will be for Windows or Linux in 32 and 64 bit versions. The source code used to build these versions is also available to download from the release that you are looking at - should you require it.
 
 
 ## Download the Source
 
-Go to <https://github.com/NormanDunbar/TraceMiner2> and click the clone or download button. Choose the option to download a zip file.
+Go to <https://github.com/NormanDunbar/TraceCollier> and click the clone or download button. Choose the option to download a zip file.
 
-Save it somewhere safe, I use my `SourceCode` folder, and extract it. This will create a new folder named `TraceMiner2-master` - you can remove the `-master` bit if you wish, however, the following instructions assume that you didn't.
+Save it somewhere safe, I use my `SourceCode` folder, and extract it. This will create a new folder named `TraceCollier-master` - you can remove the `-master` bit if you wish, however, the following instructions assume that you didn't.
 
 ## Compile the Source
 
@@ -65,16 +72,16 @@ Save it somewhere safe, I use my `SourceCode` folder, and extract it. This will 
 
 #### Use the Makefile
 
-This option is known to work on GNU/Linux and also, surprisingly, on AIX too. At least one of my "customers" is using TraceMiner2 on AIX.
+This option is known to work on GNU/Linux and also, surprisingly, on AIX too. At least one of my "customers" is using Trace Collier on AIX.
 
 
 ````
-cd TraceMiner2-master
+cd TraceCollier-master
 make -f makefile.gnu
 ````
 #### CodeBlocks IDE
 
-There is a project file in the `SourceCode/TraceMiner2-master/` folder, named `TraceMinder2.Linux.cbp`. Open that and select `Build->Build` or press CTRL-F9 to do the same. The executable will be found in `SourceCode/TraceMiner2-master/bin/ReleaseXX` when it has completed. ('XX' is 32 or 64, depending on which build you chose.)
+There is a project file in the `SourceCode/TraceCollier-master/` folder, named `TraceCollieer.Linux.cbp`. Open that and select `Build->Build` or press CTRL-F9 to do the same. The executable will be found in `SourceCode/TraceCollier-master/bin/ReleaseXX` when it has completed. ('XX' is 32 or 64, depending on which build you chose.)
 
 The build options in the project file allow you to compile Debug and/or Release versions for 32 and/or 64 bit Linux using the g++ compiler.
 
@@ -84,22 +91,22 @@ Also on Linux, there are a number of small shell scripts named `compile*.sh` and
 
 ### Visual C++/Visual Studio
 
-Just don't! Trust me, you don't need the grief. It's not like TraceMiner2 uses anything non-standard, just plain old C++ and the Standard Template Library, for maximum portability. But then again, I did mention standards didn't I? That's a problem with Microsoft. 
+Just don't! Trust me, you don't need the grief. It's not like Trace Collier uses anything non-standard, just plain old C++ and the Standard Template Library, for maximum portability. But then again, I did mention standards didn't I? That's a problem with Microsoft. 
 
-Honestly, try it if you want to. I haven't. TraceMiner of old needed so many changes to basic C code just to make it even think about compiling with Visual Studio, it's just not worth it. 
+Honestly, try it if you want to. I haven't. ~TraceMiner~ of old needed so many changes to basic C code just to make it even think about compiling with Visual Studio, it's just not worth it. 
 
 Plus, I haven't even tried! :-)
 
 #### Borland 10.1 compiler
 
 ````
-cd TraceMiner2-master
-bcc32c -o bin\TraceMiner2.exe TraceMiner2\*.cpp
+cd TraceCollier-master
+bcc32c -o bin\TraceCollier.exe TraceCollier\*.cpp
 ````
 
 #### CodeBlocks IDE
 
-There is a project file in the `SourceCode\TraceMiner2-master` folder, named `TraceMinder2.cbp`. Open that and select `Build->Build` or press CTRL-F9 to do the same. The executable will be found in `SourceCode\TraceMiner2-master\bin\ReleaseXX` when it has completed. (XX is 32  or 64 depending on your chosen build target.)
+There is a project file in the `SourceCode\TraceCollier-master` folder, named `TraceCollier.cbp`. Open that and select `Build->Build` or press CTRL-F9 to do the same. The executable will be found in `SourceCode\TraceCollier-master\bin\ReleaseXX` when it has completed. (XX is 32  or 64 depending on your chosen build target.)
 
 The build options in the project file allow you to compile Debug and/or Release versions for 32 and/or 64 bit Linux using the TDM 64/32 bit version of the g++ compiler for Windows.
 
@@ -118,10 +125,10 @@ You will need to sign up, but other than a few special offers, and a couple of t
 
 ## Command Line Options
 
-Executing TraceMiner2 is easy. At a minimum it requires a single parameter, the name of a trace file. This can be a relative or absolute path as desired. The trace file is expected to have a `.trc` extension.
+Executing Trace Collier is easy. At a minimum it requires a single parameter, the name of a trace file. This can be a relative or absolute path as desired. The trace file is expected to have a `.trc` extension.
 
 ````
-TraceMiner2 [options] trace_file
+TraceCollier [options] trace_file
 ````
 
 Possible options are:
@@ -132,7 +139,7 @@ Possible options are:
 
 - `--text` or `-t` which forces the report file to be created in plain text mode. The default is to create the report in HTML format.
 
-- `--verbose` or `-v` which creates a debugging file that will contain a huge amount of debugging information. If you have problems with TraceMiner2 then this file will help me debug things. It's best, really, that you don't run the application in this mode unless absolutely necessary! You have been warned. :-)
+- `--verbose` or `-v` which creates a debugging file that will contain a huge amount of debugging information. If you have problems with Trace Collier then this file will help me debug things. It's best, really, that you don't run the application in this mode unless absolutely necessary! You have been warned. :-)
 
 - `--quiet` or `-q` will turn off all the `Cursor: #cccccc created at line nnnn` messages. Any `ERROR #ccccc` or `PARSE ERROR #cccccc` lines, and feedback lines will still be reported though. You can't turn those off.
 
@@ -140,13 +147,13 @@ Possible options are:
 
 - `--feedback=n` or `-f=n` determines how often you get feedback about the progress of reading the trace file. The default is every 100,000 lines. Use a feedback of zero to disable feedback. Feedback is not disabled with the `--quiet` or `-q` option.
 
-Traceminer2 will create:
+Trace Collier will create:
 
 - A report file, the default is in HTML format, which is the same name as the trace file, but with the extension changed from `.trc` to `.html`.
 
 - If the report is in HTML format, then `favicon.ico` will be created, *if one doesn't already exist* in the folder the trace file is found in.
 
-- If the report is in HTML format, then `TraceMiner2.css` will be created, *if one doesn't already exist* in the folder the trace file is found in. This file allows you to style the HTML report as per your company standards (well, up to a point) or to your preference.
+- If the report is in HTML format, then `TraceCollier.css` will be created, *if one doesn't already exist* in the folder the trace file is found in. This file allows you to style the HTML report as per your company standards (well, up to a point) or to your preference.
 
 - A debugging file. If and only if running in verbose mode. This will have the same name as the trace file used for input, but with the extension changed from `.trc` to `.dbg`.
 
