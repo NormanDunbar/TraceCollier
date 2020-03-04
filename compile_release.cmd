@@ -1,4 +1,4 @@
-@echo off
+rem @echo off
 rem Compile all RELEASE versions of the TraceCollier utility.
 rem To rebuild all, use rebuild_release.cmd instead.
 
