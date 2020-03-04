@@ -26,7 +26,7 @@
 #define UTILITIES_H
 
 /** @file utilities.h
- * @brief Header file for the utility functions used in TraceMiner2.
+ * @brief Header file for the utility functions used in TraceCollier.
  */
 
 #include <string>

@@ -36,7 +36,7 @@ using std::string;
 using std::cerr;
 using std::endl;
 
-/** @brief A class representing the command line options for TraceMiner2.
+/** @brief A class representing the command line options for TraceCollier.
  */
 class tmOptions
 {

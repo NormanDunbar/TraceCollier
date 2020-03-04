@@ -2,7 +2,7 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="TraceMiner2" />
+		<Option title="TraceCollier" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<MakeCommands>
@@ -15,7 +15,7 @@
 		</MakeCommands>
 		<Build>
 			<Target title="32bit Debug">
-				<Option output="bin/Debug32/TraceMiner2" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/Debug32/TraceCollier" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug32/" />
 				<Option type="1" />
 				<Option compiler="gnu_gcc_32_bit_compiler" />
@@ -25,7 +25,7 @@
 				</Compiler>
 			</Target>
 			<Target title="32bit Release">
-				<Option output="bin/Release32/TraceMiner2" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/Release32/TraceCollier" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Release32/" />
 				<Option type="1" />
 				<Option compiler="gnu_gcc_32_bit_compiler" />
@@ -37,7 +37,7 @@
 				</Linker>
 			</Target>
 			<Target title="64bit Debug">
-				<Option output="bin/Debug64/TraceMiner2" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/Debug64/TraceCollier" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug64/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -47,7 +47,7 @@
 				</Compiler>
 			</Target>
 			<Target title="64bit Release">
-				<Option output="bin/Release64/TraceMiner2" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/Release64/TraceCollier" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Release64/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -62,32 +62,32 @@
 		<Compiler>
 			<Add option="-std=c++14" />
 		</Compiler>
-		<Unit filename="TraceMiner2/TraceMiner2.cpp" />
-		<Unit filename="TraceMiner2/TraceMiner2.css" />
-		<Unit filename="TraceMiner2/TraceMiner2.h" />
-		<Unit filename="TraceMiner2/css.h" />
-		<Unit filename="TraceMiner2/favicon.h" />
-		<Unit filename="TraceMiner2/gnu.h" />
-		<Unit filename="TraceMiner2/parseBinds.cpp" />
-		<Unit filename="TraceMiner2/parseClose.cpp" />
-		<Unit filename="TraceMiner2/parseDeadlock.cpp" />
-		<Unit filename="TraceMiner2/parseError.cpp" />
-		<Unit filename="TraceMiner2/parseExec.cpp" />
-		<Unit filename="TraceMiner2/parseParse.cpp" />
-		<Unit filename="TraceMiner2/parseParseError.cpp" />
-		<Unit filename="TraceMiner2/parseParsing.cpp" />
-		<Unit filename="TraceMiner2/parseStat.cpp" />
-		<Unit filename="TraceMiner2/parseXctend.cpp" />
-		<Unit filename="TraceMiner2/tmbind.cpp" />
-		<Unit filename="TraceMiner2/tmbind.h" />
-		<Unit filename="TraceMiner2/tmcursor.cpp" />
-		<Unit filename="TraceMiner2/tmcursor.h" />
-		<Unit filename="TraceMiner2/tmoptions.cpp" />
-		<Unit filename="TraceMiner2/tmoptions.h" />
-		<Unit filename="TraceMiner2/tmtracefile.cpp" />
-		<Unit filename="TraceMiner2/tmtracefile.h" />
-		<Unit filename="TraceMiner2/utilities.cpp" />
-		<Unit filename="TraceMiner2/utilities.h" />
+		<Unit filename="TraceCollier/TraceCollier.cpp" />
+		<Unit filename="TraceCollier/TraceCollier.css" />
+		<Unit filename="TraceCollier/TraceCollier.h" />
+		<Unit filename="TraceCollier/css.h" />
+		<Unit filename="TraceCollier/favicon.h" />
+		<Unit filename="TraceCollier/gnu.h" />
+		<Unit filename="TraceCollier/parseBinds.cpp" />
+		<Unit filename="TraceCollier/parseClose.cpp" />
+		<Unit filename="TraceCollier/parseDeadlock.cpp" />
+		<Unit filename="TraceCollier/parseError.cpp" />
+		<Unit filename="TraceCollier/parseExec.cpp" />
+		<Unit filename="TraceCollier/parseParse.cpp" />
+		<Unit filename="TraceCollier/parseParseError.cpp" />
+		<Unit filename="TraceCollier/parseParsing.cpp" />
+		<Unit filename="TraceCollier/parseStat.cpp" />
+		<Unit filename="TraceCollier/parseXctend.cpp" />
+		<Unit filename="TraceCollier/tmbind.cpp" />
+		<Unit filename="TraceCollier/tmbind.h" />
+		<Unit filename="TraceCollier/tmcursor.cpp" />
+		<Unit filename="TraceCollier/tmcursor.h" />
+		<Unit filename="TraceCollier/tmoptions.cpp" />
+		<Unit filename="TraceCollier/tmoptions.h" />
+		<Unit filename="TraceCollier/tmtracefile.cpp" />
+		<Unit filename="TraceCollier/tmtracefile.h" />
+		<Unit filename="TraceCollier/utilities.cpp" />
+		<Unit filename="TraceCollier/utilities.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />

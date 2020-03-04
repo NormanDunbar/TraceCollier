@@ -1,16 +1,16 @@
 #!/bin/bash
 
-# Compile all DEBUG versions of the TraceMiner2 utility.
+# Compile all DEBUG versions of the TraceCollier utility.
 # To rebuild all, use rebuild_release.sh instead.
 
 # Where is CodeBlocks to be found?
 CB=`which codeblocks`
 
 # What is the project file called?
-CBP=TraceMiner2.Linux.cbp
+CBP=TraceCollier.Linux.cbp
 
 # What will the logfile be called?
-LOG=TraceMiner2.debug.log
+LOG=TraceCollier.debug.log
 
 # Build all release targets
 echo Building 32bit Debug .... > ${LOG}

@@ -40,7 +40,7 @@
 *.layout
 
 # DoxyGen output.
-TraceMiner2/doxygen/
+TraceCollier/doxygen/
 
 # Gnu G++ Stuff.
 bin/*

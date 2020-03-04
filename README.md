@@ -4,17 +4,17 @@
 
 # Trace Collier
 
-**As of 3rd March, after a Cease and Desist letter from a German lawyer, https://www.wuesthoff.de, acting on behalf of their client, Synaxus, this utility has a new name, Trace Collier.**
+**On of 3rd March, I received a *Cease and Desist* letter from a German lawyer, https://www.wuesthoff.de, acting on behalf of their client, Synaxus. Because of this request, My *TraceMiner2* utility has a new name, *Trace Collier*.**
 
 **It appears that Synaxus has an unrelated software product with a very similar name to my old name, and have registered it as a trade mark.**
 
 **Their product can be found at https://www.synaxus.de/index.php/en/traceminer/tm-40 why not take a look?**
 
-An improved version of ~TraceMiner~. Written in C++ and quite honestly, a better product altogether! Requires an Oracle 10g or upwards trace file, but can *probably* be changed to cope with 9i, at the very minimum, if necessary. Maybe. It depends.
+An improved version of *TraceMiner*. Written in C++ and quite honestly, a better product altogether! Requires an Oracle 10g or upwards trace file, but can *probably* be changed to cope with 9i, at the very minimum, if necessary. Maybe. It depends.
 
 From version 1.06 onwards, Trace Collier has the ability to report the date and time that each execution took place. It does this only if you pass it the name of a trace file which was pre-processed by another of my useful utilities, *TraceAdjust*, available from  <https://github.com/NormanDunbar/TraceAdjust>.
 
-## Improvements Over ~TraceMiner~.
+## Improvements Over *TraceMiner*.
 It *may* not be faster, C++ never usually is, but it's a lot more thorough and safer too. It is less likely to bale out when it can't understand something in a trace file. Also:
 
 - You don't have to reconfigure anything and recompile if you have wider (ie, more digits) cursor IDs on your system. It appears that the cursor IDs, since Oracle 10g, are the address in memory of the cursor, as opposed to a simple incrementing integer. I may be wrong.
@@ -27,7 +27,7 @@ It *may* not be faster, C++ never usually is, but it's a lot more thorough and s
 
 - NULL values for bind variables are processed according to whether they are PL/SQL statement `OUT` variables. For PL/SQL `OUT` variables the variable's name is used as it's value - so you know it's an `OUT` value. For SQL statements, the bind's value must be `NULL`.
 
-- If a bind variable is used in multiple places in the same SQL statement `update some_table    set ... created_by = :username, creation_date = :today, last_updated_by = :username, last_update_date = :today, ... ;`, for example, then it is correctly reported in *each* of those places. ~TraceMiner~, of old, didn't know what to do when that happened!
+- If a bind variable is used in multiple places in the same SQL statement `update some_table    set ... created_by = :username, creation_date = :today, last_updated_by = :username, last_update_date = :today, ... ;`, for example, then it is correctly reported in *each* of those places. *TraceMiner*, of old, didn't know what to do when that happened!
 
 - If a bind is a ROWID type (oacdty=11 or 69) then the value line will have no quotes around the ROWID value. The output for the bind in the report will wrap the value in a `CHARTOROWID()` call - just to be explicit. If, however, the bind type is a simple `VARCHAR2`/`CHAR` there can be no wrapping, so there isn't!
 
@@ -93,11 +93,12 @@ Also on Linux, there are a number of small shell scripts named `compile*.sh` and
 
 Just don't! Trust me, you don't need the grief. It's not like Trace Collier uses anything non-standard, just plain old C++ and the Standard Template Library, for maximum portability. But then again, I did mention standards didn't I? That's a problem with Microsoft. 
 
-Honestly, try it if you want to. I haven't. ~TraceMiner~ of old needed so many changes to basic C code just to make it even think about compiling with Visual Studio, it's just not worth it. 
+Honestly, try it if you want to. I haven't. *TraceMiner* of old needed so many changes to basic C code just to make it even think about compiling with Visual Studio, it's just not worth it. 
 
 Plus, I haven't even tried! :-)
 
 #### Borland 10.1 compiler
+To compile with the Borland C++ Compiler:
 
 ````
 cd TraceCollier-master
@@ -158,7 +159,7 @@ Trace Collier will create:
 - A debugging file. If and only if running in verbose mode. This will have the same name as the trace file used for input, but with the extension changed from `.trc` to `.dbg`.
 
 ## Testing 
-Trace Miner 2 has been tested on the following:
+Trace Collier has been tested on the following:
 
 ### Compiled using Borland C++ 10.1:
 
@@ -171,7 +172,7 @@ Trace Miner 2 has been tested on the following:
 - Oracle Enterprise Linux 7.3
 - CentOS Enterprise Linux 7.2
 
-**Please note**: TraceMiner2 tries to use the Standard Template Library's REGEX facilities. However, these do not work in versions of the STL supplied with `g++` at versions less than 4.9.0. there is a check in the source code (in `gnu.h`) to determine if the compiler works or doesn't, and if not, uses plain old scanning for the required data - such as cursor IDs, depth, lengths of SQL statements etc.
+**Please note**: Trace Collier tries to use the Standard Template Library's REGEX facilities. However, these do not work in versions of the STL supplied with `g++` at versions less than 4.9.0. there is a check in the source code (in `gnu.h`) to determine if the compiler works or doesn't, and if not, uses plain old scanning for the required data - such as cursor IDs, depth, lengths of SQL statements etc.
 
 ### Compiled with G++ 5.x.x:
 
@@ -181,25 +182,25 @@ Trace Miner 2 has been tested on the following:
 
 **In development, `doxygen` version 1.8.15 was used. Versions previous to this *may* cause problems. Time and testing will tell.**
 
-![The Trace Miner!](Docs/miner-clipart-miner.png)
+![The Trace Collier!](Docs/miner-clipart-miner.png)
 
 The source code is documented with specially formatted comments which are collected by *Doxygen* <http://www.doxygen.nl/index.html>, and output as HTML files documenting all the source and header files, classes, variables, functions etc in the source code. Other output formats are available, but HTML is the default.
 
 **This is not User documentation, but Developer documentation.**
 
-There is a Doxygen configuration file included in the source code. It can be found in the folder `SourceCode\TraceMiner2-master\Docs` and is named `TraceMiner2.doxyfile`. 
+There is a Doxygen configuration file included in the source code. It can be found in the folder `SourceCode\TraceCollier-master\Docs` and is named `TraceCollier.doxyfile`. 
 
 Sadly this file doesn't appear to enable relative paths to be used when extracting from the source files, so if you desire to generate the documentation, you will have to edit the document in a number of places:
 
 Option            | Current Value                                                |
 ----------------- | ------------------------------------------------------------ |
-PROJECT\_LOGO      | E:/SourceCode/TraceMiner2/Docs/tm2\_logo\_25pct.png            |
-OUTPUT\_DIRECTORY  | E:/SourceCode/TraceMiner2/Docs                |
-WARN\_LOGFILE      | E:/SourceCode/TraceMiner2/TraceMiner2/Docs/doxygen.log    |
-INPUT             | E:/SourceCode/TraceMiner2/TraceMiner2/                       |
+PROJECT\_LOGO      | E:/SourceCode/TraceCollier/Docs/tm2\_logo\_25pct.png            |
+OUTPUT\_DIRECTORY  | E:/SourceCode/TraceCollier/Docs                |
+WARN\_LOGFILE      | E:/SourceCode/TraceCollier/TraceCollier/Docs/doxygen.log    |
+INPUT             | E:/SourceCode/TraceCollier/TraceCollier/                       |
 HAVE\_DOT          | YES                                                          |
 
-Replace `E:/SourceCode/TraceMiner2` with your appropriate top level directory.
+Replace `E:/SourceCode/TraceCollier` with your appropriate top level directory.
 
 The configuration file for Doxygen assumes the presence of the `dot` (aka `Graphviz` <http://www.graphviz.org/>) utility to draw the class, call and caller diagrams. If you don't have dot, or do not wish to generate these diagrams, then set `HAVE_DOT` to `NO`.
 
@@ -212,217 +213,21 @@ doxygen /path/to/config/file
 for example:
 
 ````
-doxygen C:/SourceCode/TraceMiner2/Docs/TraceMiner2.doxyfile
+doxygen C:/SourceCode/TraceCollier/Docs/TraceCollier.doxyfile
 ````
 
 The HTML folder, found in the location you set for `OUTPUT_DIRECTORY` above, will contain the `index.html` file that starts the documentation proper.
 
 If you have installed Doxygen, then there is a Wizard that you can run to load the configuration file and generate the documentation. On Windows 7, it is found under `start`->`all programs`->`doxygen`->`Doxywizard`.
 
-# Appendices
+### Free eBook Describing Oracle Trace Files
 
-The following appendices contain potentially useful information about the lines of the trace file that are parsed. Some/much of what you read belwo is an extract from my free eBook on Oracle Trace Files which you can download from <https://github.com/NormanDunbar/OracleTraceFilesExplained/releases>.
+You can obtain my free eBook on Oracle Trace Files from <https://github.com/NormanDunbar/OracleTraceFilesExplained/releases>.
 
-## Appendix A - Trace File changes known to prevent 9i being used.
-
-From 10g onwards, Oracle changed the format of some of the lines in a trace file. At present, one that is known to me is relating to the data type of a bind variable. (In the `Bind#n` section). In 9i this was simply `dty` but from 10g it changed to `oacdty`. Currently TraceMiner2 (and indeed TraceMiner of old), doesn't check for this value.
-
-## Appendix B - Oracle Command Codes
-
-The `oct` parameter in a PARSING IN CURSOR line in an Oracle trace file, determines the command that is being parsed in the SQL statement.
-
-Known command types are:
-
-Command Code | Data Type             |
---------:    | -----------------     |
-2            | INSERT                |
-3            | SELECT                |
-6            | UPDATE                |
-7            | DELETE                |
-26           | LOCK TABLE            |
-44           | COMMIT                |
-45           | ROLLBACK              |
-46           | SAVEPOINT             |
-47           | PL/SQL Block          |
-48           | SET TRANSACTION       |
-55           | SET ROLE              |
-90           | SET CONSTRAINTS       |
-170          | CALL                  |
-189          | MERGE                 |
-
-At the moment, TraceMiner2 only considers the command type when it comes across a bind variable that is either a PL/SQL OUT parameter, or, a SQL statement where a NULL is being passed in (or out!). It uses the command code to determine which to substitute for the bind variable name in the statement.
-
-
-## Appendix C - Bind Data Types
-
-The `oacdty` parameter in a bind variables details determines the data type of that bind variable. This is not necessarily the data type of the column in a table that it may be being `INSERT`ed or `UPDATE`d into, or compared against.
-
-The following data are taken from the *Internal Data Types* section of the *Data Types* chapter in the 11gR2 *Oracle Call Interface* manual, which you can find at <http://docs.oracle.com/cd/B19306_01/appdev.102/b14250/oci03typ.htm>.
-
-Listed data types are:
-
-Data Code | Data Type             |
---------: | -----------------     |
-1 | VARCHAR2 or NVARCHAR2 |
-2 | NUMBER                |
-8 | LONG |
-11 | ROWID                 |
-12 | DATE                  |
-23 | RAW                   |
-24 | LONG RAW |
-25 | Unhandled data type   |
-29 | Unhandled data type   |
-69 | ROWID |
-96 | CHAR or NCHAR         |
-100 | BINARY_FLOAT |
-101 | BINARY_DOUBLE |
-102 | REF_CURSOR |
-108 | User-defined type (object type, VARRAY, nested table) |
-111 | REF |
-112 | CLOB or NCLOB         |
-113 | BLOB                  |
-114 | BFILE |
-123 | VARRAY                |
-180 | TIMESTAMP             |
-181 | TIMESTAMP WITH TIME ZONE |
-182 | INTERVAL YEAR TO MONTH |
-183 | INTERVAL DAY TO SECOND |
-208 | UROWID |
-231 | TIMESTAMP WITH LOCAL TIME ZONE |
-
-However, various other sources on the internet seem to disagree with what the above table shows. In addition, I have at least one Oracle Trace where a ROWID is type 11 and not type 69, also, I have VARRAY as type 123 and not as type 108. Consistency? Who mentioned consistency?
-
-TraceMiner2 has a simple manner of extracting the bind variable value, as briefly explained below.
-
-### VARCHAR2 and NVARCHAR2
-If the data type is 1, and the value is wrapped in double quotes then the data value is simply the string between the quotes. TraceMiner2 replaces the double quotes with single quotes to match those that the original SQL statement probably used.
-
-If the first character of a type 1 data bind is *not* a double quote, then the remainder of the trace line holds hex pairs in the format `0 30 0 31 0 32 0 33` etc (for '0123' in this example) and the data type is `NVARCHAR2`.
-
-#### Examples
-
-````
-  BIND#0
-  ...
-  value="DELETE ME PLEASE"
-  ...
-  BIND#1
-  ...
-  value=0 30 0 31 0 32 0 32 0 64 0 65 ...
-  ...
-````
-
-In the latter case, '0122AB', TraceMiner2 only extracts the data bytes from the *first* line of the text. Continuation lines are simply, at present, ignored. There can be up to 50 bytes of data on the first line, and this is considered adequate. Unless, of course, you know better!
-
-### NUMBER
-For data type 2, the bind's value is just the string of digits extracted from the remainder of the trace line.
-
-One thing to watch for, if the value of the numeric bind is "###" in the trace file, then this is most likely a PL/SQL OUT parameter, and as such, TraceMiner substitutes the bind's name rather than "###".
-
-#### Examples
-
-````
-  BIND#0
-  ...
-  value=1357666
-  ...
-````
-
-### CHAR or NCHAR
-These are similar to VARCHAR2 and NVARCHAR2 above and indeed are processed by the same code.
-
-### ROWID
-If a bind variable's type (`oacdty=11` or `oacdty=69`) then the value in the trace file will not be wrapped in quotes. TraceMiner2 outputs such binds wrapped in a call to `CHARTOROWID()` to make the fact that this is a `ROWID` variable, and not a character variable, explicit.
-
-### LONG, RAW and LONG RAW
-At present, and because mainly I have no test data, these data types are not catered for. I *suspect* it might be a string of hex digits, space separated perhaps, but I don't yet know. When I do, I'll update TraceMiner2.
-
-### VARRAY
-At present, I've only seen these in the array buffer that receives the lines of text from `DBMS_OUTPUT.GET_LINES()` call. In this case, the value is missing, so we simply substitute the array name again. It's not perfect, but it's better than nothing (or `NULL`!)
-
-### REF_CURSOR
-If a bind variable has data type 102, then it's almost certainly a `PL/SQL OUT` parameter defining a `REF_CURSOR`. As it is not possible to extract a value - the trace file simply dumps out an address in memory for these types - TraceMiner2 will indicate the bind's usage by substituting the text "REF_CURSOR" into the statement.
-
-The following is a brief example of what I mean above, it shows a `PL/SQL OUT` bind for a `REF_CURSOR`:
-
-````
- Bind#3
-  oacdty=102 mxl=04(04) mxlc=00 mal=00 scl=00 pre=00
-  oacflg=01 fl2=1000000 frm=00 csi=00 siz=0 off=176
-  kxsbbbfp=c2a91548  bln=04  avl=04  flg=01
-  value=Unhandled datatype (102) found in kxsbndinf
-Dump of memory from 0x00000000C2A91548 to 0x00000000C2A9154C
-0C2A91540                   00000000                   [....]    
-````
-
-### Others.
-Any data type not mentioned above are simply considered to have the value of whatever is on the remainder of the trace file line after the text `value=`.
-
-
-## Appendix D - Bind Variable Details
-
-The following are some of the fields used in the descriptions of each individual Bind variable in a trace file. Anything not listed below is of an unknown nature.
-
-Code     | Description                                     |
-------   | -------------------------------------------     |
-oacdty   | Data type code.                                 |
-mxl      | Maximum length of the bind variable value.      |
-mal      | Array length.                                   |
-scl      | Scale - NUMBER data types only (oacdty = 2).    | 
-pre      | Precision - NUMBER data types only (oacdty = 2).|
-oacflg   | Special flag indicating bind options.           |
-fl2      | Second part of oacflg.                          |
-csi      | Character set identifier. (See Appendix D)      |
-siz      | Amount of memory to be allocated for this chunk.|
-off      | Offset into the chunk of the bind buffer.       |
-kxsbbbfp | Bind address.                                   |
-bln      | Bind buffer length.                             |
-avl      | Actual value length.                            |
-flg      | Bind status flag.                               |
-value    | Value of the bind variable (See Appendix C).    |
-
-For some reason, TraceMiner2 refers to `avl` as *average* length, not *actual*. Sigh.
-
-## Appendix E - Character Set Codes
-
-Some data types use different character sets. These are coded in the `csi` field as listed above. Typical values that you may see here are as follows:
-
-Code | Character Set |
-----:| --------------|
-1 | US7ASCII |
-31 | WE8ISO8859P1 |
-46 | WE8ISO8859P15 |
-170 | EE8MSWIN1250 |
-178 | WE8MSWIN1252 |
-871 | UTF8 |
-873 | AL32UTF8 |
-2000 | AL16UTF16 |
-
-### Examples
-
-````
- Bind#0
-  oacdty=96 mxl=128(50) mxlc=00 mal=00 scl=00 pre=00
-  oacflg=01 fl2=1000010 frm=02 csi=2000 siz=128 off=0
-  kxsbbbfp=1109ffe98  bln=128  avl=22  flg=05
-  value=0 34 0 32 0 35 0 33 0 35 0 32 0 2d 0 39 0 30 0 30 0 37 
-````
-This bind has `csi=2000` so it is using the ALUTF16 character set for its value, which happens to decode as '425352-9007'.
-
-````
- Bind#1
-  oacdty=01 mxl=32(04) mxlc=00 mal=00 scl=00 pre=00
-  oacflg=10 fl2=0001 frm=01 csi=31 siz=0 off=24
-  kxsbbbfp=610cd550  bln=32  avl=04  flg=01
-  value="DUAL"
-````
-This bind, on the other hand, has `csi=31` so it is using the WE8ISO8859P1 character set. You can see the value in the extract above.
-
-## Appendix F - Credits
 
 ### Image Credits
 
-The miner image used in TraceMiner's logo - which you can see when you generate the documentation - is used with gratitude. I obtained it from <http://www.clipartpanda.com/categories/miner-clipart>.
+The miner image used in Trace Collier's logo - which you can see when you generate the documentation - is used with gratitude. I obtained it from <http://www.clipartpanda.com/categories/miner-clipart>.
 
 ### Pandoc
 

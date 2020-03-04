@@ -10,33 +10,33 @@
 
 CPP=g++
 CPPFLAGS=-std=c++11 
-TARGET=$(BIN)/TraceMiner2
+TARGET=$(BIN)/TraceCollier
 RM=rm
 BIN=./bin
 STRIP=strip
 
-SOURCES=TraceMiner2/TraceMiner2.cpp \
-        TraceMiner2/tmoptions.cpp \
-        TraceMiner2/tmbind.cpp \
-        TraceMiner2/tmcursor.cpp \
-        TraceMiner2/tmtracefile.cpp \
-        TraceMiner2/utilities.cpp \
-        TraceMiner2/parseExec.cpp \
-        TraceMiner2/parseParsing.cpp \
-        TraceMiner2/parseParse.cpp \
-        TraceMiner2/parseBinds.cpp \
-        TraceMiner2/parseClose.cpp \
-        TraceMiner2/parseStat.cpp \
-        TraceMiner2/parseParseError.cpp \
-        TraceMiner2/parseXctend.cpp \
-        TraceMiner2/parseDeadlock.cpp \
-        TraceMiner2/parseError.cpp
+SOURCES=TraceCollier/TraceCollier.cpp \
+        TraceCollier/tmoptions.cpp \
+        TraceCollier/tmbind.cpp \
+        TraceCollier/tmcursor.cpp \
+        TraceCollier/tmtracefile.cpp \
+        TraceCollier/utilities.cpp \
+        TraceCollier/parseExec.cpp \
+        TraceCollier/parseParsing.cpp \
+        TraceCollier/parseParse.cpp \
+        TraceCollier/parseBinds.cpp \
+        TraceCollier/parseClose.cpp \
+        TraceCollier/parseStat.cpp \
+        TraceCollier/parseParseError.cpp \
+        TraceCollier/parseXctend.cpp \
+        TraceCollier/parseDeadlock.cpp \
+        TraceCollier/parseError.cpp
 
 OBJECTS=$(SOURCES:.cpp=.o)
 
-all:	traceminer2 $(BIN)
+all:	TraceCollier $(BIN)
 
-traceminer2:	$(OBJECTS) $(BIN)
+TraceCollier:	$(OBJECTS) $(BIN)
 	$(CPP) -o $(TARGET) $(OBJECTS)
 	$(STRIP) $(TARGET)
 

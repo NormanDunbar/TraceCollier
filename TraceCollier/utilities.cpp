@@ -31,7 +31,7 @@ extern string favIcon;
 //       ensure correct case is used. Just a thought!
 
 /** @file utilities.cpp
- * @brief Implementation file for the various utilities in TraceMiner2.
+ * @brief Implementation file for the various utilities in TraceCollier.
  */
 
 
@@ -173,7 +173,7 @@ bool fileExists(const string &fullPath) {
 }
 
 
-/** @brief Creates a new 'TraceMiner2.css' file, in the same folder as the trace file.
+/** @brief Creates a new 'TraceCollier.css' file, in the same folder as the trace file.
  *
  * @param fullPath const string&. The full path of the CSS filename.
  * @return bool. Returns true if the file was created, false otherwise.
@@ -185,10 +185,10 @@ bool createCSSFile(const string &fullPath) {
         *oCss << cssText << endl;
         oCss->close();
         delete oCss;
-        cout << "TraceMiner2: CSS file [" << fullPath << "] created ok." << endl;
+        cout << "TraceCollier: CSS file [" << fullPath << "] created ok." << endl;
         return true;
     } else {
-        cerr << "TraceMiner2: CSS file [" << fullPath << "] failed to create." << endl;
+        cerr << "TraceCollier: CSS file [" << fullPath << "] failed to create." << endl;
         return false;
     }
 }
@@ -215,10 +215,10 @@ bool createFaviconFile(const string &fullPath) {
         }
         oFav->close();
         delete oFav;
-        cout << "TraceMiner2: Icon file [" << fullPath << "] created ok." << endl;
+        cout << "TraceCollier: Icon file [" << fullPath << "] created ok." << endl;
         return true;
     } else {
-        cerr << "TraceMiner2: Icon file [" << fullPath << "] failed to create." << endl;
+        cerr << "TraceCollier: Icon file [" << fullPath << "] failed to create." << endl;
         return false;
     }
 }

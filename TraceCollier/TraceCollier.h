@@ -22,12 +22,12 @@
  * SOFTWARE.
  */
 
-#ifndef TRACEMINER2_H
-#define TRACEMINER2_H
+#ifndef TRACECOLLIER_H
+#define TRACECOLLIER_H
 
 
-/** @file TraceMiner2.h
- * @brief Header file for the TraceMiner2 application.
+/** @file TraceCollier.h
+ * @brief Header file for the TraceCollier application.
  */
 
 // Gnu c++ version 4.9.0 or above, is required to be able to use
@@ -76,5 +76,5 @@ using std::exception;
 #include "utilities.h"
 
 
-#endif // TRACEMINER2_H
+#endif // TRACECOLLIER_H
 

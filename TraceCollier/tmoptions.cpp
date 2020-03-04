@@ -71,7 +71,7 @@ bool tmOptions::parseArgs(int argc, char *argv[]) {
 
     if (argc < 2) {
         // Insufficient args.
-        cerr << "TraceMiner2: No arguments supplied." << endl;
+        cerr << "TraceCollier: No arguments supplied." << endl;
         return false;
     }
 
@@ -174,7 +174,7 @@ bool tmOptions::parseArgs(int argc, char *argv[]) {
         // Either a filename or an error.
         // Try for an error ...
         if (thisArg[0] == '-') {
-            cerr << "TraceMiner2: Invalid argument '";
+            cerr << "TraceCollier: Invalid argument '";
             cerr << string(argv[arg]) << "'." << endl;
             invalidArgs = true;
             continue;
@@ -188,7 +188,7 @@ bool tmOptions::parseArgs(int argc, char *argv[]) {
             gotTraceAlready = true;
         } else {
             // Too many tracefiles? Spaces around '=' in pagesize?
-            cerr << "TraceMiner2: Parameter error. (" << argv[arg] << ")." << endl;
+            cerr << "TraceCollier: Parameter error. (" << argv[arg] << ")." << endl;
             invalidArgs = true;
         }
 
@@ -203,7 +203,7 @@ bool tmOptions::parseArgs(int argc, char *argv[]) {
 
     // We need at least a trace file.
     if (mTraceFile.empty()) {
-        cerr << "TraceMiner2: No trace file supplied." << endl;
+        cerr << "TraceCollier: No trace file supplied." << endl;
         invalidArgs = true;
     }
 
@@ -218,7 +218,7 @@ bool tmOptions::parseArgs(int argc, char *argv[]) {
 
     if (mHtml) {
         mReportFile = replaceFileExtension(mTraceFile, mHtmlExtension);
-        mCssFileName = filePath(mTraceFile) + directorySeparator + "TraceMiner2.css";
+        mCssFileName = filePath(mTraceFile) + directorySeparator + "TraceCollier.css";
     } else {
         mReportFile = replaceFileExtension(mTraceFile, mReportExtension);
     }
@@ -227,14 +227,14 @@ bool tmOptions::parseArgs(int argc, char *argv[]) {
     return true;
 }
 
-/** @brief Display brief TraceMiner2 usage details.
+/** @brief Display brief TraceCollier usage details.
  *
- * Displays brief details of how to use TraceMiner2.
+ * Displays brief details of how to use TraceCollier.
  */
 void tmOptions::usage() {
 
     cerr << endl << "USAGE:" << endl << endl;
-    cerr << "TraceMiner2 [options] trace_file" << endl << endl;
+    cerr << "TraceCollier [options] trace_file" << endl << endl;
     cerr << "'trace_file' is the Oracle trace file name. It should have binds turned on." << endl << endl;
 
     cerr << "OPTIONS:" << endl << endl;

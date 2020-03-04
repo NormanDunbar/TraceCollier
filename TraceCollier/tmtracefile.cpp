@@ -72,7 +72,7 @@ tmTraceFile::~tmTraceFile()
 
 /** @brief Parses a complete trace file.
  *
- * @param const float version. Version number of TraceMiner2. Used in report footer.
+ * @param const float version. Version number of TraceCollier. Used in report footer.
  * @return bool.
  *
  * This function will parse an Oracle trace file and report on the SQL and
@@ -89,7 +89,7 @@ bool tmTraceFile::parse(const float version)
     // We might need the debug file, but if we fail to open it, just carry on.
     if (mOptions->verbose()) {
         if (!openDebugFile()) {
-            cerr << "TraceMiner2: Attempting to continue." << endl;
+            cerr << "TraceCollier: Attempting to continue." << endl;
             mOptions->setVerbose(false);
         }
     }
@@ -149,15 +149,15 @@ bool tmTraceFile::parse(const float version)
         *mOfs << "</table>"
               << "<p></p>\n<hr>\n"
               << "<p class=\"footer\">\n\t"
-              << "Created with <strong>TraceMiner2</strong> version <strong>" << version
+              << "Created with <strong>Trace Collier</strong> version <strong>" << version
               << "</strong><br>Copyright &copy; Norman Dunbar 2016-2019<br>\n\t"
               << "Released under the <a href=\"https://opensource.org/licenses/MIT\"><span class=\"url\">MIT Licence</span></a><br><br>\n\t"
               << "Binary releases available from: "
-              << "<a href=\"https://github.com/NormanDunbar/TraceMiner2/releases\">"
-              << "<span class=\"url\">https://github.com/NormanDunbar/TraceMiner2/releases</span></a><br>\n\t"
+              << "<a href=\"https://github.com/NormanDunbar/TraceCollier/releases\">"
+              << "<span class=\"url\">https://github.com/NormanDunbar/TraceCollier/releases</span></a><br>\n\t"
               << "Source code available from: "
-              << "<a href=\"https://github.com/NormanDunbar/TraceMiner2\">"
-              << "<span class=\"url\">https://github.com/NormanDunbar/TraceMiner2</span></a>\n</p>\n\n"
+              << "<a href=\"https://github.com/NormanDunbar/TraceCollier\">"
+              << "<span class=\"url\">https://github.com/NormanDunbar/TraceCollier</span></a>\n</p>\n\n"
               << "\n</body></html>" << endl;
     }
 
@@ -537,7 +537,7 @@ bool tmTraceFile::openDebugFile()
 
     if (!mDbg->good()) {
         // Don't clean up if this fails to open. We ignore it later.
-        cerr << "TraceMiner2: Cannot open debug file "
+        cerr << "TraceCollier: Cannot open debug file "
              << debugFileName << endl;
         return false;
     }
@@ -550,7 +550,7 @@ bool tmTraceFile::openDebugFile()
 
     // For my own benefit, note whether or not we are using REGEXes
     // It helps when testing, to know what's what.
-    *mDbg << "TraceMiner2 - ";
+    *mDbg << "TraceCollier - ";
     #ifdef USE_REGEX
        *mDbg << " with REGEX support.";
     #else
@@ -584,7 +584,7 @@ bool tmTraceFile::openReportFile()
 
     if (!mOfs->good()) {
         stringstream s;
-        s << "TraceMiner2: Cannot open report file "
+        s << "TraceCollier: Cannot open report file "
           << reportFileName << endl;
         cerr << s.str();
         cleanUp();
@@ -633,7 +633,7 @@ void tmTraceFile::reportHeadings() {
 
         // Once per report file headings.
         if (mExecCount == -1) {
-            *mOfs << "TraceMiner2" << endl
+            *mOfs << "TraceCollier" << endl
                   << "-----------" << endl << endl;
 
             *mOfs << "Processing Trace file: " << mOptions->traceFile();
@@ -668,16 +668,16 @@ void tmTraceFile::reportHeadings() {
         // Do we need to do the HTML headings at the very start?
         if (mExecCount == -1) {
             *mOfs << "<html lang=\"en\"><head>" << endl
-                  << "<title>TraceMiner 2</title>" << endl
+                  << "<title>Trace Collier</title>" << endl
                   << "<meta charset=\"UTF-8\" />" << endl
-                  << "<meta name=\"generator\" content=\"TraceMiner2\" />" << endl
+                  << "<meta name=\"generator\" content=\"TraceCollier\" />" << endl
                   << "<meta name=\"author\" content=\"Norman (at) Dunbar-it (dot) co (dot) uk\" />" << endl
                   << "<link rel=\"stylesheet\" href=\""
                   << fileName(mOptions->cssFileName()) << "\" />" << endl
                   << "<link rel=\"icon\" href=\"favicon.ico\" type=\"image/x-icon\" />"
                   << "</head>" << endl
                   << "<body>" << endl
-                  << "<H1>TraceMiner2</H1>" << endl
+                  << "<H1>Trace Collier</H1>" << endl
                   << "<p><strong>Processing Trace File:</strong> "
                   << mOptions->traceFile();
 
