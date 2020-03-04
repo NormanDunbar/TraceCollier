@@ -154,7 +154,7 @@
 #include "favicon.h"
 
 // Version number.
-const float version = 1.10;
+const float version = 1.50;
 
 // Various flags set according to the passed parameters.
 tmOptions options;
